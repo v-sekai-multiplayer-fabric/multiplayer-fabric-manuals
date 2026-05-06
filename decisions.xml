@@ -39,7 +39,7 @@
 <li>OTLP ports must not be exposed publicly — they accept unauthenticated writes.</li>
 <li>Other Fly apps send telemetry to <code>multiplayer-fabric-observability.internal:4317</code> or <code>:4318</code>.</li>
 <li>Grafana Tempo v3 config changed significantly from v2: <code>ingester</code> and <code>compactor</code> top-level keys were removed; <code>-target=all</code> flag is required to run all components.</li>
-<li>The GHCR image <code>godot-zone-double</code> was originally owned by <code>multiplayer-fabric-baker</code>. Package ownership is tied to the creating repository’s token, so the zone binary build was moved to <code>multiplayer-fabric-zone</code> and renamed to <code>multiplayer-fabric-zone-godot</code>.</li>
+<li>See <a href="../decisions/20260506-ghcr-package-ownership-same-repo.html">GHCR package ownership decision</a> for why the zone binary image was renamed and moved to <code>multiplayer-fabric-zone</code>.</li>
 </ul>
 
 
@@ -98,7 +98,7 @@
 
 <section id="context" class="level2">
 <h2 class="anchored" data-anchor-id="context">Context</h2>
-<p>The zone server needs low-latency bidirectional communication between clients and the Godot game server. HTTP/1.1 and WebSocket both run over TCP, which head-of-line blocks on packet loss. For real-time game state, this matters.</p>
+<p>The zone server needs low-latency bidirectional communication between clients and the Godot game server. HTTP/1.1 and WebSocket both run over TCP, which head-of-line blocks on packet loss and degrades real-time game state.</p>
 </section>
 <section id="decision" class="level2">
 <h2 class="anchored" data-anchor-id="decision">Decision</h2>
@@ -172,10 +172,10 @@
 <h2 class="anchored" data-anchor-id="decision">Decision</h2>
 <p>Deploy all services on Fly.io in the <code>iad</code> (Ashburn, Virginia) region.</p>
 <ul>
-<li><strong>Machines</strong> handle deployment; Terraform (fly-apps/fly provider v0.0.21) manages resources (apps, IPs, volumes, secrets) but not machines, due to Machines API limitations in the provider.</li>
-<li><strong>Private networking</strong> uses Fly’s 6PN (WireGuard mesh). All <code>.internal</code> DNS resolves to IPv6 only, requiring <code>socket_options: [:inet6]</code> in any Erlang/Elixir TCP stack.</li>
-<li><strong>Dedicated IPv4</strong> is required for UDP. Fly passes UDP without DNAT; the app must bind to the same port clients connect to.</li>
-<li><strong>On-demand machines</strong> (Fly Machines API) are used for the baker — one machine per bake job, exits when done.</li>
+<li>Machines handle deployment; Terraform (fly-apps/fly provider v0.0.21) manages resources (apps, IPs, volumes, secrets) but not machines, due to Machines API limitations in the provider.</li>
+<li>Private networking uses Fly’s 6PN (WireGuard mesh). All <code>.internal</code> DNS resolves to IPv6 only, requiring <code>socket_options: [:inet6]</code> in any Erlang/Elixir TCP stack.</li>
+<li>Dedicated IPv4 is required for UDP. Fly passes UDP without DNAT; the app must bind to the same port clients connect to.</li>
+<li>On-demand machines (Fly Machines API) are used for the baker — one machine per bake job, exits when done.</li>
 </ul>
 </section>
 <section id="consequences" class="level2">

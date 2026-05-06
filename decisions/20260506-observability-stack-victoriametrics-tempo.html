@@ -337,7 +337,7 @@ ul.task-list li input[type="checkbox"] {
 <li>OTLP ports must not be exposed publicly — they accept unauthenticated writes.</li>
 <li>Other Fly apps send telemetry to <code>multiplayer-fabric-observability.internal:4317</code> or <code>:4318</code>.</li>
 <li>Grafana Tempo v3 config changed significantly from v2: <code>ingester</code> and <code>compactor</code> top-level keys were removed; <code>-target=all</code> flag is required to run all components.</li>
-<li>The GHCR image <code>godot-zone-double</code> was originally owned by <code>multiplayer-fabric-baker</code>. Package ownership is tied to the creating repository’s token, so the zone binary build was moved to <code>multiplayer-fabric-zone</code> and renamed to <code>multiplayer-fabric-zone-godot</code>.</li>
+<li>See <a href="../decisions/20260506-ghcr-package-ownership-same-repo.html">GHCR package ownership decision</a> for why the zone binary image was renamed and moved to <code>multiplayer-fabric-zone</code>.</li>
 </ul>
 
 

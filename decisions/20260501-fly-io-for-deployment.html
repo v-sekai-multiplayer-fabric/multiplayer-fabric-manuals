@@ -326,10 +326,10 @@ ul.task-list li input[type="checkbox"] {
 <h2 class="anchored" data-anchor-id="decision">Decision</h2>
 <p>Deploy all services on Fly.io in the <code>iad</code> (Ashburn, Virginia) region.</p>
 <ul>
-<li><strong>Machines</strong> handle deployment; Terraform (fly-apps/fly provider v0.0.21) manages resources (apps, IPs, volumes, secrets) but not machines, due to Machines API limitations in the provider.</li>
-<li><strong>Private networking</strong> uses Fly’s 6PN (WireGuard mesh). All <code>.internal</code> DNS resolves to IPv6 only, requiring <code>socket_options: [:inet6]</code> in any Erlang/Elixir TCP stack.</li>
-<li><strong>Dedicated IPv4</strong> is required for UDP. Fly passes UDP without DNAT; the app must bind to the same port clients connect to.</li>
-<li><strong>On-demand machines</strong> (Fly Machines API) are used for the baker — one machine per bake job, exits when done.</li>
+<li>Machines handle deployment; Terraform (fly-apps/fly provider v0.0.21) manages resources (apps, IPs, volumes, secrets) but not machines, due to Machines API limitations in the provider.</li>
+<li>Private networking uses Fly’s 6PN (WireGuard mesh). All <code>.internal</code> DNS resolves to IPv6 only, requiring <code>socket_options: [:inet6]</code> in any Erlang/Elixir TCP stack.</li>
+<li>Dedicated IPv4 is required for UDP. Fly passes UDP without DNAT; the app must bind to the same port clients connect to.</li>
+<li>On-demand machines (Fly Machines API) are used for the baker — one machine per bake job, exits when done.</li>
 </ul>
 </section>
 <section id="consequences" class="level2">
