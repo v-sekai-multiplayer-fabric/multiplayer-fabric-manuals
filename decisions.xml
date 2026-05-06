@@ -50,6 +50,82 @@
   <pubDate>Wed, 06 May 2026 00:00:00 GMT</pubDate>
 </item>
 <item>
+  <title>Observability stack with VictoriaMetrics, VictoriaLogs, and Jaeger</title>
+  <link>https://v-sekai-fire.github.io/manuals/decisions/20260506-observability-stack-victoriametrics-jaeger.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<section id="context" class="level2">
+<h2 class="anchored" data-anchor-id="context">Context</h2>
+<p>Grafana Tempo was chosen for trace storage in the initial stack but is licensed under AGPL-3.0, which requires any service modifications to be open-sourced. Jaeger (Apache 2.0, CNCF graduated) is the natural replacement: mature, OTLP-native since v1.35, and the standard pairing for permissive-license stacks like VictoriaMetrics.</p>
+</section>
+<section id="decision" class="level2">
+<h2 class="anchored" data-anchor-id="decision">Decision</h2>
+<p>Replace Grafana Tempo with Jaeger all-in-one in the single-machine observability stack.</p>
+<ul>
+<li>Jaeger listens on 14317 (OTLP gRPC, internal) and exposes its UI on 16686.</li>
+<li>OTEL Collector routes traces to <code>localhost:14317</code> instead of the former Tempo port (5317).</li>
+<li>Jaeger uses Badger embedded storage (<code>/var/lib/jaeger/data</code> and <code>/var/lib/jaeger/keys</code>) persisted on the same 10 GB Fly volume.</li>
+<li><code>tempo-config.yaml</code> is deleted; Jaeger is configured entirely via CLI flags in <code>supervisord.conf</code>.</li>
+</ul>
+<p>Port map after this change:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 37%">
+<col style="width: 25%">
+<col style="width: 37%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Service</th>
+<th>Port</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>VictoriaMetrics</td>
+<td>8428</td>
+<td>Metrics storage and PromQL</td>
+</tr>
+<tr class="even">
+<td>VictoriaLogs</td>
+<td>9428</td>
+<td>Log storage and query</td>
+</tr>
+<tr class="odd">
+<td>Jaeger UI</td>
+<td>16686</td>
+<td>Trace storage and query</td>
+</tr>
+<tr class="even">
+<td>OTEL Collector</td>
+<td>4317 (gRPC), 4318 (HTTP)</td>
+<td>OTLP ingest, routes to the above</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="consequences" class="level2">
+<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
+<ul>
+<li>Jaeger UI replaces the Tempo query endpoint: <code>fly proxy 16686:16686</code> instead of <code>fly proxy 3200:3200</code>.</li>
+<li>Badger is ephemeral-safe only with <code>--badger.ephemeral=false</code>; this flag must be set or traces are lost on restart.</li>
+<li>No explicit trace TTL is configured; traces accumulate until disk pressure. Add <code>--badger.span-store-ttl</code> if retention limits are needed.</li>
+<li>Jaeger’s Badger backend does not support distributed mode; acceptable for a single-machine stack.</li>
+</ul>
+
+
+</section>
+
+ ]]></description>
+  <guid>https://v-sekai-fire.github.io/manuals/decisions/20260506-observability-stack-victoriametrics-jaeger.html</guid>
+  <pubDate>Wed, 06 May 2026 00:00:00 GMT</pubDate>
+</item>
+<item>
   <title>GHCR packages must be built by the repo that consumes them</title>
   <link>https://v-sekai-fire.github.io/manuals/decisions/20260506-ghcr-package-ownership-same-repo.html</link>
   <description><![CDATA[ 
