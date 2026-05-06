@@ -320,8 +320,8 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="context" class="level2">
 <h2 class="anchored" data-anchor-id="context">Context</h2>
-<p>Jaeger all-in-one with Badger storage was chosen as the Apache 2.0 replacement for Tempo. However, VictoriaMetrics (the same vendor as VictoriaMetrics and VictoriaLogs already in the stack) ships VictoriaTraces — an Apache 2.0 trace backend that accepts OTLP directly and claims 3.7× less RAM and 2.6× less CPU than Tempo.</p>
-<p>Using VictoriaTraces gives us a unified vendor stack (VictoriaMetrics / VictoriaLogs / VictoriaTraces), eliminates Badger’s single-node limitation, and follows the same port and CLI-flag conventions as the other Victoria services.</p>
+<p>Jaeger all-in-one with Badger storage was chosen as the Apache 2.0 replacement for Tempo. VictoriaMetrics ships VictoriaTraces — an Apache 2.0 trace backend that accepts OTLP directly. VictoriaMetrics benchmarks report 3.7× less RAM and 2.6× less CPU vs Tempo.</p>
+<p>Using VictoriaTraces puts all three storage backends (metrics, logs, traces) under the same vendor, drops Badger’s single-node limit, and matches the port and CLI-flag conventions already in use.</p>
 </section>
 <section id="decision" class="level2">
 <h2 class="anchored" data-anchor-id="decision">Decision</h2>
@@ -373,7 +373,7 @@ ul.task-list li input[type="checkbox"] {
 <section id="consequences" class="level2">
 <h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
 <ul>
-<li>All four services are now Apache 2.0 and from the VictoriaMetrics ecosystem.</li>
+<li>All four services are now Apache 2.0; the three storage backends are from VictoriaMetrics.</li>
 <li>VictoriaTraces query UI is at <code>http://...:10428/select/vmui</code>.</li>
 <li><code>fly proxy 10428:10428</code> replaces the former <code>fly proxy 16686:16686</code> for trace inspection.</li>
 <li>No explicit trace TTL is configured; add <code>-retentionPeriod</code> if disk pressure becomes a concern.</li>

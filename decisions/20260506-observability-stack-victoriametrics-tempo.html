@@ -327,7 +327,7 @@ ul.task-list li input[type="checkbox"] {
 <p>Run VictoriaMetrics (metrics), VictoriaLogs (logs), and Grafana Tempo (traces) under supervisord in a single Fly Machine, with an OpenTelemetry Collector as the ingest router.</p>
 <ul>
 <li>OTEL Collector listens on 4317 (gRPC) and 4318 (HTTP) on the private network.</li>
-<li>Collector routes: metrics → VictoriaMetrics (8428 via Prometheus remote write), logs → VictoriaLogs (9428 OTLP), traces → Tempo (5317 OTLP internal).</li>
+<li>Collector routes: metrics -&gt; VictoriaMetrics (8428 via Prometheus remote write), logs -&gt; VictoriaLogs (9428 OTLP), traces -&gt; Tempo (5317 OTLP internal).</li>
 <li>Data persists on a 10 GB Fly volume.</li>
 </ul>
 </section>

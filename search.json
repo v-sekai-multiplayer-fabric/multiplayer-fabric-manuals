@@ -4,14 +4,14 @@
     "href": "decisions/20260506-observability-stack-victoriametrics-jaeger.html",
     "title": "Observability stack with VictoriaMetrics, VictoriaLogs, and Jaeger",
     "section": "",
-    "text": "Grafana Tempo was chosen for trace storage in the initial stack but is licensed under AGPL-3.0, which requires any service modifications to be open-sourced. Jaeger (Apache 2.0, CNCF graduated) is the natural replacement: mature, OTLP-native since v1.35, and the standard pairing for permissive-license stacks like VictoriaMetrics."
+    "text": "Grafana Tempo was chosen for trace storage in the initial stack but is licensed under AGPL-3.0, which requires any service modifications to be open-sourced. Jaeger (Apache 2.0, CNCF graduated) fits the permissive-license constraint: it is OTLP-native since v1.35 and commonly deployed alongside VictoriaMetrics."
   },
   {
     "objectID": "decisions/20260506-observability-stack-victoriametrics-jaeger.html#context",
     "href": "decisions/20260506-observability-stack-victoriametrics-jaeger.html#context",
     "title": "Observability stack with VictoriaMetrics, VictoriaLogs, and Jaeger",
     "section": "",
-    "text": "Grafana Tempo was chosen for trace storage in the initial stack but is licensed under AGPL-3.0, which requires any service modifications to be open-sourced. Jaeger (Apache 2.0, CNCF graduated) is the natural replacement: mature, OTLP-native since v1.35, and the standard pairing for permissive-license stacks like VictoriaMetrics."
+    "text": "Grafana Tempo was chosen for trace storage in the initial stack but is licensed under AGPL-3.0, which requires any service modifications to be open-sourced. Jaeger (Apache 2.0, CNCF graduated) fits the permissive-license constraint: it is OTLP-native since v1.35 and commonly deployed alongside VictoriaMetrics."
   },
   {
     "objectID": "decisions/20260506-observability-stack-victoriametrics-jaeger.html#decision",
@@ -235,7 +235,7 @@
     "href": "decisions/20260506-observability-stack-victoriametrics-tempo.html#decision",
     "title": "Observability stack with VictoriaMetrics, VictoriaLogs, and Tempo",
     "section": "Decision",
-    "text": "Decision\nRun VictoriaMetrics (metrics), VictoriaLogs (logs), and Grafana Tempo (traces) under supervisord in a single Fly Machine, with an OpenTelemetry Collector as the ingest router.\n\nOTEL Collector listens on 4317 (gRPC) and 4318 (HTTP) on the private network.\nCollector routes: metrics → VictoriaMetrics (8428 via Prometheus remote write), logs → VictoriaLogs (9428 OTLP), traces → Tempo (5317 OTLP internal).\nData persists on a 10 GB Fly volume."
+    "text": "Decision\nRun VictoriaMetrics (metrics), VictoriaLogs (logs), and Grafana Tempo (traces) under supervisord in a single Fly Machine, with an OpenTelemetry Collector as the ingest router.\n\nOTEL Collector listens on 4317 (gRPC) and 4318 (HTTP) on the private network.\nCollector routes: metrics -&gt; VictoriaMetrics (8428 via Prometheus remote write), logs -&gt; VictoriaLogs (9428 OTLP), traces -&gt; Tempo (5317 OTLP internal).\nData persists on a 10 GB Fly volume."
   },
   {
     "objectID": "decisions/20260506-observability-stack-victoriametrics-tempo.html#consequences",
@@ -249,14 +249,14 @@
     "href": "decisions/20260506-observability-stack-victoriatraces.html",
     "title": "Replace Jaeger with VictoriaTraces for trace storage",
     "section": "",
-    "text": "Jaeger all-in-one with Badger storage was chosen as the Apache 2.0 replacement for Tempo. However, VictoriaMetrics (the same vendor as VictoriaMetrics and VictoriaLogs already in the stack) ships VictoriaTraces — an Apache 2.0 trace backend that accepts OTLP directly and claims 3.7× less RAM and 2.6× less CPU than Tempo.\nUsing VictoriaTraces gives us a unified vendor stack (VictoriaMetrics / VictoriaLogs / VictoriaTraces), eliminates Badger’s single-node limitation, and follows the same port and CLI-flag conventions as the other Victoria services."
+    "text": "Jaeger all-in-one with Badger storage was chosen as the Apache 2.0 replacement for Tempo. VictoriaMetrics ships VictoriaTraces — an Apache 2.0 trace backend that accepts OTLP directly. VictoriaMetrics benchmarks report 3.7× less RAM and 2.6× less CPU vs Tempo.\nUsing VictoriaTraces puts all three storage backends (metrics, logs, traces) under the same vendor, drops Badger’s single-node limit, and matches the port and CLI-flag conventions already in use."
   },
   {
     "objectID": "decisions/20260506-observability-stack-victoriatraces.html#context",
     "href": "decisions/20260506-observability-stack-victoriatraces.html#context",
     "title": "Replace Jaeger with VictoriaTraces for trace storage",
     "section": "",
-    "text": "Jaeger all-in-one with Badger storage was chosen as the Apache 2.0 replacement for Tempo. However, VictoriaMetrics (the same vendor as VictoriaMetrics and VictoriaLogs already in the stack) ships VictoriaTraces — an Apache 2.0 trace backend that accepts OTLP directly and claims 3.7× less RAM and 2.6× less CPU than Tempo.\nUsing VictoriaTraces gives us a unified vendor stack (VictoriaMetrics / VictoriaLogs / VictoriaTraces), eliminates Badger’s single-node limitation, and follows the same port and CLI-flag conventions as the other Victoria services."
+    "text": "Jaeger all-in-one with Badger storage was chosen as the Apache 2.0 replacement for Tempo. VictoriaMetrics ships VictoriaTraces — an Apache 2.0 trace backend that accepts OTLP directly. VictoriaMetrics benchmarks report 3.7× less RAM and 2.6× less CPU vs Tempo.\nUsing VictoriaTraces puts all three storage backends (metrics, logs, traces) under the same vendor, drops Badger’s single-node limit, and matches the port and CLI-flag conventions already in use."
   },
   {
     "objectID": "decisions/20260506-observability-stack-victoriatraces.html#decision",
@@ -270,6 +270,6 @@
     "href": "decisions/20260506-observability-stack-victoriatraces.html#consequences",
     "title": "Replace Jaeger with VictoriaTraces for trace storage",
     "section": "Consequences",
-    "text": "Consequences\n\nAll four services are now Apache 2.0 and from the VictoriaMetrics ecosystem.\nVictoriaTraces query UI is at http://...:10428/select/vmui.\nfly proxy 10428:10428 replaces the former fly proxy 16686:16686 for trace inspection.\nNo explicit trace TTL is configured; add -retentionPeriod if disk pressure becomes a concern."
+    "text": "Consequences\n\nAll four services are now Apache 2.0; the three storage backends are from VictoriaMetrics.\nVictoriaTraces query UI is at http://...:10428/select/vmui.\nfly proxy 10428:10428 replaces the former fly proxy 16686:16686 for trace inspection.\nNo explicit trace TTL is configured; add -retentionPeriod if disk pressure becomes a concern."
   }
 ]
