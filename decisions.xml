@@ -496,7 +496,7 @@
 
  ]]></description>
   <guid>https://v-sekai-fire.github.io/manuals/decisions/present-proposal-template.html</guid>
-  <pubDate>Thu, 07 May 2026 04:29:25 GMT</pubDate>
+  <pubDate>Thu, 07 May 2026 12:36:31 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -721,7 +721,7 @@
 
  ]]></description>
   <guid>https://v-sekai-fire.github.io/manuals/decisions/20260506-maglev-intercept-smoke-test.html</guid>
-  <pubDate>Thu, 07 May 2026 04:29:25 GMT</pubDate>
+  <pubDate>Thu, 07 May 2026 12:36:31 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -843,7 +843,7 @@
 
  ]]></description>
   <guid>https://v-sekai-fire.github.io/manuals/decisions/20260506-maglev-cycle-9-physics-vrm.html</guid>
-  <pubDate>Thu, 07 May 2026 04:29:25 GMT</pubDate>
+  <pubDate>Thu, 07 May 2026 12:36:31 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -960,7 +960,7 @@
 
  ]]></description>
   <guid>https://v-sekai-fire.github.io/manuals/decisions/20260506-maglev-cycle-8-ik-merge.html</guid>
-  <pubDate>Thu, 07 May 2026 04:29:25 GMT</pubDate>
+  <pubDate>Thu, 07 May 2026 12:36:31 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -1079,7 +1079,7 @@
 
  ]]></description>
   <guid>https://v-sekai-fire.github.io/manuals/decisions/20260506-maglev-cycle-7-ik-routing.html</guid>
-  <pubDate>Thu, 07 May 2026 04:29:25 GMT</pubDate>
+  <pubDate>Thu, 07 May 2026 12:36:31 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -1199,7 +1199,7 @@
 
  ]]></description>
   <guid>https://v-sekai-fire.github.io/manuals/decisions/20260506-maglev-cycle-6-mmog-load.html</guid>
-  <pubDate>Thu, 07 May 2026 04:29:25 GMT</pubDate>
+  <pubDate>Thu, 07 May 2026 12:36:31 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -1333,7 +1333,7 @@
 
  ]]></description>
   <guid>https://v-sekai-fire.github.io/manuals/decisions/20260506-maglev-cycle-5-zone-console.html</guid>
-  <pubDate>Thu, 07 May 2026 04:29:25 GMT</pubDate>
+  <pubDate>Thu, 07 May 2026 12:36:31 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -1467,7 +1467,7 @@
 
  ]]></description>
   <guid>https://v-sekai-fire.github.io/manuals/decisions/20260506-maglev-cycle-4-db-connection.html</guid>
-  <pubDate>Thu, 07 May 2026 04:29:25 GMT</pubDate>
+  <pubDate>Thu, 07 May 2026 12:36:31 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -1641,7 +1641,7 @@ font-style: inherit;">&gt;</span>.scn</span></code></pre></div></div>
 
  ]]></description>
   <guid>https://v-sekai-fire.github.io/manuals/decisions/20260506-maglev-cycle-3-baker.html</guid>
-  <pubDate>Thu, 07 May 2026 04:29:25 GMT</pubDate>
+  <pubDate>Thu, 07 May 2026 12:36:31 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -1738,7 +1738,14 @@ font-style: inherit;">&gt;</span>.scn</span></code></pre></div></div>
 </section>
 <section id="status" class="level2">
 <h2 class="anchored" data-anchor-id="status">Status</h2>
-<p>Status: Draft</p>
+<p>Status: In Progress (producer side complete 2026-05-07; verification pending)</p>
+<p>The observability stack itself is deployed and running on Fly (machine <code>781ed59b437968</code> started, volume <code>observability_data</code> 10GB iad attached) per <code>verify_fly_state</code> workflow output. The producer side has now been wired in all three apps:</p>
+<ul>
+<li>✅ <a href="https://github.com/V-Sekai-fire/multiplayer-fabric-gateway/pull/8">gateway PR #8</a> — <code>:opentelemetry</code> deps + <code>gateway.dispatch</code> span around <code>Gateway.Router.handle/1</code></li>
+<li>✅ <a href="https://github.com/V-Sekai-fire/multiplayer-fabric-zone-backend/pull/13">uro PR #13</a> — <code>:opentelemetry_phoenix</code> + <code>:opentelemetry_ecto</code> automatic instrumentation</li>
+<li>✅ <a href="https://github.com/V-Sekai-fire/multiplayer-fabric-zone/pull/3">zone PR #3</a> — bootstrapped <code>project/main.gd</code> initializing the engine’s <code>module_open_telemetry</code>, emits <code>zone.boot</code> span</li>
+</ul>
+<p>All ship to <code>multiplayer-fabric-observability.internal:4318</code> (OTLP/HTTP over Fly’s 6PN). End-to-end verification runs via <a href="https://github.com/V-Sekai-fire/multiplayer-fabric-infra/blob/main/.github/workflows/verify_observability.yml"><code>.github/workflows/verify_observability.yml</code></a> on <code>multiplayer-fabric-infra</code> — uses <code>flyctl ssh console -C</code> to query the Victoria* APIs from inside the observability machine (the OTLP ports are intentionally private). Pending: trigger the verify workflow after redeploys land and confirm the cycle 1 ping span is visible in VictoriaTraces.</p>
 </section>
 <section id="decision-makers" class="level2">
 <h2 class="anchored" data-anchor-id="decision-makers">Decision Makers</h2>
@@ -1774,7 +1781,7 @@ font-style: inherit;">&gt;</span>.scn</span></code></pre></div></div>
 
  ]]></description>
   <guid>https://v-sekai-fire.github.io/manuals/decisions/20260506-maglev-cycle-2-observability.html</guid>
-  <pubDate>Thu, 07 May 2026 04:29:25 GMT</pubDate>
+  <pubDate>Thu, 07 May 2026 12:36:31 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -1940,7 +1947,7 @@ font-style: inherit;">&gt;</span>.scn</span></code></pre></div></div>
 
  ]]></description>
   <guid>https://v-sekai-fire.github.io/manuals/decisions/20260506-maglev-cycle-12-game-planning.html</guid>
-  <pubDate>Thu, 07 May 2026 04:29:25 GMT</pubDate>
+  <pubDate>Thu, 07 May 2026 12:36:31 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -2061,7 +2068,7 @@ font-style: inherit;">&gt;</span>.scn</span></code></pre></div></div>
 
  ]]></description>
   <guid>https://v-sekai-fire.github.io/manuals/decisions/20260506-maglev-cycle-11-db-write.html</guid>
-  <pubDate>Thu, 07 May 2026 04:29:25 GMT</pubDate>
+  <pubDate>Thu, 07 May 2026 12:36:31 GMT</pubDate>
 </item>
 </channel>
 </rss>
