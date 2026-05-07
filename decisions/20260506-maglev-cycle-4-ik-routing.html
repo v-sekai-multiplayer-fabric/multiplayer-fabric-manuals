@@ -323,7 +323,7 @@ ul.task-list li input[type="checkbox"] {
 <h2 class="anchored" data-anchor-id="design">Design</h2>
 <p>The PCVR client — running the solved <code>multiplayer-fabric-interaction-system</code> addon via <code>xr_controller_interaction_helper.gd</code> and <code>xr_action_host.gd</code> — starts at 1 Hz IK and ramps to 10 Hz. The Steam Deck client sends gamepad datagrams at normal cadence. The gateway routes and merges both streams to the zone server on UDP 7443. The world is static.</p>
 <p>The 1 Hz phase confirms the IK datagram format parses correctly. The 10 Hz phase confirms the gateway’s merge logic is correct under concurrent input before full rate is introduced.</p>
-<p>Pass criteria: - Zone server receives and logs at least one IK datagram without parse error at 1 Hz - Zone server receives a merged tick containing both input types at 10 Hz - No gamepad datagram dropped over 60 seconds at 10 Hz - No gateway crash or restart</p>
+<p>Pass criteria: - [ ] Zone server receives and logs at least one IK datagram without parse error at 1 Hz - [ ] Zone server receives a merged tick containing both input types at 10 Hz - [ ] No gamepad datagram dropped over 60 seconds at 10 Hz - [ ] No gateway crash or restart</p>
 </section>
 <section id="cris-score" class="level2">
 <h2 class="anchored" data-anchor-id="cris-score">CRIS Score</h2>

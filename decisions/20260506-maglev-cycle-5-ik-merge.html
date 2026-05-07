@@ -322,7 +322,7 @@ ul.task-list li input[type="checkbox"] {
 <section id="design" class="level2">
 <h2 class="anchored" data-anchor-id="design">Design</h2>
 <p>The PCVR client sends 6-DOF IK datagrams at full headset rate. The Steam Deck client sends gamepad datagrams at normal cadence. Both arrive on UDP 443. The gateway merges them per tick and forwards to the zone server on UDP 7443. The world is static.</p>
-<p>Pass criteria: - Zone server processes ticks containing both input types without stalls or skipped events - No gamepad datagram is silently dropped over 60 seconds under full IK load - Gateway CPU stays within budget under both streams at full rate</p>
+<p>Pass criteria: - [ ] Zone server processes ticks containing both input types without stalls or skipped events - [ ] No gamepad datagram is silently dropped over 60 seconds under full IK load - [ ] Gateway CPU stays within budget under both streams at full rate</p>
 </section>
 <section id="cris-score" class="level2">
 <h2 class="anchored" data-anchor-id="cris-score">CRIS Score</h2>

@@ -325,7 +325,7 @@ ul.task-list li input[type="checkbox"] {
 <p>Build a minimal Godot scene (empty world, no avatar, no physics) that opens a WebTransport/QUIC connection to the gateway on UDP 443, waits for one datagram from the zone server, logs the receipt, and exits cleanly. Run it headlessly on a desktop to isolate client behaviour from display and input.</p>
 <p>The zone server is <code>godot.linuxbsd.template_release.double.x86_64</code> built from <code>V-Sekai-fire/multiplayer-fabric-zone</code> (the zone repo owns and publishes its own GHCR image). It runs <code>--headless</code> with an empty world and sends one datagram on connection.</p>
 <p>The gateway runs as root on UDP 443 (port &lt; 1024 requires root or <code>CAP_NET_BIND_SERVICE</code>) and proxies to the zone server on UDP 7443. The Fly DNS record for the gateway endpoint is DNS-only — no Cloudflare proxy, which cannot forward QUIC/UDP. Both services deploy in the <code>iad</code> region and communicate over Fly’s 6PN private network.</p>
-<p>Pass criteria: - Godot client establishes the WebTransport/QUIC connection without TLS or handshake error - Client receives and logs one <strong>datagram</strong> (not a stream) from the zone server - Client exits cleanly; no orphaned Godot process or open port</p>
+<p>Pass criteria: - [ ] Godot client establishes the WebTransport/QUIC connection without TLS or handshake error - [ ] Client receives and logs one <strong>datagram</strong> (not a stream) from the zone server - [ ] Client exits cleanly; no orphaned Godot process or open port</p>
 <p>Every subsequent cycle extends this scene.</p>
 </section>
 <section id="cris-score" class="level2">
