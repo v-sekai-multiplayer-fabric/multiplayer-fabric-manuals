@@ -288,7 +288,15 @@ ul.task-list li input[type="checkbox"] {
   <ul>
   <li><a href="#v-sekai-fire-multiplayer-fabric" id="toc-v-sekai-fire-multiplayer-fabric" class="nav-link active" data-scroll-target="#v-sekai-fire-multiplayer-fabric">V-Sekai Fire — Multiplayer Fabric</a>
   <ul class="collapse">
-  <li><a href="#repositories" id="toc-repositories" class="nav-link" data-scroll-target="#repositories">Repositories</a></li>
+  <li><a href="#repositories" id="toc-repositories" class="nav-link" data-scroll-target="#repositories">Repositories</a>
+  <ul class="collapse">
+  <li><a href="#runtime-services-fly.io" id="toc-runtime-services-fly.io" class="nav-link" data-scroll-target="#runtime-services-fly.io">Runtime services (Fly.io)</a></li>
+  <li><a href="#engine" id="toc-engine" class="nav-link" data-scroll-target="#engine">Engine</a></li>
+  <li><a href="#game-systems" id="toc-game-systems" class="nav-link" data-scroll-target="#game-systems">Game systems</a></li>
+  <li><a href="#infrastructure-tooling" id="toc-infrastructure-tooling" class="nav-link" data-scroll-target="#infrastructure-tooling">Infrastructure &amp; tooling</a></li>
+  <li><a href="#testing-verification" id="toc-testing-verification" class="nav-link" data-scroll-target="#testing-verification">Testing &amp; verification</a></li>
+  <li><a href="#skills-docs" id="toc-skills-docs" class="nav-link" data-scroll-target="#skills-docs">Skills &amp; docs</a></li>
+  </ul></li>
   </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/V-Sekai-fire/manuals/edit/main/index.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
@@ -306,9 +314,12 @@ ul.task-list li input[type="checkbox"] {
 <ul>
 <li>Source code: <a href="https://github.com/V-Sekai-fire">V-Sekai-fire on GitHub</a></li>
 <li>Issues and discussion: <a href="https://github.com/V-Sekai-fire/multiplayer-fabric-taskweft">multiplayer-fabric-taskweft</a></li>
+<li>Top-level monorepo: <a href="https://github.com/V-Sekai-fire/multiplayer-fabric">multiplayer-fabric</a> (this is the umbrella that registers every repo below as a submodule)</li>
 </ul>
 <section id="repositories" class="level2">
 <h2 class="anchored" data-anchor-id="repositories">Repositories</h2>
+<section id="runtime-services-fly.io" class="level3">
+<h3 class="anchored" data-anchor-id="runtime-services-fly.io">Runtime services (Fly.io)</h3>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -319,40 +330,202 @@ ul.task-list li input[type="checkbox"] {
 <tbody>
 <tr class="odd">
 <td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-gateway">multiplayer-fabric-gateway</a></td>
-<td>Elixir WebTransport gateway (WebRTC → Godot zone)</td>
+<td>Elixir WebTransport gateway on UDP 443 — entry point for all clients</td>
 </tr>
 <tr class="even">
-<td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-crdb">multiplayer-fabric-crdb</a></td>
-<td>CockroachDB with mTLS, role-separated access</td>
+<td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-zone">multiplayer-fabric-zone</a></td>
+<td>Headless Godot zone server (template_release, double precision)</td>
 </tr>
 <tr class="odd">
-<td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-uro">multiplayer-fabric-uro</a></td>
-<td>Phoenix zone backend (shard registry, asset API)</td>
+<td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-zone-backend">multiplayer-fabric-zone-backend</a></td>
+<td>Phoenix backend (uro): shard registry, asset API. Submodule path: <code>multiplayer-fabric-uro</code></td>
+</tr>
+<tr class="even">
+<td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-zone-console">multiplayer-fabric-zone-console</a></td>
+<td>Operator console for zone server health and shard rotations</td>
+</tr>
+<tr class="odd">
+<td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-crdb">multiplayer-fabric-crdb</a></td>
+<td>CockroachDB with mTLS, role-separated access (gateway_writer / gateway_reader / gateway_admin / root)</td>
 </tr>
 <tr class="even">
 <td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-baker">multiplayer-fabric-baker</a></td>
-<td>Headless Godot asset validator and exporter</td>
+<td>On-demand Fly Machine that validates and exports Godot assets via aria-storage</td>
 </tr>
 <tr class="odd">
-<td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-zone">multiplayer-fabric-zone</a></td>
-<td>Godot zone server (template_release, double precision)</td>
+<td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-observability">multiplayer-fabric-observability</a></td>
+<td>VictoriaMetrics (8428) + VictoriaLogs (9428) + VictoriaTraces (10428) + OTEL Collector (4317/4318) on supervisord</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="engine" class="level3">
+<h3 class="anchored" data-anchor-id="engine">Engine</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Repo</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-godot">multiplayer-fabric-godot</a></td>
+<td>V-Sekai fork of the Godot engine — feature branches per topic, assembled output lives on <code>multiplayer-fabric-base</code></td>
 </tr>
 <tr class="even">
-<td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-observability">multiplayer-fabric-observability</a></td>
-<td>VictoriaMetrics + VictoriaLogs + Tempo + OTEL Collector</td>
+<td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-godot-maglev">multiplayer-fabric-godot-maglev</a></td>
+<td>Canonical assembled engine snapshot used as <code>git subrepo</code> source by <code>multiplayer-fabric-build</code></td>
 </tr>
 <tr class="odd">
-<td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-infra">multiplayer-fabric-infra</a></td>
-<td>Terraform for Fly.io resources</td>
+<td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-merge">multiplayer-fabric-merge</a></td>
+<td><code>gitassembly</code> recipe + <code>update_godot_v_sekai.exs</code> driver that composes the engine from its feature branches</td>
 </tr>
 <tr class="even">
 <td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-build">multiplayer-fabric-build</a></td>
-<td>V-Sekai fork of the Godot engine</td>
+<td>Engine build orchestrator (Justfile + per-platform CI matrix); vendors engine source under <code>godot/</code> via git-subrepo</td>
+</tr>
+<tr class="odd">
+<td><a href="https://github.com/V-Sekai-fire/opentelemetry-godot">opentelemetry-godot</a></td>
+<td>OTLP/HTTP exporter module for the Godot engine — compiled into the assembly via <code>feat/open-telemetry-base</code></td>
+</tr>
+<tr class="even">
+<td><a href="https://github.com/V-Sekai-fire/opentelemetry-godot-project">opentelemetry-godot-project</a></td>
+<td>Godot project demonstrating + testing the OTel module in isolation</td>
+</tr>
+<tr class="odd">
+<td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-webtransport">multiplayer-fabric-webtransport</a></td>
+<td>Elixir bindings for the Rust <a href="https://github.com/BiagioFesta/wtransport">wtransport</a> WebTransport library</td>
+</tr>
+<tr class="even">
+<td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-interaction-system">multiplayer-fabric-interaction-system</a></td>
+<td>XR controller / 6-DOF IK helper addon</td>
+</tr>
+<tr class="odd">
+<td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-interaction-system-project">multiplayer-fabric-interaction-system-project</a></td>
+<td>Godot project that exercises the interaction-system addon</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="game-systems" class="level3">
+<h3 class="anchored" data-anchor-id="game-systems">Game systems</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Repo</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-taskweft">multiplayer-fabric-taskweft</a></td>
+<td>Re-entrant temporal HTN planner + ReBAC engine (Elixir/C++20 NIFs)</td>
+</tr>
+<tr class="even">
+<td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-predictive-bvh">multiplayer-fabric-predictive-bvh</a></td>
+<td>Predictive BVH adapter for spatial queries — used by the zone server’s broadphase</td>
+</tr>
+<tr class="odd">
+<td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-predictive-bvh-research">multiplayer-fabric-predictive-bvh-research</a></td>
+<td>Lean 4 formalization + correctness proofs for the predictive BVH</td>
+</tr>
+<tr class="even">
+<td><a href="https://github.com/V-Sekai-fire/aria-storage">aria-storage</a></td>
+<td>casync/desync chunked content-addressable storage (Elixir wrapper around vendored Go binary)</td>
+</tr>
+<tr class="odd">
+<td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-humanoid-project">multiplayer-fabric-humanoid-project</a></td>
+<td>Humanoid avatars + animations (<code>mire.vrm</code> is the canonical Maglev test avatar)</td>
+</tr>
+<tr class="even">
+<td><a href="https://github.com/V-Sekai-fire/elixir-turboquant-llm">elixir-turboquant-llm</a></td>
+<td>Quantized LLM inference NIF (Elixir / llama.cpp). Submodule path: <code>multiplayer-fabric-llm</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="infrastructure-tooling" class="level3">
+<h3 class="anchored" data-anchor-id="infrastructure-tooling">Infrastructure &amp; tooling</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Repo</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-infra">multiplayer-fabric-infra</a></td>
+<td>Terraform for Fly.io resources (apps, IPs, volumes, secrets) + read-only verify workflows</td>
+</tr>
+<tr class="even">
+<td><a href="https://github.com/V-Sekai-fire/docker-multiplayer-fabric">docker-multiplayer-fabric</a></td>
+<td>Dockerfiles for zone-fabric, baker, uro runtime images</td>
+</tr>
+<tr class="odd">
+<td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-hosting">multiplayer-fabric-hosting</a></td>
+<td>Self-hosted hosting recipes (Caddy, versitygw, docker-compose stack)</td>
+</tr>
+<tr class="even">
+<td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-generate-secrets">multiplayer-fabric-generate-secrets</a></td>
+<td>Shared secret-generation helpers (mTLS PKI bootstrap, JWT keys)</td>
+</tr>
+<tr class="odd">
+<td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-elf-programs">multiplayer-fabric-elf-programs</a></td>
+<td>RISC-V ELF programs run inside the engine’s <code>module_sandbox</code></td>
+</tr>
+<tr class="even">
+<td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-casync-seed">multiplayer-fabric-casync-seed</a></td>
+<td>Pre-baked casync chunk store seed for fast cold-start asset assembly</td>
+</tr>
+<tr class="odd">
+<td><a href="https://github.com/V-Sekai-fire/cockroach">cockroach</a></td>
+<td>Vendored CockroachDB source (build inputs for the multiplayer-fabric-crdb Docker image)</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="testing-verification" class="level3">
+<h3 class="anchored" data-anchor-id="testing-verification">Testing &amp; verification</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Repo</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-cycle-tests">multiplayer-fabric-cycle-tests</a></td>
+<td>Maglev cycle smoke tests — minimal headless Godot scripts, one per cycle</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="skills-docs" class="level3">
+<h3 class="anchored" data-anchor-id="skills-docs">Skills &amp; docs</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Repo</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="https://github.com/V-Sekai-fire/manuals">manuals</a></td>
+<td>This site (Quarto). Submodule path: <code>multiplayer-fabric-manuals</code></td>
+</tr>
+<tr class="even">
+<td><a href="https://github.com/V-Sekai-fire/multiplayer-fabric-skills">multiplayer-fabric-skills</a></td>
+<td>Reusable Claude Code skills shared across the fabric repos</td>
 </tr>
 </tbody>
 </table>
 
 
+</section>
 </section>
 </section>
 
