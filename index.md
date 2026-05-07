@@ -6,6 +6,28 @@ Documentation for the multiplayer fabric stack: a WebTransport-based game server
 - Issues and discussion: [multiplayer-fabric-taskweft](https://github.com/V-Sekai-fire/multiplayer-fabric-taskweft)
 - Top-level monorepo: [multiplayer-fabric](https://github.com/V-Sekai-fire/multiplayer-fabric) (this is the umbrella that registers every repo below as a submodule)
 
+## Where things live
+
+| Resource | Contents |
+|---|---|
+| [Maglev cycle ADRs](decisions.qmd) | Design and pass criteria for each cycle |
+| [Changelog](changelog.qmd) | Daily deck logs |
+| [References](references.qmd) | Bibliography of cited sources |
+| [`AGENTS.md` in the monorepo](https://github.com/V-Sekai-fire/multiplayer-fabric/blob/main/AGENTS.md) | Agent workflow rules, commit style, work queue, Maglev cycle workflow |
+| [`CONTRIBUTING.md` in the monorepo](https://github.com/V-Sekai-fire/multiplayer-fabric/blob/main/CONTRIBUTING.md) | Language guides, anti-tropes, doc style |
+
+## Quick start
+
+```sh
+git clone --recurse-submodules https://github.com/V-Sekai-fire/multiplayer-fabric
+cd multiplayer-fabric
+git submodule update --init --recursive
+```
+
+On Windows use WSL2 (Ubuntu); the local workflow is bash-first (POSIX shebangs, `/tmp` paths, symlinks, `lsof`, UNIX docker socket).
+
+Engine builds via `gscons` (macOS arm64), `gmscons` (Windows x86_64 cross-compile), or `gescons` (web wasm32) from `multiplayer-fabric-merge` after checking out the `multiplayer-fabric-base` branch. Maglev cycle smoke tests live in [`multiplayer-fabric-cycle-tests`](https://github.com/V-Sekai-fire/multiplayer-fabric-cycle-tests). See the AGENTS.md "Maglev cycle workflow" section for details.
+
 ## Repositories
 
 ### Runtime services (Fly.io)
