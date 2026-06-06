@@ -1,6 +1,7 @@
 ---
 title: "Maglev Cycle 2: Observability Stack"
 date: 2026-05-06
+status: proposed
 tier: baseline
 ---
 

@@ -1,6 +1,7 @@
 ---
 title: "Maglev Cycle 5: Zone-Console TUI Observer"
 date: 2026-05-06
+status: proposed
 tier: baseline
 ---
 

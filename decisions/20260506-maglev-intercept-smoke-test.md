@@ -1,6 +1,7 @@
 ---
 title: "Maglev Intercept: Cross-Platform Tilt-Shift Smoke Test"
 date: 2026-05-06
+status: proposed
 tier: baseline
 ---
 

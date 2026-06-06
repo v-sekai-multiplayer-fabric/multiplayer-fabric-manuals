@@ -1,6 +1,7 @@
 ---
 title: "Maglev Cycle 4: CockroachDB Connection"
 date: 2026-05-06
+status: proposed
 tier: baseline
 ---
 
