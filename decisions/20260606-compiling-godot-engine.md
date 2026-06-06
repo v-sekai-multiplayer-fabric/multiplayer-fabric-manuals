@@ -52,16 +52,16 @@ Verify `sccache --version` resolves in each shell. The verified setup uses
 
 sccache picks its backend from environment variables. Two options:
 
-- **Shared across hosts (recommended): S3-compatible bucket.** Set the
+- **Shared across hosts (recommended): S3-compatible bucket** — set the
   `SCCACHE_BUCKET` / `SCCACHE_ENDPOINT` / `SCCACHE_REGION` coordinates and point
   `AWS_PROFILE` at a profile in `~/.aws/credentials`. sccache keys include the
   compiler, target triple, and flags, so Windows/MinGW and Linux objects coexist
   in one bucket without colliding. A `SCCACHE_S3_KEY_PREFIX` namespaces these
   objects so they never collide with other projects sharing the bucket.
-- **Single host: local directory.** Set `SCCACHE_DIR` and `SCCACHE_CACHE_SIZE`
+- **Single host: local directory** — set `SCCACHE_DIR` and `SCCACHE_CACHE_SIZE`
   instead; sccache uses local disk. No S3 config needed.
 
-> **Secrets policy:** only the bucket *name, endpoint, region, and key prefix* —
+> **Secrets policy:** only the bucket _name, endpoint, region, and key prefix_ —
 > none of which are secrets — appear in committed config. The access key and
 > secret are never committed to any repo, dotfile, or build log. They live in one
 > of two places depending on where the build runs:
@@ -69,22 +69,22 @@ sccache picks its backend from environment variables. Two options:
 > - **Locally:** `~/.aws/credentials` under a named profile (`AWS_PROFILE`).
 > - **CI:** GitHub Actions **secret variables**, injected at runtime via the
 >   `${{ secrets.* }}` context. Storing the keys there is fine — they are
->   encrypted and never land in the repo. What is *not* fine is pasting a literal
+>   encrypted and never land in the repo. What is _not_ fine is pasting a literal
 >   key into a workflow YAML, a script, or this manual.
 
 ### CI — GitHub Actions
 
 In a workflow, read the credentials from secret variables into the sccache S3
-environment for the build step. Only the secret *names* appear in the committed
+environment for the build step. Only the secret _names_ appear in the committed
 YAML — the values are stored in the repo/org Actions secrets:
 
 ```yaml
 env:
-  SCCACHE_BUCKET: <your-sccache-bucket>          # non-secret coordinates
+  SCCACHE_BUCKET: <your-sccache-bucket> # non-secret coordinates
   SCCACHE_ENDPOINT: <region>.example-object-store.com
   SCCACHE_REGION: <region>
   SCCACHE_S3_KEY_PREFIX: godot
-  AWS_ACCESS_KEY_ID: ${{ secrets.SCCACHE_AWS_ACCESS_KEY_ID }}      # from Actions secrets
+  AWS_ACCESS_KEY_ID: ${{ secrets.SCCACHE_AWS_ACCESS_KEY_ID }} # from Actions secrets
   AWS_SECRET_ACCESS_KEY: ${{ secrets.SCCACHE_AWS_SECRET_ACCESS_KEY }}
 ```
 
@@ -179,15 +179,15 @@ sccache --zero-stats        # reset counters
 
 A clean first build is mostly misses; a second build of the same tree shows a high
 hit rate and finishes substantially faster. With the S3 backend, a build on the
-*other* host hits the same objects once they are uploaded.
+_other_ host hits the same objects once they are uploaded.
 
 ## Consequences
 
-- **One object cache, not two.** sccache is the sole cache; the SCons `CacheDir`
+- **One object cache, not two** — sccache is the sole cache; the SCons `CacheDir`
   is deliberately not enabled, so the same objects are never stored twice.
 - One S3 bucket serves both hosts; management is a single location, and a checkout
   can move or be renamed without losing hits (`SCCACHE_BASEDIRS`).
-- **No secrets in the repo.** Bucket coordinates are non-secret config. Access
+- **No secrets in the repo** — bucket coordinates are non-secret config. Access
   keys live in `~/.aws/credentials` locally and in GitHub Actions secret
   variables in CI — never in committed files or build logs.
 - The engine `SConstruct` recognises only `cache_path` and `cache_limit` for the
