@@ -106,7 +106,11 @@
 </section>
 <section id="decision" class="level2">
 <h2 class="anchored" data-anchor-id="decision">Decision</h2>
-<p>Standardise on <a href="https://github.com/mozilla/sccache"><code>sccache</code></a> as the compiler launcher plus SCons’s own <code>CacheDir</code>, both pointed at a single physical directory on the <code>E:</code> drive so Windows and WSL share one store. Wrap the build in a <code>gscons</code> shell function on each host.</p>
+<p>Standardise on <a href="https://github.com/mozilla/sccache"><code>sccache</code></a> as the compiler launcher plus SCons’s own <code>CacheDir</code>, both pointed at one shared cache directory reachable from both hosts. Wrap the build in a <code>gscons</code> shell function on each host. Two environment variables parameterise the setup, so this guide hardcodes no absolute paths:</p>
+<ul>
+<li><code>GODOT_SRC</code> — the engine checkout root.</li>
+<li><code>GODOT_BUILD_CACHE</code> — the shared cache directory.</li>
+</ul>
 <section id="prerequisites" class="level3">
 <h3 class="anchored" data-anchor-id="prerequisites">Prerequisites</h3>
 <table class="caption-top table">
@@ -154,43 +158,104 @@
 </section>
 <section id="shared-cache-layout" class="level3">
 <h3 class="anchored" data-anchor-id="shared-cache-layout">Shared cache layout</h3>
-<p>WSL mounts <code>E:</code> at <code>/mnt/e</code>, so the same files back both build hosts:</p>
+<p>Both the sccache object cache and the SCons <code>CacheDir</code> live under <code>GODOT_BUILD_CACHE</code>:</p>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 21%">
-<col style="width: 36%">
-<col style="width: 41%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Purpose</th>
-<th>Windows path</th>
-<th>WSL path</th>
+<th>Path</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td>sccache object cache</td>
-<td><code>E:\godot-build-cache\sccache</code></td>
-<td><code>/mnt/e/godot-build-cache/sccache</code></td>
+<td><code>$GODOT_BUILD_CACHE/sccache</code></td>
 </tr>
 <tr class="even">
 <td>SCons <code>CacheDir</code></td>
-<td><code>E:\godot-build-cache\scons_cache</code></td>
-<td><code>/mnt/e/godot-build-cache/scons_cache</code></td>
+<td><code>$GODOT_BUILD_CACHE/scons_cache</code></td>
 </tr>
 </tbody>
 </table>
-<p><code>sccache</code> keys include the compiler, target triple, and flags, so MinGW and Linux objects coexist in the same store without colliding — they simply do not hit each other. Sharing the location keeps cache management to one directory.</p>
-<p><code>SCCACHE_BASEDIRS</code> (the equivalent of ccache’s <code>CCACHE_BASEDIR</code>) strips a leading absolute prefix before hashing so hits survive a moved/renamed checkout. Set it to the checkout root. Paths must be <strong>absolute</strong>; separate multiple dirs with <code>;</code> on Windows and <code>:</code> elsewhere (longest matching prefix wins). The server reads it at startup — run <code>sccache --stop-server</code> after changing it.</p>
+<p>To share one store between Windows and WSL, set <code>GODOT_BUILD_CACHE</code> to a location both can reach — on a combined workstation that is usually a drive WSL mounts under <code>/mnt</code>. <code>sccache</code> keys include the compiler, target triple, and flags, so MinGW and Linux objects coexist in the same store without colliding.</p>
+<p><code>SCCACHE_BASEDIRS</code> (the equivalent of ccache’s <code>CCACHE_BASEDIR</code>) strips a leading absolute prefix before hashing so hits survive a moved/renamed checkout. Point it at <code>GODOT_SRC</code>. Paths must be <strong>absolute</strong>; separate multiple dirs with <code>;</code> on Windows and <code>:</code> elsewhere (longest matching prefix wins). The server reads it at startup — run <code>sccache --stop-server</code> after changing it.</p>
 </section>
 <section id="windows-powershell-profile" class="level3">
 <h3 class="anchored" data-anchor-id="windows-powershell-profile">Windows — PowerShell profile</h3>
-<p>Add to <code>Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1</code>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb1-1"><span class="co" style="color: #5E5E5E;
+<p>Set <code>GODOT_SRC</code> and <code>GODOT_BUILD_CACHE</code> to your locations, then add to <code>Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb1-1"><span class="cf" style="color: #003B4F;
 background-color: null;
-font-style: inherit;"># Shared build cache on E: — same physical dir as WSL (/mnt/e/godot-build-cache).</span></span>
-<span id="cb1-2"><span class="va" style="color: #111111;
+font-weight: bold;
+font-style: inherit;">if</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(-not</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$env</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">GODOT_SRC</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$env</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">GODOT_SRC</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$env</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">USERPROFILE</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\godot"</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb1-2"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(-not</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$env</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">GODOT_BUILD_CACHE</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$env</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">GODOT_BUILD_CACHE</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$env</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">LOCALAPPDATA</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\godot-build"</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb1-3"><span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">$env</span><span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -200,8 +265,16 @@ font-style: inherit;">SCCACHE_DIR</span> <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"E:\godot-build-cache\sccache"</span></span>
-<span id="cb1-3"><span class="va" style="color: #111111;
+font-style: inherit;">"</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$env</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">GODOT_BUILD_CACHE</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\sccache"</span></span>
+<span id="cb1-4"><span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">$env</span><span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -212,9 +285,6 @@ background-color: null;
 font-style: inherit;">=</span> <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"20G"</span></span>
-<span id="cb1-4"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Strip the checkout root from compile paths so cache hits survive a moved/renamed build dir.</span></span>
 <span id="cb1-5"><span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">$env</span><span class="op" style="color: #5E5E5E;
@@ -223,9 +293,13 @@ font-style: inherit;">:</span><span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">SCCACHE_BASEDIRS</span> <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
 background-color: null;
-font-style: inherit;">"E:\godot"</span></span>
+font-style: inherit;">$env</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">GODOT_SRC</span></span>
 <span id="cb1-6"><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">New-Item</span> <span class="op" style="color: #5E5E5E;
@@ -244,7 +318,15 @@ font-style: inherit;">SCCACHE_DIR</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">,</span> <span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"E:\godot-build-cache\scons_cache"</span> <span class="op" style="color: #5E5E5E;
+font-style: inherit;">"</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$env</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">GODOT_BUILD_CACHE</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\scons_cache"</span> <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">|</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -270,13 +352,17 @@ font-style: inherit;">=</span>double c_compiler_launcher<span class="op" style="
 background-color: null;
 font-style: inherit;">=</span>sccache cpp_compiler_launcher<span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span>sccache cache_path<span class="op" style="color: #5E5E5E;
+font-style: inherit;">=</span>sccache <span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">=</span>E<span class="op" style="color: #5E5E5E;
+font-style: inherit;">"cache_path=</span><span class="va" style="color: #111111;
 background-color: null;
-font-style: inherit;">:/</span>godot-build-cache<span class="op" style="color: #5E5E5E;
+font-style: inherit;">$env</span><span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">/</span>scons_cache <span class="op" style="color: #5E5E5E;
+font-style: inherit;">:</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">GODOT_BUILD_CACHE</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">/scons_cache"</span> <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">-</span>j16 @args <span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -286,11 +372,50 @@ font-style: inherit;">}</span></span></code></pre></div></div>
 <h3 class="anchored" data-anchor-id="wsl-linux-.bashrc">WSL / Linux — <code>~/.bashrc</code></h3>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># Godot V-Sekai linuxbsd build.</span></span>
-<span id="cb2-2"><span class="co" style="color: #5E5E5E;
+font-style: inherit;"># Godot V-Sekai linuxbsd build. sccache caches object compilation.</span></span>
+<span id="cb2-2"><span class="bu" style="color: null;
 background-color: null;
-font-style: inherit;"># Uses sccache as the compiler launcher to cache object compilation.</span></span>
+font-style: inherit;">export</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">GODOT_SRC</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">${GODOT_SRC</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:-</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$HOME</span>/godot<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">}</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>                       <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># engine checkout</span></span>
 <span id="cb2-3"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">export</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">GODOT_BUILD_CACHE</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">${GODOT_BUILD_CACHE</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:-</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$HOME</span>/.cache/godot-build<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">}</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># shared cache</span></span>
+<span id="cb2-4"><span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">export</span> <span class="va" style="color: #111111;
 background-color: null;
@@ -302,12 +427,14 @@ font-style: inherit;">"</span><span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">${SCCACHE_DIR</span><span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">:-</span>/mnt/e/godot-build-cache/sccache<span class="va" style="color: #111111;
+font-style: inherit;">:-</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$GODOT_BUILD_CACHE</span>/sccache<span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">}</span><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"</span></span>
-<span id="cb2-4"><span class="bu" style="color: null;
+<span id="cb2-5"><span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">export</span> <span class="va" style="color: #111111;
 background-color: null;
@@ -324,10 +451,10 @@ background-color: null;
 font-style: inherit;">}</span><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"</span></span>
-<span id="cb2-5"><span class="co" style="color: #5E5E5E;
+<span id="cb2-6"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Strip the checkout root from compile paths so cache hits survive a moved/renamed build dir.</span></span>
-<span id="cb2-6"><span class="bu" style="color: null;
+<span id="cb2-7"><span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">export</span> <span class="va" style="color: #111111;
 background-color: null;
@@ -339,28 +466,34 @@ font-style: inherit;">"</span><span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">${SCCACHE_BASEDIRS</span><span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">:-</span>/mnt/e/godot<span class="va" style="color: #111111;
+font-style: inherit;">:-</span><span class="va" style="color: #111111;
 background-color: null;
-font-style: inherit;">}</span><span class="st" style="color: #20794D;
+font-style: inherit;">$GODOT_SRC}</span><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"</span></span>
-<span id="cb2-7"><span class="fu" style="color: #4758AB;
+<span id="cb2-8"><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">gscons()</span> <span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">{</span></span>
-<span id="cb2-8">    <span class="ex" style="color: null;
+<span id="cb2-9">    <span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">python3</span> <span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">-m</span> SCons compiledb=yes target=editor precision=double <span class="dt" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">\</span></span>
-<span id="cb2-9">        c_compiler_launcher=sccache cpp_compiler_launcher=sccache <span class="dt" style="color: #AD0000;
+<span id="cb2-10">        c_compiler_launcher=sccache cpp_compiler_launcher=sccache <span class="dt" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">\</span></span>
-<span id="cb2-10">        cache_path=/mnt/e/godot-build-cache/scons_cache debug_symbols=yes tests=yes <span class="at" style="color: #657422;
+<span id="cb2-11">        <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"cache_path=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$GODOT_BUILD_CACHE</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">/scons_cache"</span> debug_symbols=yes tests=yes <span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">-j</span><span class="va" style="color: #111111;
 background-color: null;
@@ -375,7 +508,7 @@ background-color: null;
 font-style: inherit;">$@</span><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"</span></span>
-<span id="cb2-11"><span class="kw" style="color: #003B4F;
+<span id="cb2-12"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">}</span></span></code></pre></div></div>
@@ -383,7 +516,7 @@ font-style: inherit;">}</span></span></code></pre></div></div>
 </section>
 <section id="building" class="level3">
 <h3 class="anchored" data-anchor-id="building">Building</h3>
-<p>From the engine checkout (<code>E:\godot</code> / <code>/mnt/e/godot</code>):</p>
+<p>From your engine checkout (<code>$GODOT_SRC</code>):</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">gscons</span>                      <span class="co" style="color: #5E5E5E;
@@ -430,9 +563,9 @@ font-style: inherit;"># reset counters</span></span></code></pre></div></div>
 <section id="consequences" class="level2">
 <h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
 <ul>
-<li>One cache directory on <code>E:</code> serves both hosts; management is a single location.</li>
+<li>One cache directory (<code>GODOT_BUILD_CACHE</code>) serves both hosts; management is a single location.</li>
 <li>The engine <code>SConstruct</code> recognises only <code>cache_path</code> and <code>cache_limit</code> for the SCons cache. <code>scons_cache=</code> is <strong>not</strong> valid and is silently ignored.</li>
-<li>WSL builds run against <code>/mnt/e</code>, whose 9p mount is slower than native ext4 — the trade-off accepted for a shared cache.</li>
+<li>If the shared cache lives on a Windows drive mounted into WSL, that mount is slower than native ext4 — the trade-off accepted for sharing one store.</li>
 <li>Common failures: no hits between builds → server started before the env vars, run <code>sccache --stop-server</code>; no hits after relocating a checkout → set <code>SCCACHE_BASEDIRS</code> to the checkout root.</li>
 </ul>
 </section>
