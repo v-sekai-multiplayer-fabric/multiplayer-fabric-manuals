@@ -5,6 +5,10 @@ status: proposed
 tier: baseline
 ---
 
+> Deployment note: the stack now runs on the Harvester cluster; it has moved off
+> Fly.io (see [self-host on Harvester HCI](20260606-self-host-on-harvester-hci.md)).
+> The Fly-specific details below are from the original deployment.
+
 ## The Context
 
 The observability stack — OTEL Collector (4317/4318), VictoriaMetrics (8428), VictoriaLogs (9428), VictoriaTraces (10428) — is infrastructure-level and depends only on the Fly deployment being live after Cycle 1. It can run in parallel with the game-logic track (Cycles 3–10) and the DB connection (Cycle 9).

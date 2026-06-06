@@ -6,6 +6,10 @@ tier: baseline
 supersedes: 20260506-observability-stack-victoriametrics-jaeger.md
 ---
 
+> Deployment note: the stack now runs on the Harvester cluster; it has moved off
+> Fly.io (see [self-host on Harvester HCI](20260606-self-host-on-harvester-hci.md)).
+> The Fly volume and `fly proxy` references below are from the original deployment.
+
 ## Context
 
 Jaeger all-in-one with Badger storage was chosen as the Apache 2.0 replacement for Tempo. VictoriaMetrics ships VictoriaTraces — an Apache 2.0 trace backend that accepts OTLP directly. VictoriaMetrics benchmarks report 3.7× less RAM and 2.6× less CPU vs Tempo.
