@@ -29,7 +29,7 @@ stop/start of the server on every build to apply it, which is slow and races
 the process lifecycle.
 
 We are not local administrators by default, and Windows `sudo` here runs in
-*Force New Window* mode, so any elevation is an interactive UAC prompt.
+_Force New Window_ mode, so any elevation is an interactive UAC prompt.
 
 ## Decision Drivers
 
@@ -53,7 +53,7 @@ We are not local administrators by default, and Windows `sudo` here runs in
 - **`sc.exe create` directly** — the SCM expects a process that implements the
   service protocol; a bare exe started this way is killed as non-responsive.
 - **[nssm](https://nssm.cc/) (Non-Sucking Service Manager) wrapping the program**
-  — a thin supervisor that *is* a proper service and keeps an ordinary foreground
+  — a thin supervisor that _is_ a proper service and keeps an ordinary foreground
   process alive, restarting it on exit.
 
 ## Decision Outcome
@@ -64,19 +64,19 @@ auto-start/auto-restart service while staying an ordinary executable.
 
 The pattern has four parts:
 
-1. **Run the target in the foreground.** A supervisor can only watch a process
+1. **Run the target in the foreground** — a supervisor can only watch a process
    that does not fork-and-exit. For sccache that means
    `SCCACHE_START_SERVER=1` + `SCCACHE_NO_DAEMON=1` and invoking the bare binary
    (not `--start-server`, which always daemonizes). Most servers (Godot
    `--headless`, `cockroach start`, zone daemons) are already foreground.
 
 2. **A per-instance launcher script** sets that instance's environment and execs
-   the program by **absolute path** — services run as *LocalSystem*, whose `PATH`
+   the program by **absolute path** — services run as _LocalSystem_, whose `PATH`
    does not include user shims (e.g. scoop). Secrets are read at runtime from
    their existing secured file (for sccache, the object-store keys come from the
    `do-tor1` AWS profile in `~/.aws/credentials`, exported as
    `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` because sccache's S3 backend
-   ignores AWS *profiles*). Nothing secret is written to disk by the script.
+   ignores AWS _profiles_). Nothing secret is written to disk by the script.
 
 3. **An elevated installer script** registers each service with nssm, sets it to
    `SERVICE_AUTO_START`, enables restart-on-exit with a throttle/delay, points
@@ -84,7 +84,7 @@ The pattern has four parts:
    (stop + remove + reinstall) and writes a transcript so the result can be
    reviewed after the separate elevated window closes.
 
-4. **Instance isolation by port (and namespace).** Each instance listens on its
+4. **Instance isolation by port (and namespace)** — each instance listens on its
    own loopback port; clients select an instance by port. Loopback is not
    session-isolated, so a LocalSystem service in session 0 is reachable from the
    user session. sccache additionally uses a distinct S3 key prefix per instance.
@@ -94,10 +94,10 @@ The pattern has four parts:
 Two services back two projects from the one shared object-store bucket, kept apart
 by port and key prefix:
 
-| Service             | Port | Key prefix     | Base dirs (checkout roots)         |
-| ------------------- | ---- | -------------- | ---------------------------------- |
-| `sccache-godot`     | 4227 | `godot`        | the Godot checkout + merge dir     |
-| `sccache-idtx-flow` | 4226 | `idtx-flow`    | the idtx-flow checkouts            |
+| Service             | Port | Key prefix  | Base dirs (checkout roots)     |
+| ------------------- | ---- | ----------- | ------------------------------ |
+| `sccache-godot`     | 4227 | `godot`     | the Godot checkout + merge dir |
+| `sccache-idtx-flow` | 4226 | `idtx-flow` | the idtx-flow checkouts        |
 
 4226 is sccache's default port, so the idtx-flow builds use that service with no
 changes; the Godot build sets `SCCACHE_SERVER_PORT=4227`. The build wrapper
@@ -130,7 +130,7 @@ The same launcher + installer shape runs other dev infrastructure as services:
   their existing secured files and are read at runtime.
 - Good: build/runtime wrappers shrink to "pick a port and run" — no server
   management, no restart races.
-- Bad: requires one-time elevation per install/change; with *Force New Window*
+- Bad: requires one-time elevation per install/change; with _Force New Window_
   sudo this is an interactive UAC prompt and the output must be logged to a file
   to be reviewed afterward.
 - Bad: services run as LocalSystem in session 0, so launchers must use absolute
