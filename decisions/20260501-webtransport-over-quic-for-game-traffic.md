@@ -2,6 +2,7 @@
 title: Use WebTransport over QUIC for game traffic
 date: 2026-05-01
 status: accepted
+tier: baseline
 ---
 
 ## Context

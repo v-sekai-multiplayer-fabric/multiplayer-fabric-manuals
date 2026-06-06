@@ -1,4 +1,8 @@
-# Maglev Cycle 9: Physics and VRM Loading
+---
+title: "Maglev Cycle 9: Physics and VRM Loading"
+date: 2026-05-06
+tier: baseline
+---
 
 ## The Context
 

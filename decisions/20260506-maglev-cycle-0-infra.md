@@ -1,4 +1,8 @@
-# Maglev Cycle 0: Terraform Fly.io Infrastructure
+---
+title: "Maglev Cycle 0: Terraform Fly.io Infrastructure"
+date: 2026-05-06
+tier: baseline
+---
 
 ## The Context
 

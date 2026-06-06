@@ -1,4 +1,8 @@
-# Maglev Intercept: Cross-Platform Tilt-Shift Smoke Test
+---
+title: "Maglev Intercept: Cross-Platform Tilt-Shift Smoke Test"
+date: 2026-05-06
+tier: baseline
+---
 
 ## The Context
 

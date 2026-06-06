@@ -2,6 +2,7 @@
 title: CockroachDB with mTLS and role-separated access
 date: 2026-05-01
 status: accepted
+tier: baseline
 ---
 
 ## Context

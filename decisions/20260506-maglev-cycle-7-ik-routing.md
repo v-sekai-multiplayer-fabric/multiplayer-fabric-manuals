@@ -1,4 +1,8 @@
-# Maglev Cycle 7: IK Routing and Merge
+---
+title: "Maglev Cycle 7: IK Routing and Merge"
+date: 2026-05-06
+tier: baseline
+---
 
 ## The Context
 

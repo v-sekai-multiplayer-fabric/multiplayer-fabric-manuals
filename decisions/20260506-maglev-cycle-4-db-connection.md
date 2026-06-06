@@ -1,4 +1,8 @@
-# Maglev Cycle 4: CockroachDB Connection
+---
+title: "Maglev Cycle 4: CockroachDB Connection"
+date: 2026-05-06
+tier: baseline
+---
 
 ## The Context
 

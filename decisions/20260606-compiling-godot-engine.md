@@ -2,6 +2,7 @@
 title: Compiling the Godot engine
 date: 2026-06-06
 status: accepted
+tier: baseline
 ---
 
 ## Context

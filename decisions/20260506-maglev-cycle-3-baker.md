@@ -1,4 +1,8 @@
-# Maglev Cycle 3: Baker Pipeline
+---
+title: "Maglev Cycle 3: Baker Pipeline"
+date: 2026-05-06
+tier: baseline
+---
 
 ## The Context
 

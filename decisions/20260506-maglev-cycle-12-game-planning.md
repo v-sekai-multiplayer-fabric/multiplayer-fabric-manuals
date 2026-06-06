@@ -1,4 +1,8 @@
-# Maglev Cycle 12: Game Cycle Planning
+---
+title: "Maglev Cycle 12: Game Cycle Planning"
+date: 2026-05-06
+tier: baseline
+---
 
 ## The Context
 

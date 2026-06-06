@@ -1,4 +1,8 @@
-# Maglev Cycle 5: Zone-Console TUI Observer
+---
+title: "Maglev Cycle 5: Zone-Console TUI Observer"
+date: 2026-05-06
+tier: baseline
+---
 
 ## The Context
 

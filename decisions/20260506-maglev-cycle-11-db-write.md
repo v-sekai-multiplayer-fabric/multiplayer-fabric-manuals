@@ -1,4 +1,8 @@
-# Maglev Cycle 11: CockroachDB Score Write
+---
+title: "Maglev Cycle 11: CockroachDB Score Write"
+date: 2026-05-06
+tier: baseline
+---
 
 ## The Context
 
