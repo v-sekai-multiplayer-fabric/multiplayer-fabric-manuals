@@ -140,6 +140,68 @@
   <pubDate>Sat, 06 Jun 2026 00:00:00 GMT</pubDate>
 </item>
 <item>
+  <title>Pin the engine to a frozen Godot 4.7 commit</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-pin-engine-to-frozen-godot-4-7.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<section id="context-and-problem-statement" class="level2">
+<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
+<p>The engine fork carries many feature branches (cassie, resonance audio, native media, speech, spatial audio, the fabric modules) that the <code>merge</code> recipe assembles onto a base. If that base tracks a moving upstream, every assembly can shift under the patches, so a green build one day can break the next from upstream churn alone. What base should the feature branches and the assembly build on?</p>
+</section>
+<section id="decision-drivers" class="level2">
+<h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
+<ul>
+<li>A stable base so assembly and CI are reproducible.</li>
+<li>Patch branches that do not have to chase upstream API changes mid-cycle.</li>
+<li>A known engine version for the docs and for downstream images.</li>
+</ul>
+</section>
+<section id="considered-options" class="level2">
+<h2 class="anchored" data-anchor-id="considered-options">Considered Options</h2>
+<ul>
+<li>Track upstream <code>godotengine/godot</code> <code>master</code>.</li>
+<li>Track an upstream release branch.</li>
+<li>Pin the fork’s <code>master</code> to one frozen upstream Godot 4.7 commit.</li>
+</ul>
+</section>
+<section id="decision-outcome" class="level2">
+<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
+<p>Chosen option: “Pin the fork’s <code>master</code> to one frozen upstream Godot 4.7 commit”, because it gives the patch branches and the assembly a fixed target, so builds are reproducible and upstream churn cannot break an assembly.</p>
+<ul>
+<li>The fork’s <code>master</code> is the frozen base. Its tip is <code>8a337510</code> (Godot <code>4.7.0-beta</code>, per <code>version.py</code>).</li>
+<li>Every feature branch in the <a href="https://github.com/v-sekai-multiplayer-fabric/merge"><code>merge</code></a> <code>gitassembly</code> recipe stands alone on <code>master</code>; the recipe merges them onto the assembled branch from that base.</li>
+<li>The pin moves only by a deliberate update to <code>master</code>, not by following upstream.</li>
+</ul>
+<section id="consequences" class="level3">
+<h3 class="anchored" data-anchor-id="consequences">Consequences</h3>
+<ul>
+<li>Good: assemblies and CI are reproducible against a fixed engine.</li>
+<li>Good: feature branches target one fixed engine API.</li>
+<li>Bad: upstream fixes after the pin are not picked up until <code>master</code> is advanced on purpose.</li>
+<li>Bad: the longer the pin sits on a beta, the larger the eventual catch-up to a later 4.7.</li>
+</ul>
+</section>
+<section id="confirmation" class="level3">
+<h3 class="anchored" data-anchor-id="confirmation">Confirmation</h3>
+<p><code>version.py</code> on the fork reports <code>4.7.0-beta</code>, and the <code>gitassembly</code> recipe bases its branches on <code>master</code>. Advancing the engine is a single, reviewable change to the <code>master</code> pin.</p>
+</section>
+</section>
+<section id="more-information" class="level2">
+<h2 class="anchored" data-anchor-id="more-information">More Information</h2>
+<p>This pin is why the <a href="../decisions/20260606-spatial-audio-patched-resonance-audio.html">spatial audio decision</a> notes the module targets a fixed engine API. The exact upstream commit that <code>master</code> mirrors lives in the godot fork’s git history.</p>
+
+
+</section>
+
+ ]]></description>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-pin-engine-to-frozen-godot-4-7.html</guid>
+  <pubDate>Sat, 06 Jun 2026 00:00:00 GMT</pubDate>
+</item>
+<item>
   <title>Two-org split between V-Sekai-fire and v-sekai-multiplayer-fabric</title>
   <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-org-split-v-sekai-multiplayer-fabric.html</link>
   <description><![CDATA[ 
@@ -1257,7 +1319,7 @@ font-style: inherit;"># reset counters</span></span></code></pre></div></div>
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/present-proposal-template.html</guid>
-  <pubDate>Sat, 06 Jun 2026 15:29:31 GMT</pubDate>
+  <pubDate>Sat, 06 Jun 2026 15:32:32 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -1482,7 +1544,7 @@ font-style: inherit;"># reset counters</span></span></code></pre></div></div>
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260506-maglev-intercept-smoke-test.html</guid>
-  <pubDate>Sat, 06 Jun 2026 15:29:31 GMT</pubDate>
+  <pubDate>Sat, 06 Jun 2026 15:32:32 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -1604,7 +1666,7 @@ font-style: inherit;"># reset counters</span></span></code></pre></div></div>
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260506-maglev-cycle-9-physics-vrm.html</guid>
-  <pubDate>Sat, 06 Jun 2026 15:29:31 GMT</pubDate>
+  <pubDate>Sat, 06 Jun 2026 15:32:32 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -1721,7 +1783,7 @@ font-style: inherit;"># reset counters</span></span></code></pre></div></div>
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260506-maglev-cycle-8-ik-merge.html</guid>
-  <pubDate>Sat, 06 Jun 2026 15:29:31 GMT</pubDate>
+  <pubDate>Sat, 06 Jun 2026 15:32:32 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -1840,127 +1902,7 @@ font-style: inherit;"># reset counters</span></span></code></pre></div></div>
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260506-maglev-cycle-7-ik-routing.html</guid>
-  <pubDate>Sat, 06 Jun 2026 15:29:31 GMT</pubDate>
-</item>
-<item>
-  <title></title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260506-maglev-cycle-6-mmog-load.html</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<section id="maglev-cycle-6-dual-same-type-clients" class="level1">
-<h1>Maglev Cycle 6: Dual Same-Type Clients</h1>
-<section id="the-context" class="level2">
-<h2 class="anchored" data-anchor-id="the-context">The Context</h2>
-<p>With one Godot client verified end-to-end and the observability stack live (Cycle 2), the next question is whether the gateway can multiplex two same-type connections into one zone server tick while keeping both clients synchronized. Observability must be running before this cycle begins — a broadcast failure here is unattributable without gateway traces.</p>
-</section>
-<section id="the-problem-statement" class="level2">
-<h2 class="anchored" data-anchor-id="the-problem-statement">The Problem Statement</h2>
-<p>16 clients in one zone is the minimum to qualify as MMOG load. 14 are taskweft bots (~15 MB each, not full Godot processes); 1 is the PCVR human; 1 is the Steam Deck human. Connection-slot handling, datagram ordering, and state broadcast to 16 sockets have not been tested under concurrent load.</p>
-</section>
-<section id="design" class="level2">
-<h2 class="anchored" data-anchor-id="design">Design</h2>
-<p>16 clients connect to the gateway simultaneously. All receive datagram state from the same zone server instance each tick. One static entity in an empty world.</p>
-<p>Pass criteria:</p>
-<ul class="task-list">
-<li><label><input type="checkbox">All 16 clients receive consistent entity state each tick for 60 seconds</label></li>
-<li><label><input type="checkbox">No client observes a tick gap or duplicate</label></li>
-<li><label><input type="checkbox">Zone-console shows 16 entities at 20 Hz</label></li>
-<li><label><input type="checkbox">Gateway process memory stays flat under 16 connections</label></li>
-<li><label><input type="checkbox">All 14 bots disconnect and reconnect simultaneously; gateway recovers within 5 seconds and all clients resync without a restart</label></li>
-<li><label><input type="checkbox">Under 100 ms injected latency and 2% packet loss, no client desyncs over 30 seconds</label></li>
-</ul>
-</section>
-<section id="estimate" class="level2">
-<h2 class="anchored" data-anchor-id="estimate">Estimate</h2>
-<p><strong>5 days</strong> (2026-05-13 → 2026-05-19). Taskweft bots are proven (93 PropCheck properties passing). The work is wiring 14 bots to the gateway and adding the reconnect storm and network condition harnesses. No prior multi-bot gateway test exists in the history; projecting from the gateway build pace.</p>
-</section>
-<section id="cris-score" class="level2">
-<h2 class="anchored" data-anchor-id="cris-score">CRIS Score</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 10%">
-<col style="width: 3%">
-<col style="width: 86%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Factor</th>
-<th>Score</th>
-<th>Evidence</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>C</strong>omplexity</td>
-<td>6</td>
-<td>16 same-type connections; taskweft bots are proven infrastructure but have not been combined with the gateway at this count.</td>
-</tr>
-<tr class="even">
-<td><strong>R</strong>each</td>
-<td>10</td>
-<td>All subsequent cycles run at 16-client load.</td>
-</tr>
-<tr class="odd">
-<td><strong>I</strong>mpediment</td>
-<td>9</td>
-<td>A desync at 16 clients means the gateway’s broadcast path is broken before heterogeneous input is added.</td>
-</tr>
-<tr class="even">
-<td><strong>S</strong>takeholder</td>
-<td>10</td>
-<td>Gate for Cycles 7–10.</td>
-</tr>
-<tr class="odd">
-<td><strong>Total</strong></td>
-<td>8.75</td>
-<td>Build after Cycles 1 and 2 pass.</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="the-downsides" class="level2">
-<h2 class="anchored" data-anchor-id="the-downsides">The Downsides</h2>
-<p>16 same-type bots leave the heterogeneous input path unvalidated.</p>
-</section>
-<section id="the-road-not-taken" class="level2">
-<h2 class="anchored" data-anchor-id="the-road-not-taken">The Road Not Taken</h2>
-<p>Starting immediately with heterogeneous IK and gamepad inputs at 16-client scale was rejected — a broadcast failure at full complexity would be ambiguous between gateway capacity and input-mux issues. Cycle 6 uses uniform bots to isolate the broadcast path.</p>
-</section>
-<section id="status" class="level2">
-<h2 class="anchored" data-anchor-id="status">Status</h2>
-<p>Status: Draft</p>
-</section>
-<section id="decision-makers" class="level2">
-<h2 class="anchored" data-anchor-id="decision-makers">Decision Makers</h2>
-<ul>
-<li>Lead Architect / Fabric Maintainer</li>
-</ul>
-</section>
-<section id="tags" class="level2">
-<h2 class="anchored" data-anchor-id="tags">Tags</h2>
-<ul>
-<li>maglev-cycle-6, mmog-load, gateway, smoke-test, galls-law, 20260506-maglev-cycle-6-mmog-load, present-proposal-template</li>
-</ul>
-</section>
-<section id="further-reading" class="level2">
-<h2 class="anchored" data-anchor-id="further-reading">Further Reading</h2>
-<pre><code>@misc{v_sekai_2026,
-  title = {V-Sekai},
-  year  = {2026},
-  url   = {https://v-sekai.org/}
-}</code></pre>
-
-
-</section>
-</section>
-
- ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260506-maglev-cycle-6-mmog-load.html</guid>
-  <pubDate>Sat, 06 Jun 2026 15:29:31 GMT</pubDate>
+  <pubDate>Sat, 06 Jun 2026 15:32:32 GMT</pubDate>
 </item>
 </channel>
 </rss>
