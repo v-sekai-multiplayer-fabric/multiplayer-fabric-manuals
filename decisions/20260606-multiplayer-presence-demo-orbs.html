@@ -24,7 +24,26 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -330,7 +349,13 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The <code>xr-grid</code> debug scene currently shows one VRM avatar standing on the grid with a few clusters of small colored orbs floating nearby as placeholder remote players. The next increment should prove shared presence: several people in the same space at once, at the scale of a full V-Sekai Discord call. What is the smallest piece that demonstrates real multiplayer presence without committing to full networked avatars for everyone?</p>
+<p>The <code>xr-grid</code> debug scene currently shows one skinned-mesh hero asset (a rigged mesh with a skeleton, not a VRM) standing on the grid as a visual landmark; it does not represent a player. Around it float a few clusters of small colored orbs. Each cluster encodes the translation and orientation (a full pose) of one tracked point — head, hand, hand — for a remote participant, drawn as orientation and translation orbs. The next increment should prove shared presence: several people in the same space at once, at the scale of a full V-Sekai Discord call. What is the smallest piece that demonstrates real multiplayer presence without committing to full networked avatars for everyone?</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="attachments/20260606_vsekai-mpf_xr-grid-debug-orbs_0001.png" class="img-fluid figure-img"></p>
+<figcaption>The <code>xr-grid</code> debug scene, 2026-06-06: a skinned-mesh hero asset as a visual landmark, with each remote participant drawn as head and hand orientation-and-translation orb clusters. <span class="citation" data-cites="vsekai_xrgrid_debug_2026">(<a href="#ref-vsekai_xrgrid_debug_2026" role="doc-biblioref">V-Sekai Multiplayer Fabric 2026</a>)</span></figcaption>
+</figure>
+</div>
 </section>
 <section id="decision-drivers" class="level2">
 <h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
@@ -344,7 +369,7 @@ ul.task-list li input[type="checkbox"] {
 <section id="considered-options" class="level2">
 <h2 class="anchored" data-anchor-id="considered-options">Considered Options</h2>
 <ul>
-<li>Full networked VRM avatar for every participant.</li>
+<li>Full networked character (skinned mesh) for every participant.</li>
 <li>Head plus two hand orbs per participant (3-point tracking representation).</li>
 <li>Text nameplates with no embodiment.</li>
 </ul>
@@ -354,7 +379,7 @@ ul.task-list li input[type="checkbox"] {
 <p>Chosen option: “Head plus two hand orbs per participant”, because three tracked points per person convey presence and gesture at a fraction of the cost of a full avatar, which lets the demo scale to a whole call.</p>
 <p>Scope of the demo:</p>
 <ul>
-<li>Each participant is represented by one head orb and two hand orbs, driven by their 3-point tracking. One full VRM (as in the current scene) can stand in for the local player.</li>
+<li>Every participant, including the local player, is represented by three tracked points — head, hand, hand — each shown as a cluster of orbs that encodes its translation and orientation (pose). The existing skinned-mesh hero asset stays in the scene as a visual landmark and does not represent any player.</li>
 <li>The room scales to a V-Sekai Discord call’s worth of participants.</li>
 <li>A participant who wants to identify themselves signs with the pen (<a href="../decisions/20260606-feature-classification-poc-baseline-stretch.html">cassie</a>); the signature is the identity mark. Unsigned participants stay anonymous orbs.</li>
 <li>Built on <a href="https://github.com/v-sekai-multiplayer-fabric/xr-grid">xr-grid</a>.</li>
@@ -370,17 +395,22 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="confirmation" class="level3">
 <h3 class="anchored" data-anchor-id="confirmation">Confirmation</h3>
-<p>A session shows multiple participants, each rendered as a head orb and two hand orbs tracking their movement, at call scale. Signing with the pen produces a visible identifying mark next to that participant’s orbs.</p>
+<p>A session shows multiple participants, each rendered as three orb clusters (head, hand, hand) tracking the pose of those points, at call scale. Signing with the pen produces a visible identifying mark next to that participant’s orbs.</p>
 </section>
 </section>
 <section id="more-information" class="level2">
 <h2 class="anchored" data-anchor-id="more-information">More Information</h2>
-<p>This is the “smallest new piece” milestone: expand the existing single-avatar <code>xr-grid</code> debug scene (one VRM plus placeholder orb clusters) into a populated room. It composes the <a href="../decisions/20260606-feature-classification-poc-baseline-stretch.html">pen-stroke / cassie capability</a> for optional identity.</p>
+<p>This is the “smallest new piece” milestone: expand the existing <code>xr-grid</code> debug scene (a skinned-mesh hero asset as a landmark, plus orientation and translation orb clusters) into a populated room. It composes the <a href="../decisions/20260606-feature-classification-poc-baseline-stretch.html">pen-stroke / cassie capability</a> for optional identity.</p>
+
 
 
 </section>
 
-</main> <!-- /main -->
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-vsekai_xrgrid_debug_2026" class="csl-entry" role="listitem">
+V-Sekai Multiplayer Fabric. 2026. <em><span class="nocase">xr-grid</span> Debug Scene: Hero-Asset Landmark with Head and Hand Orientation-and-Translation Orbs</em>.
+</div>
+</div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right
