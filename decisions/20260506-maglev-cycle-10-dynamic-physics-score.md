@@ -1,4 +1,8 @@
-# Maglev Cycle 10: Dynamic Physics and Causal Ordering
+---
+title: "Maglev Cycle 10: Dynamic Physics and Causal Ordering"
+date: 2026-05-06
+tier: baseline
+---
 
 ## The Context
 

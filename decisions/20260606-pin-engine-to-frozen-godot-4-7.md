@@ -2,6 +2,7 @@
 title: Pin the engine to a frozen Godot 4.7 commit
 date: 2026-06-06
 status: accepted
+tier: baseline
 ---
 
 ## Context and Problem Statement

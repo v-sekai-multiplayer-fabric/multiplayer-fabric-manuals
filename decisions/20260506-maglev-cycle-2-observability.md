@@ -1,4 +1,8 @@
-# Maglev Cycle 2: Observability Stack
+---
+title: "Maglev Cycle 2: Observability Stack"
+date: 2026-05-06
+tier: baseline
+---
 
 ## The Context
 

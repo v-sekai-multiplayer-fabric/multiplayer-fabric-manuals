@@ -2,6 +2,7 @@
 title: GHCR packages must be built by the repo that consumes them
 date: 2026-05-06
 status: accepted
+tier: baseline
 ---
 
 ## Context

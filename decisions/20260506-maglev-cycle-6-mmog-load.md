@@ -1,4 +1,8 @@
-# Maglev Cycle 6: Dual Same-Type Clients
+---
+title: "Maglev Cycle 6: Dual Same-Type Clients"
+date: 2026-05-06
+tier: baseline
+---
 
 ## The Context
 

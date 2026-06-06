@@ -2,6 +2,7 @@
 title: Fly.io for deployment
 date: 2026-05-01
 status: accepted
+tier: baseline
 ---
 
 ## Context

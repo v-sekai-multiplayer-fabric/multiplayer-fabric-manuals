@@ -1,4 +1,8 @@
-# Maglev Cycle 8: Full-Rate IK Merge
+---
+title: "Maglev Cycle 8: Full-Rate IK Merge"
+date: 2026-05-06
+tier: baseline
+---
 
 ## The Context
 

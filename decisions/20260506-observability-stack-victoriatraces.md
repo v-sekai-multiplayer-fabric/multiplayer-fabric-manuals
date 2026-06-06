@@ -2,6 +2,7 @@
 title: Replace Jaeger with VictoriaTraces for trace storage
 date: 2026-05-06
 status: accepted
+tier: baseline
 supersedes: 20260506-observability-stack-victoriametrics-jaeger.md
 ---
 
