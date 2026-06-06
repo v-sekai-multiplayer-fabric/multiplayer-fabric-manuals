@@ -20,6 +20,7 @@
 
 
 
+<p><em><a href="index.html">Manuals</a> › Archival file naming convention for committed assets</em></p>
 <p><strong>Tier:</strong> baseline · <strong>Status:</strong> accepted</p>
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
@@ -91,6 +92,7 @@
 
 
 
+<p><em><a href="index.html">Manuals</a> › Compiling the Godot engine</em></p>
 <p><strong>Tier:</strong> baseline · <strong>Status:</strong> accepted</p>
 <section id="context" class="level2">
 <h2 class="anchored" data-anchor-id="context">Context</h2>
@@ -452,6 +454,7 @@ font-style: inherit;"># reset counters</span></span></code></pre></div></div>
 
 
 
+<p><em><a href="index.html">Manuals</a> › Feature classification — proof of concept, baseline, stretch</em></p>
 <p><strong>Tier:</strong> baseline · <strong>Status:</strong> accepted</p>
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
@@ -531,6 +534,7 @@ font-style: inherit;"># reset counters</span></span></code></pre></div></div>
 
 
 
+<p><em><a href="index.html">Manuals</a> › Ghostly partial-body presence avatar from ANNY via SOMA-X</em></p>
 <p><strong>Tier:</strong> proof of concept · <strong>Status:</strong> proposed</p>
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
@@ -591,6 +595,12 @@ font-style: inherit;"># reset counters</span></span></code></pre></div></div>
 <p>Refines the <a href="../decisions/20260606-presence-marker-representation.html">presence marker decision</a> and revives <a href="https://linear.app/chibifire/issue/CHI-298/use-soma-and-anny-to-fit-concepts-to-personas">CHI-298</a>. Models: <a href="https://github.com/naver/anny">ANNY</a>, <a href="https://github.com/NVlabs/SOMA-X">SOMA-X</a>.</p>
 
 
+</section>
+<section id="backlinks" class="level2">
+<h2 class="anchored" data-anchor-id="backlinks">Backlinks</h2>
+<ul>
+<li><p><a href="20260606-presence-marker-representation.html">Human-readable presence markers with an orb debug mode</a></p></li>
+</ul>
 
 </section>
 
@@ -620,6 +630,7 @@ Stein, Jan-Philipp, and Peter Ohler. 2017. <span>“Venturing into the Uncanny V
 
 
 
+<p><em><a href="index.html">Manuals</a> › Human-readable presence markers with an orb debug mode</em></p>
 <p><strong>Tier:</strong> proof of concept · <strong>Status:</strong> proposed</p>
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
@@ -672,7 +683,7 @@ Stein, Jan-Philipp, and Peter Ohler. 2017. <span>“Venturing into the Uncanny V
 </section>
 <section id="more-information" class="level2">
 <h2 class="anchored" data-anchor-id="more-information">More Information</h2>
-<p>Supersedes <a href="../decisions/20260606-multiplayer-presence-demo-orbs.html">Minimal multiplayer presence demo with head and hand orbs</a>. The orb representation is retained as the debug mode. UX input from Joseph.</p>
+<p>Supersedes <a href="../decisions/20260606-multiplayer-presence-demo-orbs.html">Minimal multiplayer presence demo with head and hand orbs</a>. The orb representation is retained as the debug mode. UX input from Joseph. Refined by <a href="../decisions/20260606-ghostly-presence-body-model.html">Ghostly partial-body presence avatar from ANNY via SOMA-X</a>.</p>
 
 
 </section>
@@ -702,6 +713,7 @@ V-Sekai Multiplayer Fabric. 2026. <em><span class="nocase">xr-grid</span> Debug 
 
 
 
+<p><em><a href="index.html">Manuals</a> › Minimal multiplayer presence demo with head and hand orbs</em></p>
 <p><strong>Tier:</strong> proof of concept · <strong>Status:</strong> superseded by <a href="20260606-presence-marker-representation.html">20260606-presence-marker-representation</a></p>
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
@@ -784,6 +796,7 @@ V-Sekai Multiplayer Fabric. 2026. <em><span class="nocase">xr-grid</span> Debug 
 
 
 
+<p><em><a href="index.html">Manuals</a> › Pin the engine to a frozen Godot 4.7 commit</em></p>
 <p><strong>Tier:</strong> baseline · <strong>Status:</strong> accepted</p>
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
@@ -854,6 +867,7 @@ V-Sekai Multiplayer Fabric. 2026. <em><span class="nocase">xr-grid</span> Debug 
 
 
 
+<p><em><a href="index.html">Manuals</a> › Presence demo pose networking</em></p>
 <p><strong>Tier:</strong> baseline · <strong>Status:</strong> accepted</p>
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
@@ -920,6 +934,7 @@ V-Sekai Multiplayer Fabric. 2026. <em><span class="nocase">xr-grid</span> Debug 
 
 
 
+<p><em><a href="index.html">Manuals</a> › Recursive art-game loop and its minimal steel thread</em></p>
 <p><strong>Tier:</strong> proof of concept · <strong>Status:</strong> proposed</p>
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
@@ -1003,6 +1018,7 @@ V-Sekai Multiplayer Fabric. 2026. <em><span class="nocase">xr-grid</span> Debug 
 
 
 
+<p><em><a href="index.html">Manuals</a> › Require pull requests and a merge queue on main</em></p>
 <p><strong>Tier:</strong> baseline · <strong>Status:</strong> accepted</p>
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
@@ -1068,6 +1084,7 @@ V-Sekai Multiplayer Fabric. 2026. <em><span class="nocase">xr-grid</span> Debug 
 
 
 
+<p><em><a href="index.html">Manuals</a> › Self-host on Harvester HCI instead of Fly.io</em></p>
 <p><strong>Tier:</strong> baseline · <strong>Status:</strong> accepted</p>
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
@@ -1134,6 +1151,7 @@ V-Sekai Multiplayer Fabric. 2026. <em><span class="nocase">xr-grid</span> Debug 
 
 
 
+<p><em><a href="index.html">Manuals</a> › Spatial audio via a patched Resonance Audio (HRTF and audio probes)</em></p>
 <p><strong>Tier:</strong> baseline · <strong>Status:</strong> accepted</p>
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
@@ -1205,6 +1223,7 @@ V-Sekai Multiplayer Fabric. 2026. <em><span class="nocase">xr-grid</span> Debug 
 
 
 
+<p><em><a href="index.html">Manuals</a> › Two-org split between V-Sekai-fire and v-sekai-multiplayer-fabric</em></p>
 <p><strong>Tier:</strong> baseline · <strong>Status:</strong> accepted</p>
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
@@ -1345,6 +1364,7 @@ V-Sekai Multiplayer Fabric. 2026. <em><span class="nocase">xr-grid</span> Debug 
 
 
 
+<p><em><a href="index.html">Manuals</a> › WebTransport over HTTP/3 transport</em></p>
 <p><strong>Tier:</strong> baseline · <strong>Status:</strong> accepted</p>
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
@@ -1414,6 +1434,7 @@ V-Sekai Multiplayer Fabric. 2026. <em><span class="nocase">xr-grid</span> Debug 
 
 
 
+<p><em><a href="index.html">Manuals</a> › GHCR packages must be built by the repo that consumes them</em></p>
 <p><strong>Tier:</strong> baseline · <strong>Status:</strong> accepted</p>
 <section id="context" class="level2">
 <h2 class="anchored" data-anchor-id="context">Context</h2>
@@ -1459,6 +1480,7 @@ V-Sekai Multiplayer Fabric. 2026. <em><span class="nocase">xr-grid</span> Debug 
 
 
 
+<p><em><a href="index.html">Manuals</a> › Maglev Cycle 0: Terraform Fly.io Infrastructure</em></p>
 <p><strong>Tier:</strong> baseline · <strong>Status:</strong> superseded by <a href="20260606-self-host-on-harvester-hci.html">20260606-self-host-on-harvester-hci</a></p>
 <section id="the-context" class="level2">
 <h2 class="anchored" data-anchor-id="the-context">The Context</h2>
@@ -1612,6 +1634,7 @@ V-Sekai Multiplayer Fabric. 2026. <em><span class="nocase">xr-grid</span> Debug 
 
 
 
+<p><em><a href="index.html">Manuals</a> › Maglev Cycle 10: Dynamic Physics and Causal Ordering</em></p>
 <p><strong>Tier:</strong> baseline · <strong>Status:</strong> rejected</p>
 <section id="the-context" class="level2">
 <h2 class="anchored" data-anchor-id="the-context">The Context</h2>
@@ -1741,6 +1764,7 @@ V-Sekai Multiplayer Fabric. 2026. <em><span class="nocase">xr-grid</span> Debug 
 
 
 
+<p><em><a href="index.html">Manuals</a> › Maglev Cycle 11: CockroachDB Score Write</em></p>
 <p><strong>Tier:</strong> baseline · <strong>Status:</strong> rejected</p>
 <section id="the-context" class="level2">
 <h2 class="anchored" data-anchor-id="the-context">The Context</h2>
@@ -1866,6 +1890,7 @@ V-Sekai Multiplayer Fabric. 2026. <em><span class="nocase">xr-grid</span> Debug 
 
 
 
+<p><em><a href="index.html">Manuals</a> › Maglev Cycle 12: Game Cycle Planning</em></p>
 <p><strong>Tier:</strong> baseline · <strong>Status:</strong> rejected</p>
 <section id="the-context" class="level2">
 <h2 class="anchored" data-anchor-id="the-context">The Context</h2>
@@ -2036,6 +2061,7 @@ V-Sekai Multiplayer Fabric. 2026. <em><span class="nocase">xr-grid</span> Debug 
 
 
 
+<p><em><a href="index.html">Manuals</a> › Maglev Cycle 1: Godot Client Gateway Handshake</em></p>
 <p><strong>Tier:</strong> baseline · <strong>Status:</strong> accepted</p>
 <section id="the-context" class="level2">
 <h2 class="anchored" data-anchor-id="the-context">The Context</h2>
