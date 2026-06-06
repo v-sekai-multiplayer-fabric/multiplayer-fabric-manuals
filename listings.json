@@ -18,6 +18,7 @@
       "/decisions/20260606-presence-demo-networking-internals.html",
       "/decisions/20260606-art-game-loop-steel-thread.html",
       "/decisions/20260606-require-pr-and-merge-queue-on-main.html",
+      "/decisions/20260606-windows-background-services-nssm.html",
       "/decisions/20260606-self-host-on-harvester-hci.html",
       "/decisions/20260606-spatial-audio-patched-resonance-audio.html",
       "/decisions/20260606-org-split-v-sekai-multiplayer-fabric.html",

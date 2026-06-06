@@ -327,6 +327,7 @@ font-style: inherit;">Set-Alias</span> scc sccheck</span></code></pre></div></di
 <h2 class="anchored" data-anchor-id="related">Related</h2>
 <ul>
 <li><p><a href="20260606-compiling-godot-engine.html">Compiling the Godot engine</a></p></li>
+<li><p><a href="20260606-windows-background-services-nssm.html">Running background services on Windows with nssm</a></p></li>
 </ul>
 </section>
 
@@ -921,6 +922,7 @@ font-style: inherit;"># reset counters</span></span></code></pre></div></div>
 <li><p><a href="../changelog/2026/20260606-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-06 (Saturday)</a></p></li>
 <li><p><a href="20260606-checking-sccache.html">Checking the sccache build cache</a></p></li>
 <li><p><a href="20260606-presence-demo-cold-boot-dependencies.html">Cold-boot dependencies for the presence-marker demo</a></p></li>
+<li><p><a href="20260606-windows-background-services-nssm.html">Running background services on Windows with nssm</a></p></li>
 </ul>
 </section>
 
@@ -1665,6 +1667,143 @@ V-Sekai Multiplayer Fabric. 2026. <em><span class="nocase">xr-grid</span> Debug 
   <pubDate>Sat, 06 Jun 2026 00:00:00 GMT</pubDate>
 </item>
 <item>
+  <title>Running background services on Windows with nssm</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-windows-background-services-nssm.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Running background services on Windows with nssm</em></p>
+<p><strong>Tier:</strong> baseline · <strong>Status:</strong> accepted</p>
+<section id="context-and-problem-statement" class="level2">
+<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
+<p>Several pieces of the workstation stack need to run as long-lived background processes that survive shells, log-offs, and reboots, and restart themselves when they crash:</p>
+<ul>
+<li>the <a href="https://github.com/mozilla/sccache">sccache</a> compile-cache server(s) backing native builds,</li>
+<li>Godot dedicated/headless game servers,</li>
+<li>a CockroachDB (<code>crdb</code>) node for the local RDBMS,</li>
+<li>zone servers and similar per-world daemons.</li>
+</ul>
+<p>The naive approaches all failed in practice. Starting these by hand in a terminal ties them to that shell. The compile cache made the problem concrete: sccache auto-starts a single machine-wide server on first use, and whichever project touches it first fixes its configuration (S3 key prefix, base dirs) for everyone — so a second project silently inherits the wrong cache namespace. Worse, a configuration that lives only in a per-build environment forces a stop/start of the server on every build to apply it, which is slow and races (“Address in use”). None of this is “a service” in the Windows sense: nothing owns the process lifecycle.</p>
+<p>We are not local administrators by default, and Windows <code>sudo</code> here runs in <em>Force New Window</em> mode, so any elevation is an interactive UAC prompt.</p>
+</section>
+<section id="decision-drivers" class="level2">
+<h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
+<ul>
+<li>Processes must auto-start at boot and auto-restart on crash, independent of any interactive session.</li>
+<li>Multiple instances of the same program must coexist without clobbering each other’s state (e.g.&nbsp;one cache server per project, several game/zone servers).</li>
+<li>Secrets (object-store keys, DB credentials) must never be written into a repo, a service definition, or the registry — only read at runtime from their existing secured location.</li>
+<li>The target programs are plain executables, not native Windows services, so they do not implement the Service Control Manager (SCM) protocol on their own.</li>
+<li>Setup must be reproducible from a script and reviewable after an elevated run.</li>
+</ul>
+</section>
+<section id="considered-options" class="level2">
+<h2 class="anchored" data-anchor-id="considered-options">Considered Options</h2>
+<ul>
+<li><strong>Run by hand in a terminal</strong> — dies with the shell; no restart; no boot start.</li>
+<li><strong>Scheduled Task (logon trigger)</strong> — runs in the user session and needs no service wrapper, but it is not a true service (no SCM state, weaker restart semantics), and registering one was denied by policy on this machine.</li>
+<li><strong><code>sc.exe create</code> directly</strong> — the SCM expects a process that implements the service protocol; a bare exe started this way is killed as non-responsive.</li>
+<li><strong><a href="https://nssm.cc/">nssm</a> (Non-Sucking Service Manager) wrapping the program</strong> — a thin supervisor that <em>is</em> a proper service and keeps an ordinary foreground process alive, restarting it on exit.</li>
+</ul>
+</section>
+<section id="decision-outcome" class="level2">
+<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
+<p>Chosen option: <strong>nssm-supervised foreground processes, one Windows service per instance.</strong> nssm satisfies the SCM, so each target runs as a real auto-start/auto-restart service while staying an ordinary executable.</p>
+<p>The pattern has four parts:</p>
+<ol type="1">
+<li><p><strong>Run the target in the foreground</strong> — a supervisor can only watch a process that does not fork-and-exit. For sccache that means <code>SCCACHE_START_SERVER=1</code> + <code>SCCACHE_NO_DAEMON=1</code> and invoking the bare binary (not <code>--start-server</code>, which always daemonizes). Most servers (Godot <code>--headless</code>, <code>cockroach start</code>, zone daemons) are already foreground.</p></li>
+<li><p><strong>A per-instance launcher script</strong> sets that instance’s environment and execs the program by <strong>absolute path</strong> — services run as <em>LocalSystem</em>, whose <code>PATH</code> does not include user shims (e.g.&nbsp;scoop). Secrets are read at runtime from their existing secured file (for sccache, the object-store keys come from the <code>do-tor1</code> AWS profile in <code>~/.aws/credentials</code>, exported as <code>AWS_ACCESS_KEY_ID</code>/<code>AWS_SECRET_ACCESS_KEY</code> because sccache’s S3 backend ignores AWS <em>profiles</em>). Nothing secret is written to disk by the script.</p></li>
+<li><p><strong>An elevated installer script</strong> registers each service with nssm, sets it to <code>SERVICE_AUTO_START</code>, enables restart-on-exit with a throttle/delay, points stdout/stderr at rotating log files, and starts it. It is idempotent (stop + remove + reinstall) and writes a transcript so the result can be reviewed after the separate elevated window closes.</p></li>
+<li><p><strong>Instance isolation by port (and namespace)</strong> — each instance listens on its own loopback port; clients select an instance by port. Loopback is not session-isolated, so a LocalSystem service in session 0 is reachable from the user session. sccache additionally uses a distinct S3 key prefix per instance.</p></li>
+</ol>
+<section id="worked-example-the-sccache-services" class="level3">
+<h3 class="anchored" data-anchor-id="worked-example-the-sccache-services">Worked example — the sccache services</h3>
+<p>Two services back two projects from the one shared object-store bucket, kept apart by port and key prefix:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 29%">
+<col style="width: 6%">
+<col style="width: 17%">
+<col style="width: 46%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Service</th>
+<th>Port</th>
+<th>Key prefix</th>
+<th>Base dirs (checkout roots)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>sccache-godot</code></td>
+<td>4227</td>
+<td><code>godot</code></td>
+<td>the Godot checkout + merge dir</td>
+</tr>
+<tr class="even">
+<td><code>sccache-idtx-flow</code></td>
+<td>4226</td>
+<td><code>idtx-flow</code></td>
+<td>the idtx-flow checkouts</td>
+</tr>
+</tbody>
+</table>
+<p>4226 is sccache’s default port, so the idtx-flow builds use that service with no changes; the Godot build sets <code>SCCACHE_SERVER_PORT=4227</code>. The build wrapper (<code>gscons</code>) therefore no longer manages the server at all — it sets one port variable and runs. This supersedes the earlier per-build environment juggling and server restarts described in <a href="../decisions/20260606-compiling-godot-engine.html">Compiling the Godot engine</a> and <a href="../decisions/20260606-checking-sccache.html">Checking the sccache build cache</a>.</p>
+</section>
+<section id="applying-the-pattern-elsewhere" class="level3">
+<h3 class="anchored" data-anchor-id="applying-the-pattern-elsewhere">Applying the pattern elsewhere</h3>
+<p>The same launcher + installer shape runs other dev infrastructure as services:</p>
+<ul>
+<li><strong>Godot dedicated servers</strong> — one service per instance, each on its own port; the launcher passes <code>--headless</code> and the scene/port arguments.</li>
+<li><strong>Zone servers</strong> — one service per zone/world, isolated by port, supervised and restarted independently so one zone crashing does not take down the others.</li>
+<li><strong>Zone backends</strong> — the per-zone backend daemons (state/persistence/matchmaking workers) behind those zone servers, each its own service with its own port and runtime-read credentials.</li>
+<li><strong>CockroachDB</strong> — a <code>cockroach start</code> (or <code>start-single-node</code>) service; secrets (certs/join tokens) read at runtime, data dir as an absolute path.</li>
+</ul>
+</section>
+<section id="consequences" class="level3">
+<h3 class="anchored" data-anchor-id="consequences">Consequences</h3>
+<ul>
+<li>Good: real services — boot start, crash restart, and lifecycle owned by the SCM, not a terminal.</li>
+<li>Good: many instances of one binary coexist cleanly (port/namespace per service).</li>
+<li>Good: no secrets in the repo, the service config, or the registry; they stay in their existing secured files and are read at runtime.</li>
+<li>Good: build/runtime wrappers shrink to “pick a port and run” — no server management, no restart races.</li>
+<li>Bad: requires one-time elevation per install/change; with <em>Force New Window</em> sudo this is an interactive UAC prompt and the output must be logged to a file to be reviewed afterward.</li>
+<li>Bad: services run as LocalSystem in session 0, so launchers must use absolute paths and cannot rely on the user environment; anything needing the desktop is unsuitable.</li>
+<li>Bad: nssm is an extra dependency to install (via scoop) and keep updated.</li>
+</ul>
+</section>
+<section id="confirmation" class="level3">
+<h3 class="anchored" data-anchor-id="confirmation">Confirmation</h3>
+<p>After install, both sccache services report <code>Running</code> with <code>Automatic</code> start, and <code>sccache --show-stats</code> on each port shows the expected S3 backend (<code>s3, name: &lt;bucket&gt;</code>) with the correct per-project key prefix and base dirs — so isolation, credentials, and auto-start all hold. A subsequent build connects on port 4227 and accumulates cache hits with zero cache errors.</p>
+</section>
+</section>
+<section id="more-information" class="level2">
+<h2 class="anchored" data-anchor-id="more-information">More Information</h2>
+<ul>
+<li>Foreground is the crux: a fork-and-exit daemon makes nssm see an immediate exit and enter its rapid-exit guard (<code>SERVICE_PAUSED</code>). Verify a target stays in the foreground before wrapping it.</li>
+<li>LocalSystem can read another user’s secured files (e.g.&nbsp;the AWS credentials file), but <code>$HOME</code>/<code>%USERPROFILE%</code> resolve to the system profile — always pass absolute paths to both the launcher and the secrets it reads.</li>
+<li>Restart-on-crash plus a throttle/delay avoids a hot loop when a target is misconfigured; check the per-service stderr log to diagnose.</li>
+<li>Related: <a href="../decisions/20260606-compiling-godot-engine.html">Compiling the Godot engine</a>, <a href="../decisions/20260606-checking-sccache.html">Checking the sccache build cache</a>.</li>
+</ul>
+
+
+</section>
+<section id="related" class="level2">
+<h2 class="anchored" data-anchor-id="related">Related</h2>
+<ul>
+<li><p><a href="20260606-checking-sccache.html">Checking the sccache build cache</a></p></li>
+<li><p><a href="20260606-compiling-godot-engine.html">Compiling the Godot engine</a></p></li>
+</ul>
+</section>
+
+ ]]></description>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-windows-background-services-nssm.html</guid>
+  <pubDate>Sat, 06 Jun 2026 00:00:00 GMT</pubDate>
+</item>
+<item>
   <title>Self-host on Harvester HCI instead of Fly.io</title>
   <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-self-host-on-harvester-hci.html</link>
   <description><![CDATA[ 
@@ -2025,52 +2164,6 @@ V-Sekai Multiplayer Fabric. 2026. <em><span class="nocase">xr-grid</span> Debug 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-webtransport-http3-transport.html</guid>
   <pubDate>Sat, 06 Jun 2026 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>GHCR packages must be built by the repo that consumes them</title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260506-ghcr-package-ownership-same-repo.html</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › GHCR packages must be built by the repo that consumes them</em></p>
-<p><strong>Tier:</strong> baseline · <strong>Status:</strong> accepted</p>
-<section id="context" class="level2">
-<h2 class="anchored" data-anchor-id="context">Context</h2>
-<p>The zone server binary was built by <code>multiplayer-fabric-baker</code> and pushed to <code>ghcr.io/v-sekai-fire/godot-zone-double</code>. The zone deploy workflow (in <code>multiplayer-fabric-zone</code>) used <code>--local-only</code> with <code>docker/login-action</code> to pull that image, but received 403 Forbidden.</p>
-<p>GitHub Container Registry ties package write access to the repository whose <code>GITHUB_TOKEN</code> created it. The zone repo’s token could not push to a package owned by the baker repo, and could not pull a private package owned by another repo without package-scoped access.</p>
-</section>
-<section id="decision" class="level2">
-<h2 class="anchored" data-anchor-id="decision">Decision</h2>
-<p>Each repository builds and publishes the GHCR images it directly uses in its own deploy:</p>
-<ul>
-<li><code>multiplayer-fabric-baker</code> builds and owns <code>godot-editor-double</code>.</li>
-<li><code>multiplayer-fabric-zone</code> builds and owns <code>multiplayer-fabric-zone-godot</code> (renamed from <code>godot-zone-double</code> to reflect ownership).</li>
-</ul>
-<p><code>workflow_run</code> triggers only fire within the same repository, so the zone binary build workflow must live in the zone repo for the deploy to auto-trigger after a successful build.</p>
-</section>
-<section id="consequences" class="level2">
-<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
-<ul>
-<li>Package names must reflect the owning repo to avoid confusion.</li>
-<li>Moving a package between repos requires deleting it (needs <code>delete:packages</code> API scope) and rebuilding, or renaming.</li>
-<li>Cross-repo GHCR access requires either a PAT with <code>read:packages</code> scope or making the package public.</li>
-</ul>
-
-
-</section>
-<section id="related" class="level2">
-<h2 class="anchored" data-anchor-id="related">Related</h2>
-<ul>
-<li><p><a href="20260506-observability-stack-victoriametrics-tempo.html">Observability stack with VictoriaMetrics, VictoriaLogs, and Tempo</a></p></li>
-</ul>
-</section>
-
- ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260506-ghcr-package-ownership-same-repo.html</guid>
-  <pubDate>Wed, 06 May 2026 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
