@@ -140,6 +140,94 @@
   <pubDate>Sat, 06 Jun 2026 00:00:00 GMT</pubDate>
 </item>
 <item>
+  <title>Presence demo networking internals</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-presence-demo-networking-internals.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<section id="context-and-problem-statement" class="level2">
+<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
+<p>The <a href="../decisions/20260606-multiplayer-presence-demo-orbs.html">presence demo</a> vetoes Godot’s high-level networking and sends pose data with low-level explicit calls. This records the engine pieces that make that work and how a head or hand pose reaches the wire. The relevant code lives on the engine fork’s feature branches, which the <a href="https://github.com/v-sekai-multiplayer-fabric/merge"><code>merge</code></a> recipe assembles; the engine is <a href="../decisions/20260606-pin-engine-to-frozen-godot-4-7.html">pinned to a frozen Godot 4.7 commit</a>.</p>
+</section>
+<section id="decision-drivers" class="level2">
+<h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
+<ul>
+<li>High-rate pose streams must be compact, so the wire format has to be tight.</li>
+<li>Reuse the engine’s own WebTransport stack rather than a side channel.</li>
+<li>Avoid the per-property bookkeeping of automatic scene replication.</li>
+</ul>
+</section>
+<section id="considered-options" class="level2">
+<h2 class="anchored" data-anchor-id="considered-options">Considered Options</h2>
+<ul>
+<li>High-level scene replication (<code>MultiplayerSynchronizer</code> / <code>MultiplayerSpawner</code>).</li>
+<li>Explicit RPC over a standard <code>MultiplayerPeer</code> (ENet / WebRTC / WebSocket).</li>
+<li>Explicit messages over the engine’s WebTransport (HTTP/3) module.</li>
+</ul>
+</section>
+<section id="decision-outcome" class="level2">
+<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
+<p>Chosen option: “Explicit messages over the engine’s WebTransport module”, with poses encoded as compact binary. High-level replication stays off.</p>
+<section id="transport-the-http3-webtransport-module" class="level3">
+<h3 class="anchored" data-anchor-id="transport-the-http3-webtransport-module">Transport: the HTTP/3 / WebTransport module</h3>
+<p>On the <code>feat/module-http3</code> branch, <code>modules/http3</code> provides the WebTransport stack:</p>
+<ul>
+<li><code>modules/http3/quic_picoquic_backend.{cpp,h}</code> — native QUIC via picoquic.</li>
+<li><code>modules/http3/quic_web_backend.cpp</code> + <code>quic_web_glue.js</code> — the web/wasm backend.</li>
+<li><code>modules/http3/http3_client.{cpp,h}</code>, <code>quic_client.{cpp,h}</code>, <code>quic_server.h</code>.</li>
+<li>Exposed classes (<code>modules/http3/doc_classes/</code>): <code>HTTP3Client</code>, <code>QUICClient</code>, <code>QUICServer</code>, <code>WebTransportPeer</code>.</li>
+<li>Demos: <code>modules/http3/demo/wt_client_test.gd</code>, <code>wt_server_demo.gd</code>, <code>wt_browser_test.html</code>.</li>
+<li><code>lean/http3/PollingTermination.lean</code> carries a Lean proof about the polling loop.</li>
+</ul>
+<p>WebTransport gives reliable streams and unreliable datagrams over one QUIC connection, so high-rate pose updates ride datagrams.</p>
+</section>
+<section id="pose-source" class="level3">
+<h3 class="anchored" data-anchor-id="pose-source">Pose source</h3>
+<p>Poses come from the XR trackers (<code>servers/xr/</code>):</p>
+<ul>
+<li><code>XRPositionalTracker</code> (<code>servers/xr/xr_positional_tracker.h</code>) holds named <code>XRPose</code> entries with a hand enum.</li>
+<li><code>XRPose</code> (<code>servers/xr/xr_pose.h</code>) carries a <code>Transform3D</code>, linear and angular velocity, and a tracking-confidence level.</li>
+<li><code>XRHandTracker</code> (<code>servers/xr/xr_hand_tracker.h</code>) tracks 26 hand joints, each a <code>Transform3D</code>.</li>
+</ul>
+<p>The demo reads the local head and hand poses, encodes them, and sends them; remote peers apply the decoded transforms to orb nodes.</p>
+</section>
+<section id="what-is-vetoed-and-why" class="level3">
+<h3 class="anchored" data-anchor-id="what-is-vetoed-and-why">What is vetoed and why</h3>
+<p><code>modules/multiplayer</code> ships the high-level nodes (<code>MultiplayerSynchronizer</code>, <code>MultiplayerSpawner</code>, <code>SceneReplicationInterface</code>) and the Variant-based RPC path (<code>MultiplayerAPI::encode_and_compress_variants</code>). Variant encoding of a <code>Transform3D</code> is general but fat, so it is not used for the pose stream. The demo hand-rolls a compact binary encoding instead. Standard <code>MultiplayerPeer</code> transports (<code>modules/enet</code>, <code>modules/webrtc</code>, <code>modules/websocket</code>) exist, but the stack’s transport is WebTransport.</p>
+</section>
+<section id="identity-stretch" class="level3">
+<h3 class="anchored" data-anchor-id="identity-stretch">Identity (stretch)</h3>
+<p>The pen, <code>modules/cassie</code> on <code>feat/module-cassie</code>, supplies the optional <a href="../decisions/20260606-feature-classification-poc-baseline-stretch.html">signing identity</a>.</p>
+</section>
+<section id="consequences" class="level3">
+<h3 class="anchored" data-anchor-id="consequences">Consequences</h3>
+<ul>
+<li>Good: poses ride compact datagrams over the same WebTransport the gateway uses.</li>
+<li>Good: the engine already proves the transport with the <code>http3</code> demos and a Lean termination proof.</li>
+<li>Bad: the compact encoding, send rate, and interpolation are hand-written and have to be maintained.</li>
+<li>Bad: the WebTransport, cassie, and fabric modules live on separate feature branches, so the full stack only exists in the assembled engine.</li>
+</ul>
+</section>
+<section id="confirmation" class="level3">
+<h3 class="anchored" data-anchor-id="confirmation">Confirmation</h3>
+<p>The <code>modules/http3</code> demos open a WebTransport client and server. The presence demo sends head and hand poses as datagrams and a remote peer renders the orbs from the decoded transforms.</p>
+</section>
+</section>
+<section id="more-information" class="level2">
+<h2 class="anchored" data-anchor-id="more-information">More Information</h2>
+<p>Modules cited here are on the engine fork’s feature branches (<code>feat/module-http3</code>, <code>feat/module-cassie</code>) and are composed by the <code>merge</code> <code>gitassembly</code> recipe onto the frozen Godot 4.7 base.</p>
+
+
+</section>
+
+ ]]></description>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-presence-demo-networking-internals.html</guid>
+  <pubDate>Sat, 06 Jun 2026 00:00:00 GMT</pubDate>
+</item>
+<item>
   <title>Pin the engine to a frozen Godot 4.7 commit</title>
   <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-pin-engine-to-frozen-godot-4-7.html</link>
   <description><![CDATA[ 
@@ -386,13 +474,18 @@
 <li>A participant who wants to identify themselves signs with the pen (<a href="../decisions/20260606-feature-classification-poc-baseline-stretch.html">cassie</a>); the signature is the identity mark. Unsigned participants stay anonymous orbs.</li>
 <li>Built on <a href="https://github.com/v-sekai-multiplayer-fabric/xr-grid">xr-grid</a>.</li>
 </ul>
+<section id="networking" class="level3">
+<h3 class="anchored" data-anchor-id="networking">Networking</h3>
+<p>Godot’s high-level networking is vetoed for this demo. Automatic scene replication (the <code>MultiplayerSpawner</code> and <code>MultiplayerSynchronizer</code> nodes and the <code>SceneMultiplayer</code> replicator) is not used. Orb poses go over low-level, explicit RPC calls instead, so the demo controls exactly what is sent each tick and how it is encoded. See the <a href="../decisions/20260606-presence-demo-networking-internals.html">networking technical details</a>.</p>
+</section>
 <section id="consequences" class="level3">
 <h3 class="anchored" data-anchor-id="consequences">Consequences</h3>
 <ul>
 <li>Good: presence and gesture for many people at low per-player cost.</li>
 <li>Good: identity is opt-in through signing, so there is no login step.</li>
 <li>Bad: orbs are not full avatars, so the demo does not exercise avatar networking or IK.</li>
-<li>Bad: pen signing depends on cassie, which is a proof-of-concept capability (patch surface creation loses about 90%), so the signing path is the weakest link.</li>
+<li>Neutral: pen signing depends on cassie, whose pen stroke creation is solid, so signing (which only needs strokes) is reliable. Only cassie’s patch surface creation is buggy (loses about 90%), and signing does not depend on that.</li>
+<li>Neutral: explicit RPC means hand-rolling the encoding, send rate, and interpolation. That cost is the point. Pose streams have to be fast and succinct, so they need a compact binary wire format. If it could be easy it would be JSON, and JSON is too fat for high-rate pose updates.</li>
 </ul>
 </section>
 <section id="confirmation" class="level3">
@@ -1482,7 +1575,7 @@ font-style: inherit;"># reset counters</span></span></code></pre></div></div>
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/present-proposal-template.html</guid>
-  <pubDate>Sat, 06 Jun 2026 15:53:39 GMT</pubDate>
+  <pubDate>Sat, 06 Jun 2026 16:02:47 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -1707,129 +1800,7 @@ font-style: inherit;"># reset counters</span></span></code></pre></div></div>
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260506-maglev-intercept-smoke-test.html</guid>
-  <pubDate>Sat, 06 Jun 2026 15:53:39 GMT</pubDate>
-</item>
-<item>
-  <title></title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260506-maglev-cycle-9-physics-vrm.html</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<section id="maglev-cycle-9-physics-and-vrm-loading" class="level1">
-<h1>Maglev Cycle 9: Physics and VRM Loading</h1>
-<section id="the-context" class="level2">
-<h2 class="anchored" data-anchor-id="the-context">The Context</h2>
-<p>The gateway merges two input types at full rate after Cycle 9. This cycle loads the Maglev train scene with stationary cores on a banking train, verifies replication across clients, and confirms VRM avatar loading from the chunk store. Banking is a scene parameter change; VRM loading is verified in the same session as physics baseline.</p>
-<p>Baked assets from Cycle 3 must be available in the chunk store before this cycle begins. Banking and VRM loading are combined here to reduce the number of cycles before the first physics demo.</p>
-</section>
-<section id="the-problem-statement" class="level2">
-<h2 class="anchored" data-anchor-id="the-problem-statement">The Problem Statement</h2>
-<p>Physics replication to clients with different frame rates requires validation before dynamic forces are added. Adding banking motion and rolling cores at the same time as replication makes any failure unattributable. This cycle proves the replication layer works before the physics is made dynamic.</p>
-</section>
-<section id="design" class="level2">
-<h2 class="anchored" data-anchor-id="design">Design</h2>
-<p>Load the Maglev train scene (greyboxed for this cycle: a CSG floor + banking pivot is sufficient) on the zone server. The train banks on a fixed schedule. Quantum Data-Cores sit stationary on the floor under authoritative physics (held by a constraint). The zone server sends datagram state each tick; both clients display the core and avatar positions.</p>
-<p>The PCVR client sees the car as a waist-height diorama; the Steam Deck client sees the same instance as an isometric action-RPG. Both load <code>mire.vrm</code> (baked in Cycle 3 from <code>multiplayer-fabric-humanoid-project/humanoid/art/mire/mire.vrm</code>) as the avatar.</p>
-<p>Pass criteria:</p>
-<ul class="task-list">
-<li><label><input type="checkbox">Zone server loads the Maglev train scene from the chunk store</label></li>
-<li><label><input type="checkbox">Core positions agree between both clients each tick for 60 seconds under continuous banking</label></li>
-<li><label><input type="checkbox">Zone server tick rate holds at 20 Hz with physics active</label></li>
-<li><label><input type="checkbox"><code>mire.vrm</code> loads from the chunk store on both clients without error; humanoid skeleton root present</label></li>
-<li><label><input type="checkbox">No entity desync over the run</label></li>
-</ul>
-</section>
-<section id="estimate" class="level2">
-<h2 class="anchored" data-anchor-id="estimate">Estimate</h2>
-<p><strong>10 days</strong> (2026-06-02 → 2026-06-16). First cycle to load game assets and run physics. The zone server initial deploy took 2 days; adding a physics scene, banking animation, and VRM loading from the chunk store is the first substantial game dev work with no prior baseline. Projecting 2× the zone-console build time (6 working days) plus physics integration overhead.</p>
-</section>
-<section id="cris-score" class="level2">
-<h2 class="anchored" data-anchor-id="cris-score">CRIS Score</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 9%">
-<col style="width: 3%">
-<col style="width: 86%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Factor</th>
-<th>Score</th>
-<th>Evidence</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>C</strong>omplexity</td>
-<td>6</td>
-<td>Physics replication to clients with different frame rates is untested, but a static scene removes the dynamic normal force variable.</td>
-</tr>
-<tr class="even">
-<td><strong>R</strong>each</td>
-<td>10</td>
-<td>Cycle 10 cannot begin until replication itself is verified.</td>
-</tr>
-<tr class="odd">
-<td><strong>I</strong>mpediment</td>
-<td>9</td>
-<td>A replication bug here means Cycle 10 results are unreliable.</td>
-</tr>
-<tr class="even">
-<td><strong>S</strong>takeholder</td>
-<td>10</td>
-<td>Gate for Cycle 10 and beyond.</td>
-</tr>
-<tr class="odd">
-<td><strong>Total</strong></td>
-<td>8.75</td>
-<td>Build after Cycles 8 and 6 pass.</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="the-downsides" class="level2">
-<h2 class="anchored" data-anchor-id="the-downsides">The Downsides</h2>
-<p>A passing Cycle 9 does not validate rolling physics or causal ordering; those require Cycle 10.</p>
-</section>
-<section id="the-road-not-taken" class="level2">
-<h2 class="anchored" data-anchor-id="the-road-not-taken">The Road Not Taken</h2>
-<p>Starting with rolling cores was rejected — replication and rolling-core physics are easier to separate when cores are stationary.</p>
-</section>
-<section id="status" class="level2">
-<h2 class="anchored" data-anchor-id="status">Status</h2>
-<p>Status: Draft</p>
-</section>
-<section id="decision-makers" class="level2">
-<h2 class="anchored" data-anchor-id="decision-makers">Decision Makers</h2>
-<ul>
-<li>Lead Architect / Fabric Maintainer</li>
-<li>Game Director</li>
-</ul>
-</section>
-<section id="tags" class="level2">
-<h2 class="anchored" data-anchor-id="tags">Tags</h2>
-<ul>
-<li>maglev-cycle-9, physics-vrm, replication, galls-law, 20260506-maglev-cycle-9-physics-vrm, present-proposal-template</li>
-</ul>
-</section>
-<section id="further-reading" class="level2">
-<h2 class="anchored" data-anchor-id="further-reading">Further Reading</h2>
-<pre><code>@misc{v_sekai_2026,
-  title = {V-Sekai},
-  year  = {2026},
-  url   = {https://v-sekai.org/}
-}</code></pre>
-
-
-</section>
-</section>
-
- ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260506-maglev-cycle-9-physics-vrm.html</guid>
-  <pubDate>Sat, 06 Jun 2026 15:53:39 GMT</pubDate>
+  <pubDate>Sat, 06 Jun 2026 16:02:47 GMT</pubDate>
 </item>
 </channel>
 </rss>

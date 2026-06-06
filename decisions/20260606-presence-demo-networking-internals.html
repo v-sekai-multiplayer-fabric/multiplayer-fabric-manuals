@@ -8,7 +8,7 @@
 
 <meta name="dcterms.date" content="2026-06-06">
 
-<title>Minimal multiplayer presence demo with head and hand orbs – V-Sekai Fire — Manuals</title>
+<title>Presence demo networking internals – V-Sekai Fire — Manuals</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -24,26 +24,7 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for citations */
-div.csl-bib-body { }
-div.csl-entry {
-  clear: both;
-}
-.hanging-indent div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
-}
-div.csl-left-margin {
-  min-width:2em;
-  float:left;
-}
-div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
-}
-div.csl-indent {
-  margin-left: 2em;
-}</style>
+</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -311,13 +292,16 @@ div.csl-indent {
   <li><a href="#considered-options" id="toc-considered-options" class="nav-link" data-scroll-target="#considered-options">Considered Options</a></li>
   <li><a href="#decision-outcome" id="toc-decision-outcome" class="nav-link" data-scroll-target="#decision-outcome">Decision Outcome</a>
   <ul class="collapse">
-  <li><a href="#networking" id="toc-networking" class="nav-link" data-scroll-target="#networking">Networking</a></li>
+  <li><a href="#transport-the-http3-webtransport-module" id="toc-transport-the-http3-webtransport-module" class="nav-link" data-scroll-target="#transport-the-http3-webtransport-module">Transport: the HTTP/3 / WebTransport module</a></li>
+  <li><a href="#pose-source" id="toc-pose-source" class="nav-link" data-scroll-target="#pose-source">Pose source</a></li>
+  <li><a href="#what-is-vetoed-and-why" id="toc-what-is-vetoed-and-why" class="nav-link" data-scroll-target="#what-is-vetoed-and-why">What is vetoed and why</a></li>
+  <li><a href="#identity-stretch" id="toc-identity-stretch" class="nav-link" data-scroll-target="#identity-stretch">Identity (stretch)</a></li>
   <li><a href="#consequences" id="toc-consequences" class="nav-link" data-scroll-target="#consequences">Consequences</a></li>
   <li><a href="#confirmation" id="toc-confirmation" class="nav-link" data-scroll-target="#confirmation">Confirmation</a></li>
   </ul></li>
   <li><a href="#more-information" id="toc-more-information" class="nav-link" data-scroll-target="#more-information">More Information</a></li>
   </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/v-sekai-multiplayer-fabric/manuals/edit/main/decisions/20260606-multiplayer-presence-demo-orbs.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/v-sekai-multiplayer-fabric/manuals/edit/main/decisions/20260606-presence-demo-networking-internals.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -325,7 +309,7 @@ div.csl-indent {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Minimal multiplayer presence demo with head and hand orbs</h1>
+<h1 class="title">Presence demo networking internals</h1>
 </div>
 
 
@@ -350,73 +334,80 @@ div.csl-indent {
 
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The <code>xr-grid</code> debug scene currently shows one skinned-mesh hero asset (a rigged mesh with a skeleton, not a VRM) standing on the grid as a visual landmark; it does not represent a player. Around it float a few clusters of small colored orbs. Each cluster encodes the translation and orientation (a full pose) of one tracked point — head, hand, hand — for a remote participant, drawn as orientation and translation orbs. The next increment should prove shared presence: several people in the same space at once, at the scale of a full V-Sekai Discord call. What is the smallest piece that demonstrates real multiplayer presence without committing to full networked avatars for everyone?</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="attachments/20260606_vsekai-mpf_xr-grid-debug-orbs_0001.png" class="img-fluid figure-img"></p>
-<figcaption>The <code>xr-grid</code> debug scene, 2026-06-06: a skinned-mesh hero asset as a visual landmark, with each remote participant drawn as head and hand orientation-and-translation orb clusters. <span class="citation" data-cites="vsekai_xrgrid_debug_2026">(<a href="#ref-vsekai_xrgrid_debug_2026" role="doc-biblioref">V-Sekai Multiplayer Fabric 2026</a>)</span></figcaption>
-</figure>
-</div>
+<p>The <a href="../decisions/20260606-multiplayer-presence-demo-orbs.html">presence demo</a> vetoes Godot’s high-level networking and sends pose data with low-level explicit calls. This records the engine pieces that make that work and how a head or hand pose reaches the wire. The relevant code lives on the engine fork’s feature branches, which the <a href="https://github.com/v-sekai-multiplayer-fabric/merge"><code>merge</code></a> recipe assembles; the engine is <a href="../decisions/20260606-pin-engine-to-frozen-godot-4-7.html">pinned to a frozen Godot 4.7 commit</a>.</p>
 </section>
 <section id="decision-drivers" class="level2">
 <h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
 <ul>
-<li>Smallest demonstrable multiplayer increment on top of the existing scene.</li>
-<li>Real presence for many participants, roughly a Discord call’s worth.</li>
-<li>Cheap per-player representation that still reads as a person.</li>
-<li>Identity should be optional, not a login wall.</li>
+<li>High-rate pose streams must be compact, so the wire format has to be tight.</li>
+<li>Reuse the engine’s own WebTransport stack rather than a side channel.</li>
+<li>Avoid the per-property bookkeeping of automatic scene replication.</li>
 </ul>
 </section>
 <section id="considered-options" class="level2">
 <h2 class="anchored" data-anchor-id="considered-options">Considered Options</h2>
 <ul>
-<li>Full networked character (skinned mesh) for every participant.</li>
-<li>Head plus two hand orbs per participant (3-point tracking representation).</li>
-<li>Text nameplates with no embodiment.</li>
+<li>High-level scene replication (<code>MultiplayerSynchronizer</code> / <code>MultiplayerSpawner</code>).</li>
+<li>Explicit RPC over a standard <code>MultiplayerPeer</code> (ENet / WebRTC / WebSocket).</li>
+<li>Explicit messages over the engine’s WebTransport (HTTP/3) module.</li>
 </ul>
 </section>
 <section id="decision-outcome" class="level2">
 <h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: “Head plus two hand orbs per participant”, because three tracked points per person convey presence and gesture at a fraction of the cost of a full avatar, which lets the demo scale to a whole call.</p>
-<p>Scope of the demo:</p>
+<p>Chosen option: “Explicit messages over the engine’s WebTransport module”, with poses encoded as compact binary. High-level replication stays off.</p>
+<section id="transport-the-http3-webtransport-module" class="level3">
+<h3 class="anchored" data-anchor-id="transport-the-http3-webtransport-module">Transport: the HTTP/3 / WebTransport module</h3>
+<p>On the <code>feat/module-http3</code> branch, <code>modules/http3</code> provides the WebTransport stack:</p>
 <ul>
-<li>Every participant, including the local player, is represented by three tracked points — head, hand, hand — each shown as a cluster of orbs that encodes its translation and orientation (pose). The existing skinned-mesh hero asset stays in the scene as a visual landmark and does not represent any player.</li>
-<li>The room scales to a V-Sekai Discord call’s worth of participants.</li>
-<li>A participant who wants to identify themselves signs with the pen (<a href="../decisions/20260606-feature-classification-poc-baseline-stretch.html">cassie</a>); the signature is the identity mark. Unsigned participants stay anonymous orbs.</li>
-<li>Built on <a href="https://github.com/v-sekai-multiplayer-fabric/xr-grid">xr-grid</a>.</li>
+<li><code>modules/http3/quic_picoquic_backend.{cpp,h}</code> — native QUIC via picoquic.</li>
+<li><code>modules/http3/quic_web_backend.cpp</code> + <code>quic_web_glue.js</code> — the web/wasm backend.</li>
+<li><code>modules/http3/http3_client.{cpp,h}</code>, <code>quic_client.{cpp,h}</code>, <code>quic_server.h</code>.</li>
+<li>Exposed classes (<code>modules/http3/doc_classes/</code>): <code>HTTP3Client</code>, <code>QUICClient</code>, <code>QUICServer</code>, <code>WebTransportPeer</code>.</li>
+<li>Demos: <code>modules/http3/demo/wt_client_test.gd</code>, <code>wt_server_demo.gd</code>, <code>wt_browser_test.html</code>.</li>
+<li><code>lean/http3/PollingTermination.lean</code> carries a Lean proof about the polling loop.</li>
 </ul>
-<section id="networking" class="level3">
-<h3 class="anchored" data-anchor-id="networking">Networking</h3>
-<p>Godot’s high-level networking is vetoed for this demo. Automatic scene replication (the <code>MultiplayerSpawner</code> and <code>MultiplayerSynchronizer</code> nodes and the <code>SceneMultiplayer</code> replicator) is not used. Orb poses go over low-level, explicit RPC calls instead, so the demo controls exactly what is sent each tick and how it is encoded. See the <a href="../decisions/20260606-presence-demo-networking-internals.html">networking technical details</a>.</p>
+<p>WebTransport gives reliable streams and unreliable datagrams over one QUIC connection, so high-rate pose updates ride datagrams.</p>
+</section>
+<section id="pose-source" class="level3">
+<h3 class="anchored" data-anchor-id="pose-source">Pose source</h3>
+<p>Poses come from the XR trackers (<code>servers/xr/</code>):</p>
+<ul>
+<li><code>XRPositionalTracker</code> (<code>servers/xr/xr_positional_tracker.h</code>) holds named <code>XRPose</code> entries with a hand enum.</li>
+<li><code>XRPose</code> (<code>servers/xr/xr_pose.h</code>) carries a <code>Transform3D</code>, linear and angular velocity, and a tracking-confidence level.</li>
+<li><code>XRHandTracker</code> (<code>servers/xr/xr_hand_tracker.h</code>) tracks 26 hand joints, each a <code>Transform3D</code>.</li>
+</ul>
+<p>The demo reads the local head and hand poses, encodes them, and sends them; remote peers apply the decoded transforms to orb nodes.</p>
+</section>
+<section id="what-is-vetoed-and-why" class="level3">
+<h3 class="anchored" data-anchor-id="what-is-vetoed-and-why">What is vetoed and why</h3>
+<p><code>modules/multiplayer</code> ships the high-level nodes (<code>MultiplayerSynchronizer</code>, <code>MultiplayerSpawner</code>, <code>SceneReplicationInterface</code>) and the Variant-based RPC path (<code>MultiplayerAPI::encode_and_compress_variants</code>). Variant encoding of a <code>Transform3D</code> is general but fat, so it is not used for the pose stream. The demo hand-rolls a compact binary encoding instead. Standard <code>MultiplayerPeer</code> transports (<code>modules/enet</code>, <code>modules/webrtc</code>, <code>modules/websocket</code>) exist, but the stack’s transport is WebTransport.</p>
+</section>
+<section id="identity-stretch" class="level3">
+<h3 class="anchored" data-anchor-id="identity-stretch">Identity (stretch)</h3>
+<p>The pen, <code>modules/cassie</code> on <code>feat/module-cassie</code>, supplies the optional <a href="../decisions/20260606-feature-classification-poc-baseline-stretch.html">signing identity</a>.</p>
 </section>
 <section id="consequences" class="level3">
 <h3 class="anchored" data-anchor-id="consequences">Consequences</h3>
 <ul>
-<li>Good: presence and gesture for many people at low per-player cost.</li>
-<li>Good: identity is opt-in through signing, so there is no login step.</li>
-<li>Bad: orbs are not full avatars, so the demo does not exercise avatar networking or IK.</li>
-<li>Neutral: pen signing depends on cassie, whose pen stroke creation is solid, so signing (which only needs strokes) is reliable. Only cassie’s patch surface creation is buggy (loses about 90%), and signing does not depend on that.</li>
-<li>Neutral: explicit RPC means hand-rolling the encoding, send rate, and interpolation. That cost is the point. Pose streams have to be fast and succinct, so they need a compact binary wire format. If it could be easy it would be JSON, and JSON is too fat for high-rate pose updates.</li>
+<li>Good: poses ride compact datagrams over the same WebTransport the gateway uses.</li>
+<li>Good: the engine already proves the transport with the <code>http3</code> demos and a Lean termination proof.</li>
+<li>Bad: the compact encoding, send rate, and interpolation are hand-written and have to be maintained.</li>
+<li>Bad: the WebTransport, cassie, and fabric modules live on separate feature branches, so the full stack only exists in the assembled engine.</li>
 </ul>
 </section>
 <section id="confirmation" class="level3">
 <h3 class="anchored" data-anchor-id="confirmation">Confirmation</h3>
-<p>A session shows multiple participants, each rendered as three orb clusters (head, hand, hand) tracking the pose of those points, at call scale. Signing with the pen produces a visible identifying mark next to that participant’s orbs.</p>
+<p>The <code>modules/http3</code> demos open a WebTransport client and server. The presence demo sends head and hand poses as datagrams and a remote peer renders the orbs from the decoded transforms.</p>
 </section>
 </section>
 <section id="more-information" class="level2">
 <h2 class="anchored" data-anchor-id="more-information">More Information</h2>
-<p>This is the “smallest new piece” milestone: expand the existing <code>xr-grid</code> debug scene (a skinned-mesh hero asset as a landmark, plus orientation and translation orb clusters) into a populated room. It composes the <a href="../decisions/20260606-feature-classification-poc-baseline-stretch.html">pen-stroke / cassie capability</a> for optional identity.</p>
-
+<p>Modules cited here are on the engine fork’s feature branches (<code>feat/module-http3</code>, <code>feat/module-cassie</code>) and are composed by the <code>merge</code> <code>gitassembly</code> recipe onto the frozen Godot 4.7 base.</p>
 
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
-<div id="ref-vsekai_xrgrid_debug_2026" class="csl-entry" role="listitem">
-V-Sekai Multiplayer Fabric. 2026. <em><span class="nocase">xr-grid</span> Debug Scene: Hero-Asset Landmark with Head and Hand Orientation-and-Translation Orbs</em>.
-</div>
-</div></section></div></main> <!-- /main -->
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right
@@ -838,7 +829,7 @@ V-Sekai Multiplayer Fabric. 2026. <em><span class="nocase">xr-grid</span> Debug 
     </div>   
     <div class="nav-footer-center">
       &nbsp;
-    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/v-sekai-multiplayer-fabric/manuals/edit/main/decisions/20260606-multiplayer-presence-demo-orbs.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/v-sekai-multiplayer-fabric/manuals/edit/main/decisions/20260606-presence-demo-networking-internals.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
     <div class="nav-footer-right">
       <ul class="footer-items list-unstyled">
     <li class="nav-item compact">
