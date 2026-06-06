@@ -82,7 +82,6 @@
 <h2 class="anchored" data-anchor-id="related">Related</h2>
 <ul>
 <li><p><a href="../changelog/2026/20260606-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-06 (Saturday)</a></p></li>
-<li><p><a href="20260606-gitassembly-tag-release.html">Cut versioned gitassembly tag releases for the assembled engine</a></p></li>
 <li><p><a href="20260606-multiplayer-presence-demo-orbs.html">Minimal multiplayer presence demo with head and hand orbs</a></p></li>
 </ul>
 </section>
@@ -191,7 +190,7 @@
 <h3 class="anchored" data-anchor-id="engine-pick-one">1. Engine (pick one)</h3>
 <ul>
 <li>Prebuilt: pull the editor image from <a href="https://github.com/v-sekai-multiplayer-fabric/godot-images">godot-images</a> (GHCR), built at the <a href="../decisions/20260606-pin-engine-to-frozen-godot-4-7.html">pinned Godot 4.7 commit</a>.</li>
-<li>From source: the <a href="../decisions/20260606-compiling-godot-engine.html">compiling SOP</a> toolchain (<code>git</code>, Python 3, SCons, sccache, MinGW-w64 on Windows / <code>build-essential</code> on Linux), plus <a href="https://github.com/v-sekai-multiplayer-fabric/merge">merge</a> (Elixir <code>gitassembly</code>) to assemble <code>feat/module-xr-grid</code>, <code>feat/module-cassie</code>, and <code>feat/module-http3</code> onto the pinned base. Pin to a <a href="../decisions/20260606-gitassembly-tag-release.html">gitassembly tag release</a> rather than the moving branch tips for a reproducible assembly.</li>
+<li>From source: the <a href="../decisions/20260606-compiling-godot-engine.html">compiling SOP</a> toolchain (<code>git</code>, Python 3, SCons, sccache, MinGW-w64 on Windows / <code>build-essential</code> on Linux), plus <a href="https://github.com/v-sekai-multiplayer-fabric/merge">merge</a> (Elixir <code>gitassembly</code>) to assemble <code>feat/module-xr-grid</code>, <code>feat/module-cassie</code>, and <code>feat/module-http3</code> onto the pinned base. Check out a <a href="../decisions/20260606-gitassembly-tag-release.html">gitassembly tag release</a> (<code>v2026.06.06.1853-multiplayer-fabric</code>) rather than the moving branch tips for a reproducible assembly.</li>
 </ul>
 </section>
 <section id="demo-project" class="level3">
@@ -241,7 +240,7 @@
 <ul>
 <li><p><a href="20260606-compiling-godot-engine.html">Compiling the Godot engine</a></p></li>
 <li><p><a href="20260606-ghostly-presence-body-model.html">Ghostly partial-body presence avatar from ANNY via SOMA-X</a></p></li>
-<li><p><a href="20260606-gitassembly-tag-release.html">Cut versioned gitassembly tag releases for the assembled engine</a></p></li>
+<li><p><a href="20260606-gitassembly-tag-release.html">Cut gitassembly tag releases for the assembled engine</a></p></li>
 <li><p><a href="20260606-pin-engine-to-frozen-godot-4-7.html">Pin the engine to a frozen Godot 4.7 commit</a></p></li>
 <li><p><a href="20260606-presence-marker-representation.html">Human-readable presence markers with an orb debug mode</a></p></li>
 <li><p><a href="20260606-webtransport-http3-transport.html">WebTransport over HTTP/3 transport</a></p></li>
@@ -755,7 +754,7 @@ font-style: inherit;"># reset counters</span></span></code></pre></div></div>
   <pubDate>Sat, 06 Jun 2026 00:00:00 GMT</pubDate>
 </item>
 <item>
-  <title>Cut versioned gitassembly tag releases for the assembled engine</title>
+  <title>Cut gitassembly tag releases for the assembled engine</title>
   <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-gitassembly-tag-release.html</link>
   <description><![CDATA[ 
 
@@ -763,11 +762,11 @@ font-style: inherit;"># reset counters</span></span></code></pre></div></div>
 
 
 
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Cut versioned gitassembly tag releases for the assembled engine</em></p>
-<p><strong>Status:</strong> proposed</p>
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Cut gitassembly tag releases for the assembled engine</em></p>
+<p><strong>Status:</strong> accepted</p>
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The <a href="https://github.com/v-sekai-multiplayer-fabric/merge"><code>merge</code></a> <code>gitassembly</code> recipe builds the engine by merging feature branches (<code>feat/module-xr-grid</code>, <code>feat/module-cassie</code>, <code>feat/module-http3</code>, and the rest) onto the <a href="../decisions/20260606-pin-engine-to-frozen-godot-4-7.html">frozen Godot 4.7 base</a>. The base is pinned, but the feature branch tips are not: an assembly run today and one next week can merge different branch SHAs and produce a different engine. The <a href="../decisions/20260606-presence-demo-cold-boot-dependencies.html">cold-boot dependencies</a> refer to the branches by name, so “assemble these branches” is not yet a reproducible artifact. How do we name a fixed, shareable point of the assembled engine?</p>
+<p>The <a href="https://github.com/v-sekai-multiplayer-fabric/merge"><code>merge</code></a> repo’s <code>gitassembly</code> recipe builds the engine by merging feature branches (<code>feat/module-xr-grid</code>, <code>feat/module-cassie</code>, <code>feat/module-http3</code>, and the rest) onto the <a href="../decisions/20260606-pin-engine-to-frozen-godot-4-7.html">frozen Godot 4.7 base</a>. The base is pinned, but the feature branch tips are not: an assembly run today and one next week can merge different branch SHAs and produce a different engine. The <a href="../decisions/20260606-presence-demo-cold-boot-dependencies.html">cold-boot dependencies</a> refer to the branches by name, so “assemble these branches” alone is not a reproducible artifact. What is the shareable, fixed reference for the assembled engine?</p>
 </section>
 <section id="decision-drivers" class="level2">
 <h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
@@ -775,50 +774,50 @@ font-style: inherit;"># reset counters</span></span></code></pre></div></div>
 <li>Reproducibility: a name that resolves to one exact assembled tree, not moving tips.</li>
 <li>A single reference the demo, <code>godot-images</code>, and CI can all build from.</li>
 <li>Cheap to cut so releases keep pace with the feature branches.</li>
-<li>Provenance: the tag records the base pin and every merged branch SHA.</li>
+<li>Do not steamroll prior assemblies that other work already builds against.</li>
 </ul>
 </section>
 <section id="considered-options" class="level2">
 <h2 class="anchored" data-anchor-id="considered-options">Considered Options</h2>
 <ul>
-<li>Keep referring to branch names (status quo); each consumer assembles the tips.</li>
-<li>Tag only the <code>godot-images</code> build output, not the source assembly.</li>
-<li>Cut a versioned tag on the assembled branch the <code>gitassembly</code> recipe produces.</li>
+<li>Keep referring to branch names; each consumer assembles the tips itself.</li>
+<li>Force-push the assembled <code>multiplayer-fabric</code> branch as the shared reference.</li>
+<li>Push an immutable, timestamped tag of the assembled tree (the existing <code>merge</code> tooling already does this).</li>
 </ul>
 </section>
 <section id="decision-outcome" class="level2">
 <h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: “Cut a versioned tag on the assembled branch”, because it gives one immutable reference that resolves to an exact tree, while the per-branch SHAs in the recipe keep the assembly’s provenance.</p>
+<p>Chosen option: “Push an immutable, timestamped tag”, because it gives one reference that resolves to an exact tree without overwriting prior assemblies. This adopts the behavior the <code>merge</code> tooling already implements rather than inventing a new scheme.</p>
 <ul>
-<li>The recipe assembles the feature branches onto the pinned base and tags the result. The tag is annotated and records the base pin SHA and each merged branch SHA in its message.</li>
-<li>Tag pattern: <code>gitassembly-YYYYMMDD-NNNN</code> — ISO date first so tags sort chronologically, with a zero-padded same-day sequence, mirroring the <a href="../decisions/20260606-archival-file-naming-convention.html">archival naming convention</a>.</li>
-<li>The first tag, <code>gitassembly-20260606-0001</code>, is the cold-boot reference for the presence-marker demo: base <code>8a337510</code> (Godot <code>4.7.0-beta</code>) with <code>feat/module-xr-grid</code>, <code>feat/module-cassie</code>, and <code>feat/module-http3</code> merged.</li>
-<li>Consumers pin to a tag, not to branch names. <code>godot-images</code> builds its GHCR editor image from a tag, and the cold-boot steps reference that tag.</li>
-<li>A tag is cut whenever a merged branch advances enough to matter; the moving branches stay the development surface, and tags are the shareable checkpoints.</li>
+<li><code>elixir update_godot_v_sekai.exs</code> (run from <code>main</code>) fetches the remotes, runs the vendored <code>git-assembler</code> over the <code>gitassembly</code> recipe, then tags the assembled <code>multiplayer-fabric</code> branch and pushes <strong>only the tag</strong> to <code>v-sekai-multiplayer-fabric/godot</code>. The moving branch stays local, so a release never steamrolls anyone working off a previous tip.</li>
+<li>Tag format (CalVer, UTC): <code>v&lt;YYYY.MM.DD.HHMM&gt;-multiplayer-fabric</code>. The timestamp is the only thing that changes between runs; the assembler is deterministic, so the same inputs produce the same tree.</li>
+<li>The current cold-boot reference is <code>v2026.06.06.1853-multiplayer-fabric</code> (commit <code>9ea526ab</code>), assembled onto the pinned 4.7 base with the full recipe, including <code>feat/module-xr-grid</code>, <code>feat/module-cassie</code>, and <code>feat/module-http3</code>.</li>
+<li>Consumers pin to a tag, not to branch names. <code>godot-images</code> builds its GHCR editor image from a tag, and the <a href="../decisions/20260606-presence-demo-cold-boot-dependencies.html">cold-boot steps</a> reference that tag.</li>
+<li>Iterate with <code>--dry-run</code> (assembles locally, no push) before cutting a release.</li>
 </ul>
 <section id="consequences" class="level3">
 <h3 class="anchored" data-anchor-id="consequences">Consequences</h3>
 <ul>
-<li>Good: a tag resolves to one exact assembled engine, so demo, image, and CI all build the same tree.</li>
-<li>Good: each tag carries the base and branch SHAs, so any assembly is auditable.</li>
+<li>Good: a tag resolves to one exact assembled engine, so demo, image, and CI build the same tree.</li>
+<li>Good: tag-only push keeps every prior assembly intact and addressable.</li>
+<li>Bad: the CalVer tag carries no semantic version, so the assembled Godot version is implicit in the <a href="../decisions/20260606-pin-engine-to-frozen-godot-4-7.html">pinned base</a>.</li>
 <li>Bad: tags must be cut deliberately, so a stale tag can lag the live branches.</li>
 </ul>
 </section>
 <section id="confirmation" class="level3">
 <h3 class="anchored" data-anchor-id="confirmation">Confirmation</h3>
-<p><code>git show gitassembly-20260606-0001</code> lists the base pin and the merged branch SHAs, and a <code>godot-images</code> build from that tag reproduces the same editor. The cold-boot steps and <code>godot-images</code> reference a tag rather than branch names.</p>
+<p><code>git ls-remote --tags v-sekai-multiplayer-fabric/godot</code> lists <code>v&lt;YYYY.MM.DD.HHMM&gt;-multiplayer-fabric</code> tags, a <code>godot-images</code> build from a tag reproduces the same editor, and the cold-boot steps reference a tag rather than branch names.</p>
 </section>
 </section>
 <section id="more-information" class="level2">
 <h2 class="anchored" data-anchor-id="more-information">More Information</h2>
-<p>The tag sits on top of the <a href="../decisions/20260606-pin-engine-to-frozen-godot-4-7.html">engine pin</a>: the pin fixes the base, and the tag fixes the assembly merged onto it. It is the reproducible artifact the <a href="../decisions/20260606-presence-demo-cold-boot-dependencies.html">cold-boot dependencies</a> build from.</p>
+<p>The tag sits on top of the <a href="../decisions/20260606-pin-engine-to-frozen-godot-4-7.html">engine pin</a>: the pin fixes the base, and the tag fixes the assembly merged onto it. It is the reproducible artifact the <a href="../decisions/20260606-presence-demo-cold-boot-dependencies.html">cold-boot dependencies</a> build from. The tag format and workflow are documented in the <code>merge</code> repo’s <code>CONTRIBUTING.md</code>.</p>
 
 
 </section>
 <section id="related" class="level2">
 <h2 class="anchored" data-anchor-id="related">Related</h2>
 <ul>
-<li><p><a href="20260606-archival-file-naming-convention.html">Archival file naming convention for committed assets</a></p></li>
 <li><p><a href="20260606-pin-engine-to-frozen-godot-4-7.html">Pin the engine to a frozen Godot 4.7 commit</a></p></li>
 <li><p><a href="20260606-presence-demo-cold-boot-dependencies.html">Cold-boot dependencies for the presence-marker demo</a></p></li>
 </ul>
@@ -1242,7 +1241,7 @@ V-Sekai Multiplayer Fabric. 2026. <em><span class="nocase">xr-grid</span> Debug 
 <h2 class="anchored" data-anchor-id="related">Related</h2>
 <ul>
 <li><p><a href="../changelog/2026/20260606-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-06 (Saturday)</a></p></li>
-<li><p><a href="20260606-gitassembly-tag-release.html">Cut versioned gitassembly tag releases for the assembled engine</a></p></li>
+<li><p><a href="20260606-gitassembly-tag-release.html">Cut gitassembly tag releases for the assembled engine</a></p></li>
 <li><p><a href="20260606-presence-demo-cold-boot-dependencies.html">Cold-boot dependencies for the presence-marker demo</a></p></li>
 <li><p><a href="20260606-self-host-on-harvester-hci.html">Self-host on Harvester HCI instead of Fly.io</a></p></li>
 <li><p><a href="20260606-spatial-audio-patched-resonance-audio.html">Spatial audio via a patched Resonance Audio (HRTF and audio probes)</a></p></li>
