@@ -29,7 +29,7 @@ marker be?
 
 - Raw orb clusters as the default (current).
 - A vague ghostly or cartoony head plus distinct hand markers that show heading.
-- A floating "TV head" showing the user's Steam avatar (the "Lord Kanti" look).
+- A floating "TV head" showing the user's Steam avatar.
 
 ## Decision Outcome
 
