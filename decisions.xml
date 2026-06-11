@@ -10,7 +10,78 @@
 <atom:link href="https://v-sekai-multiplayer-fabric.github.io/manuals/decisions.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.9.38</generator>
-<lastBuildDate>Tue, 09 Jun 2026 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Wed, 10 Jun 2026 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Hexagonal core/ports/adapters as the component convention</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260610-hexagonal-core-ports-adapters.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Hexagonal core/ports/adapters as the component convention</em></p>
+<p><strong>Status:</strong> accepted</p>
+<section id="context-and-problem-statement" class="level2">
+<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
+<p>Components in the stack span several languages (C, C++, Python, Elixir, GDScript), run as separate processes, and each binds to hardware, a GPU, the network, or an engine runtime. A component has to stay testable without its device, replaceable without a rewrite of its callers, and composable with components written in another language. A shared monolith or a single in-memory object model does not hold across those boundaries.</p>
+</section>
+<section id="decision-drivers" class="level2">
+<h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
+<ul>
+<li>Real-time and pipeline paths cross process and language boundaries with no shared object model.</li>
+<li>Hardware, OS, GPU, network, and engine concerns have to stay out of the domain logic, or that logic becomes untestable away from the live system.</li>
+<li>CI runs the domain logic against recorded fixtures, without the device or the runtime.</li>
+<li>One computed result often feeds several outputs from a single pass.</li>
+</ul>
+</section>
+<section id="decision-outcome" class="level2">
+<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
+<p>Each component is a hexagon with a uniform <code>core/</code> + <code>ports/</code> + <code>adapters/</code> layout, and components compose into a cluster by wiring ports across the boundary.</p>
+<section id="core-dependency-free-domain-logic" class="level3">
+<h3 class="anchored" data-anchor-id="core-dependency-free-domain-logic">core/ — dependency-free domain logic</h3>
+<p><code>core/</code> holds the component’s domain logic and nothing else: it opens no socket, reads no device, and links no framework. It carries its own <code>core/spec/</code> of tests that run in isolation against fixtures. A transport never reaches into the core.</p>
+</section>
+<section id="ports-interface-contracts-labelled-by-direction" class="level3">
+<h3 class="anchored" data-anchor-id="ports-interface-contracts-labelled-by-direction">ports/ — interface contracts, labelled by direction</h3>
+<p>A port is a narrow interface the core defines and an adapter implements. Each port is labelled by its side of the hexagon and by its data direction:</p>
+<ul>
+<li>driving (primary) ports carry input the outside world pushes into the core;</li>
+<li>driven (secondary) ports carry the core’s output back out to the outside world;</li>
+<li>by data flow, a <code>*_source</code> port reads data in and a <code>*_sink</code> port writes data out.</li>
+</ul>
+<p>A port stays at the lowest common denominator every binding language can implement: a C-ABI struct of function pointers where the cluster crosses languages, a language-native interface where it does not. One header then binds C, C++, and Python adapters alike.</p>
+</section>
+<section id="adapters-concrete-io-at-the-edges" class="level3">
+<h3 class="anchored" data-anchor-id="adapters-concrete-io-at-the-edges">adapters/ — concrete I/O at the edges</h3>
+<p>Adapters implement the ports against the real world: a serial device, a UDP socket, a recorded fixture for CI, a GPU compute host, a renderer, an engine runtime. One port admits many adapters, so a single core output fans out to several destinations from one pass, and a recorded-fixture adapter stands in for live hardware under CI.</p>
+</section>
+<section id="cluster-composition-wiring-ports-across-the-seam" class="level3">
+<h3 class="anchored" data-anchor-id="cluster-composition-wiring-ports-across-the-seam">Cluster composition — wiring ports across the seam</h3>
+<p>Components compose by connecting one component’s sink to another’s source. An in-process dependency links the sibling directly; a cross-process dependency meets on a wire, a network protocol the two ends share. The wire is the integration contract, so a producer in one language and a consumer in another share no code, only the message format. Each component declares its sibling wiring alongside its ports.</p>
+</section>
+</section>
+<section id="consequences" class="level2">
+<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
+<ul>
+<li>A dependency-free core lets CI replay recorded fixtures through the domain logic with no device and no runtime.</li>
+<li>The wire seam decouples languages and processes, so any component is rewritable or replaceable as long as it keeps the message contract.</li>
+<li>A new output is a new sink adapter, with no change to the core that produced the data.</li>
+<li>The driving and driven labels keep the dependency direction explicit: adapters depend on the core through ports, and the core depends on nothing.</li>
+<li>The convention costs interface boilerplate, and across a process boundary it adds a serialize and parse step the in-process link avoids. That cost buys cross-language, cross-process composition.</li>
+</ul>
+</section>
+<section id="more-information" class="level2">
+<h2 class="anchored" data-anchor-id="more-information">More Information</h2>
+<p>The <code>sinew-mocap</code> cluster applies the pattern end to end. Each repository (<code>driver</code>, <code>mount_drift</code>, <code>solve</code>, <code>viewer</code>, <code>vr_bridge</code>) carries the <code>core/</code> + <code>ports/</code> + <code>adapters/</code> triad; ports are header-only C struct vtables labelled driving or driven and named <code>*_source.h</code> / <code>*_sink.h</code> (FrameSource, TrackerSink, PoseSink, HmdSource); adapters bind the serial dongle, a recorded <code>.rawlog</code>, UDP, polyscope, SteamVR, OpenVR, and Vulkan; and the repositories compose over the <code>/sinew</code> OSC wire (UDP 39539), with each <code>ports/sibling-repos.txt</code> declaring the wiring. The synthetic-data branch in <code>sinew-vrdance/pose_distill</code> applies the same triad in Python: core geometry and label cleaning, ports for the teacher pose model, renderer, and dataset sink, and adapters for the model, the Godot renderer, and the COCO sink.</p>
+
+
+</section>
+
+ ]]></description>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260610-hexagonal-core-ports-adapters.html</guid>
+  <pubDate>Wed, 10 Jun 2026 00:00:00 GMT</pubDate>
+</item>
 <item>
   <title>An umbrella package installs every component in one command</title>
   <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260609-umbrella-package-installs-all-components.html</link>
@@ -2216,75 +2287,6 @@ V-Sekai Multiplayer Fabric. 2026. <em><span class="nocase">xr-grid</span> Debug 
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-windows-background-services-nssm.html</guid>
-  <pubDate>Sat, 06 Jun 2026 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Self-host on Harvester HCI instead of Fly.io</title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-self-host-on-harvester-hci.html</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Self-host on Harvester HCI instead of Fly.io</em></p>
-<p><strong>Tier:</strong> baseline · <strong>Status:</strong> accepted</p>
-<section id="context-and-problem-statement" class="level2">
-<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The runtime first deployed on Fly.io (see the superseded Fly.io decision and Maglev Cycle 0). The project is moving to a self-hosted Harvester HCI cluster, where each service runs as a qcow2 VM image driven by podman quadlets. This records that Fly.io is no longer the deployment target.</p>
-</section>
-<section id="decision-drivers" class="level2">
-<h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
-<ul>
-<li>Own the cluster, its cost, and its control.</li>
-<li>Ship each service as a VM image run by podman quadlets.</li>
-<li>Reuse the existing image build pipeline.</li>
-</ul>
-</section>
-<section id="considered-options" class="level2">
-<h2 class="anchored" data-anchor-id="considered-options">Considered Options</h2>
-<ul>
-<li>Stay on Fly.io.</li>
-<li>Self-host on Harvester HCI.</li>
-</ul>
-</section>
-<section id="decision-outcome" class="level2">
-<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: “Self-host on Harvester HCI”. Fly.io is no longer used. Deployment is OpenTofu in <a href="https://github.com/v-sekai-multiplayer-fabric/infra">infra</a> onto a Harvester cluster, with each service a qcow2 image (<code>linux-base-image</code> plus the per-service <code>*-image</code> repos) run as a podman quadlet.</p>
-<p>This supersedes <a href="../decisions/20260501-fly-io-for-deployment.html">Fly.io for deployment</a> and <a href="../decisions/20260506-maglev-cycle-0-infra.html">Maglev Cycle 0: Terraform Fly.io Infrastructure</a>.</p>
-<section id="consequences" class="level3">
-<h3 class="anchored" data-anchor-id="consequences">Consequences</h3>
-<ul>
-<li>Good: full control of the cluster, and the VM-image pipeline already exists.</li>
-<li>Bad: we operate our own HCI cluster.</li>
-<li>Bad: the migration is mid-pivot (see the infra repo’s <code>docs/migration-status.md</code>), so some older records still mention Fly until each service moves.</li>
-</ul>
-</section>
-<section id="confirmation" class="level3">
-<h3 class="anchored" data-anchor-id="confirmation">Confirmation</h3>
-<p>The infra repo provisions Harvester VMs via OpenTofu and podman quadlets, and creates no Fly.io resources.</p>
-</section>
-</section>
-<section id="more-information" class="level2">
-<h2 class="anchored" data-anchor-id="more-information">More Information</h2>
-<p>The VM images live in the <code>*-image</code> repos; the engine is <a href="../decisions/20260606-pin-engine-to-frozen-godot-4-7.html">pinned to a frozen Godot 4.7 commit</a>.</p>
-
-
-</section>
-<section id="related" class="level2">
-<h2 class="anchored" data-anchor-id="related">Related</h2>
-<ul>
-<li><p><a href="../changelog/2026/20260606-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-06 (Saturday)</a></p></li>
-<li><p><a href="20260501-fly-io-for-deployment.html">Fly.io for deployment</a></p></li>
-<li><p><a href="20260506-maglev-cycle-0-infra.html">Maglev Cycle 0: Terraform Fly.io Infrastructure</a></p></li>
-<li><p><a href="20260506-maglev-cycle-2-observability.html">Maglev Cycle 2: Observability Stack</a></p></li>
-<li><p><a href="20260506-observability-stack-victoriatraces.html">Replace Jaeger with VictoriaTraces for trace storage</a></p></li>
-<li><p><a href="20260606-pin-engine-to-frozen-godot-4-7.html">Pin the engine to a frozen Godot 4.7 commit</a></p></li>
-</ul>
-</section>
-
- ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-self-host-on-harvester-hci.html</guid>
   <pubDate>Sat, 06 Jun 2026 00:00:00 GMT</pubDate>
 </item>
 </channel>

@@ -1,8 +1,19 @@
 [
   {
+    "listing": "/changelog.html",
+    "items": [
+      "/changelog/2026/20260606-deck-log.html",
+      "/changelog/2026/20260507-deck-log.html",
+      "/changelog/2026/20260506-deck-log.html",
+      "/changelog/2026/20260425-deck-log.html",
+      "/changelog/2026/20260421-deck-log.html"
+    ]
+  },
+  {
     "listing": "/decisions.html",
     "items": [
       "/decisions/present-proposal-template.html",
+      "/decisions/20260610-hexagonal-core-ports-adapters.html",
       "/decisions/20260609-umbrella-package-installs-all-components.html",
       "/decisions/20260609-commit-messages-sentence-case.html",
       "/decisions/20260607-tenseless-continuous-present-voice.html",
@@ -48,16 +59,6 @@
       "/decisions/20260501-fly-io-for-deployment.html",
       "/decisions/20260501-godot-double-precision-template-release-for-zone.html",
       "/decisions/20260501-webtransport-over-quic-for-game-traffic.html"
-    ]
-  },
-  {
-    "listing": "/changelog.html",
-    "items": [
-      "/changelog/2026/20260606-deck-log.html",
-      "/changelog/2026/20260507-deck-log.html",
-      "/changelog/2026/20260506-deck-log.html",
-      "/changelog/2026/20260425-deck-log.html",
-      "/changelog/2026/20260421-deck-log.html"
     ]
   }
 ]

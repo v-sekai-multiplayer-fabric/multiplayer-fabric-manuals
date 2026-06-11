@@ -6,9 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2026-05-06">
+<meta name="dcterms.date" content="2026-06-10">
 
-<title>Maglev Cycle 2: Observability Stack – V-Sekai Fire — Manuals</title>
+<title>Hexagonal core/ports/adapters as the component convention – V-Sekai Fire — Manuals</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -287,20 +287,19 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#the-context" id="toc-the-context" class="nav-link active" data-scroll-target="#the-context">The Context</a></li>
-  <li><a href="#the-problem-statement" id="toc-the-problem-statement" class="nav-link" data-scroll-target="#the-problem-statement">The Problem Statement</a></li>
-  <li><a href="#design" id="toc-design" class="nav-link" data-scroll-target="#design">Design</a></li>
-  <li><a href="#estimate" id="toc-estimate" class="nav-link" data-scroll-target="#estimate">Estimate</a></li>
-  <li><a href="#cris-score" id="toc-cris-score" class="nav-link" data-scroll-target="#cris-score">CRIS Score</a></li>
-  <li><a href="#the-downsides" id="toc-the-downsides" class="nav-link" data-scroll-target="#the-downsides">The Downsides</a></li>
-  <li><a href="#the-road-not-taken" id="toc-the-road-not-taken" class="nav-link" data-scroll-target="#the-road-not-taken">The Road Not Taken</a></li>
-  <li><a href="#status" id="toc-status" class="nav-link" data-scroll-target="#status">Status</a></li>
-  <li><a href="#decision-makers" id="toc-decision-makers" class="nav-link" data-scroll-target="#decision-makers">Decision Makers</a></li>
-  <li><a href="#tags" id="toc-tags" class="nav-link" data-scroll-target="#tags">Tags</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading">Further Reading</a></li>
-  <li><a href="#related" id="toc-related" class="nav-link" data-scroll-target="#related">Related</a></li>
+  <li><a href="#context-and-problem-statement" id="toc-context-and-problem-statement" class="nav-link active" data-scroll-target="#context-and-problem-statement">Context and Problem Statement</a></li>
+  <li><a href="#decision-drivers" id="toc-decision-drivers" class="nav-link" data-scroll-target="#decision-drivers">Decision Drivers</a></li>
+  <li><a href="#decision-outcome" id="toc-decision-outcome" class="nav-link" data-scroll-target="#decision-outcome">Decision Outcome</a>
+  <ul class="collapse">
+  <li><a href="#core-dependency-free-domain-logic" id="toc-core-dependency-free-domain-logic" class="nav-link" data-scroll-target="#core-dependency-free-domain-logic">core/ — dependency-free domain logic</a></li>
+  <li><a href="#ports-interface-contracts-labelled-by-direction" id="toc-ports-interface-contracts-labelled-by-direction" class="nav-link" data-scroll-target="#ports-interface-contracts-labelled-by-direction">ports/ — interface contracts, labelled by direction</a></li>
+  <li><a href="#adapters-concrete-io-at-the-edges" id="toc-adapters-concrete-io-at-the-edges" class="nav-link" data-scroll-target="#adapters-concrete-io-at-the-edges">adapters/ — concrete I/O at the edges</a></li>
+  <li><a href="#cluster-composition-wiring-ports-across-the-seam" id="toc-cluster-composition-wiring-ports-across-the-seam" class="nav-link" data-scroll-target="#cluster-composition-wiring-ports-across-the-seam">Cluster composition — wiring ports across the seam</a></li>
+  </ul></li>
+  <li><a href="#consequences" id="toc-consequences" class="nav-link" data-scroll-target="#consequences">Consequences</a></li>
+  <li><a href="#more-information" id="toc-more-information" class="nav-link" data-scroll-target="#more-information">More Information</a></li>
   </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/v-sekai-multiplayer-fabric/manuals/edit/main/decisions/20260506-maglev-cycle-2-observability.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/v-sekai-multiplayer-fabric/manuals/edit/main/decisions/20260610-hexagonal-core-ports-adapters.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -308,7 +307,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Maglev Cycle 2: Observability Stack</h1>
+<h1 class="title">Hexagonal core/ports/adapters as the component convention</h1>
 </div>
 
 
@@ -319,7 +318,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">May 6, 2026</p>
+      <p class="date">June 10, 2026</p>
     </div>
   </div>
   
@@ -331,140 +330,62 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Maglev Cycle 2: Observability Stack</em></p>
-<p><strong>Tier:</strong> baseline · <strong>Status:</strong> rejected</p>
-<blockquote class="blockquote">
-<p>Deployment note: the stack now runs on the Harvester cluster; it has moved off Fly.io (see <a href="../decisions/20260606-self-host-on-harvester-hci.html">self-host on Harvester HCI</a>). The Fly-specific details below are from the original deployment.</p>
-</blockquote>
-<section id="the-context" class="level2">
-<h2 class="anchored" data-anchor-id="the-context">The Context</h2>
-<p>The observability stack — OTEL Collector (4317/4318), VictoriaMetrics (8428), VictoriaLogs (9428), VictoriaTraces (10428) — is infrastructure-level and depends only on the Fly deployment being live after Cycle 1. It can run in parallel with the game-logic track (Cycles 3–10) and the DB connection (Cycle 9).</p>
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Hexagonal core/ports/adapters as the component convention</em></p>
+<p><strong>Status:</strong> accepted</p>
+<section id="context-and-problem-statement" class="level2">
+<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
+<p>Components in the stack span several languages (C, C++, Python, Elixir, GDScript), run as separate processes, and each binds to hardware, a GPU, the network, or an engine runtime. A component has to stay testable without its device, replaceable without a rewrite of its callers, and composable with components written in another language. A shared monolith or a single in-memory object model does not hold across those boundaries.</p>
 </section>
-<section id="the-problem-statement" class="level2">
-<h2 class="anchored" data-anchor-id="the-problem-statement">The Problem Statement</h2>
-<p>No cycle verifies that traces from <code>multiplayer-fabric-gateway</code>, <code>multiplayer-fabric-zone</code>, and <code>multiplayer-fabric-uro</code> reach VictoriaTraces, or that metrics reach VictoriaMetrics. Without this, any failure in Cycles 3–10 has no trace evidence to debug against.</p>
-</section>
-<section id="design" class="level2">
-<h2 class="anchored" data-anchor-id="design">Design</h2>
-<p>Start the observability stack on the Fly deployment:</p>
+<section id="decision-drivers" class="level2">
+<h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
 <ul>
-<li>VictoriaMetrics on port 8428</li>
-<li>VictoriaLogs on port 9428</li>
-<li>VictoriaTraces on port 10428 (replaces Jaeger; <code>fly proxy 10428:10428</code> for local inspection)</li>
-<li>OTEL Collector on 4317 (gRPC) and 4318 (HTTP), routing to all three backends</li>
-</ul>
-<p>Trigger a single gateway request and a single zone tick. The zone server binary includes the <code>opentelemetry-godot</code> module compiled into the engine (verify with <code>--test --test-case="*OTel*"</code> before the run). Verify each service emits OTLP spans to the Collector.</p>
-<p>Pass criteria:</p>
-<ul class="task-list">
-<li><label><input type="checkbox">VictoriaTraces UI at <code>http://localhost:10428/select/vmui</code> shows spans from at least one gateway request</label></li>
-<li><label><input type="checkbox">VictoriaMetrics at port 8428 returns a non-empty result for a zone-server metric query</label></li>
-<li><label><input type="checkbox">VictoriaLogs at port 9428 shows at least one log line from uro</label></li>
-<li><label><input type="checkbox">All four services are Apache 2.0 (no Tempo, no Jaeger)</label></li>
+<li>Real-time and pipeline paths cross process and language boundaries with no shared object model.</li>
+<li>Hardware, OS, GPU, network, and engine concerns have to stay out of the domain logic, or that logic becomes untestable away from the live system.</li>
+<li>CI runs the domain logic against recorded fixtures, without the device or the runtime.</li>
+<li>One computed result often feeds several outputs from a single pass.</li>
 </ul>
 </section>
-<section id="estimate" class="level2">
-<h2 class="anchored" data-anchor-id="estimate">Estimate</h2>
-<p><strong>3 days</strong> (2026-05-09 → 2026-05-13, parallel). VictoriaMetrics/Logs/Traces share a config pattern; the only unknown is Fly volume persistence. Comparable to the zone-console Fly deploy (2 days of config commits on 2026-04-24–25).</p>
+<section id="decision-outcome" class="level2">
+<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
+<p>Each component is a hexagon with a uniform <code>core/</code> + <code>ports/</code> + <code>adapters/</code> layout, and components compose into a cluster by wiring ports across the boundary.</p>
+<section id="core-dependency-free-domain-logic" class="level3">
+<h3 class="anchored" data-anchor-id="core-dependency-free-domain-logic">core/ — dependency-free domain logic</h3>
+<p><code>core/</code> holds the component’s domain logic and nothing else: it opens no socket, reads no device, and links no framework. It carries its own <code>core/spec/</code> of tests that run in isolation against fixtures. A transport never reaches into the core.</p>
 </section>
-<section id="cris-score" class="level2">
-<h2 class="anchored" data-anchor-id="cris-score">CRIS Score</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 7%">
-<col style="width: 2%">
-<col style="width: 89%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Factor</th>
-<th>Score</th>
-<th>Evidence</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>C</strong>omplexity</td>
-<td>7</td>
-<td>All four Victoria backends share port conventions and the OTEL Collector config is well-documented; the only unknown is Fly volume persistence under the single-machine deployment.</td>
-</tr>
-<tr class="even">
-<td><strong>R</strong>each</td>
-<td>10</td>
-<td>Every failure in Cycles 3–10 requires trace evidence to diagnose; without this cycle no networking or physics failure is attributable.</td>
-</tr>
-<tr class="odd">
-<td><strong>I</strong>mpediment</td>
-<td>7</td>
-<td>A missing observability stack does not block Cycles 3–10 but leaves failures in Cycles 3–10 impossible to root-cause.</td>
-</tr>
-<tr class="even">
-<td><strong>S</strong>takeholder</td>
-<td>10</td>
-<td>Required for any post-mission debugging of physics desync or score write failures.</td>
-</tr>
-<tr class="odd">
-<td><strong>Total</strong></td>
-<td>8.5</td>
-<td>Build after Cycle 1 passes, in parallel with Cycles 9 and 6–11. Must complete before Cycle 3 begins.</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="the-downsides" class="level2">
-<h2 class="anchored" data-anchor-id="the-downsides">The Downsides</h2>
-<p>A passing Cycle 2 does not validate trace volume or retention under mission load; that stress only appears during Cycles 9–2.</p>
-</section>
-<section id="the-road-not-taken" class="level2">
-<h2 class="anchored" data-anchor-id="the-road-not-taken">The Road Not Taken</h2>
-<p>Deferring observability to after Cycle 11 was rejected — a failure in Cycle 8 (dynamic physics) or Cycle 10 (score write) with no trace evidence requires rerunning the entire cycle with instrumentation added, doubling the debugging time.</p>
-</section>
-<section id="status" class="level2">
-<h2 class="anchored" data-anchor-id="status">Status</h2>
-<p>Status: In Progress (producer side complete 2026-05-07; verification pending)</p>
-<p>The observability stack itself is deployed and running on Fly (machine <code>781ed59b437968</code> started, volume <code>observability_data</code> 10GB iad attached) per <code>verify_fly_state</code> workflow output. The producer side has now been wired in all three apps:</p>
+<section id="ports-interface-contracts-labelled-by-direction" class="level3">
+<h3 class="anchored" data-anchor-id="ports-interface-contracts-labelled-by-direction">ports/ — interface contracts, labelled by direction</h3>
+<p>A port is a narrow interface the core defines and an adapter implements. Each port is labelled by its side of the hexagon and by its data direction:</p>
 <ul>
-<li>✅ <a href="https://github.com/V-Sekai-fire/multiplayer-fabric-gateway/pull/8">gateway PR #8</a> — <code>:opentelemetry</code> deps + <code>gateway.dispatch</code> span around <code>Gateway.Router.handle/1</code></li>
-<li>✅ <a href="https://github.com/V-Sekai-fire/multiplayer-fabric-zone-backend/pull/13">uro PR #13</a> — <code>:opentelemetry_phoenix</code> + <code>:opentelemetry_ecto</code> automatic instrumentation</li>
-<li>✅ <a href="https://github.com/V-Sekai-fire/multiplayer-fabric-zone/pull/3">zone PR #3</a> — bootstrapped <code>project/main.gd</code> initializing the engine’s <code>module_open_telemetry</code>, emits <code>zone.boot</code> span</li>
+<li>driving (primary) ports carry input the outside world pushes into the core;</li>
+<li>driven (secondary) ports carry the core’s output back out to the outside world;</li>
+<li>by data flow, a <code>*_source</code> port reads data in and a <code>*_sink</code> port writes data out.</li>
 </ul>
-<p>All ship to <code>multiplayer-fabric-observability.internal:4318</code> (OTLP/HTTP over Fly’s 6PN). End-to-end verification runs via <a href="https://github.com/V-Sekai-fire/multiplayer-fabric-infra/blob/main/.github/workflows/verify_observability.yml"><code>.github/workflows/verify_observability.yml</code></a> on <code>multiplayer-fabric-infra</code> — uses <code>flyctl ssh console -C</code> to query the Victoria* APIs from inside the observability machine (the OTLP ports are intentionally private). Pending: trigger the verify workflow after redeploys land and confirm the cycle 1 ping span is visible in VictoriaTraces.</p>
+<p>A port stays at the lowest common denominator every binding language can implement: a C-ABI struct of function pointers where the cluster crosses languages, a language-native interface where it does not. One header then binds C, C++, and Python adapters alike.</p>
 </section>
-<section id="decision-makers" class="level2">
-<h2 class="anchored" data-anchor-id="decision-makers">Decision Makers</h2>
+<section id="adapters-concrete-io-at-the-edges" class="level3">
+<h3 class="anchored" data-anchor-id="adapters-concrete-io-at-the-edges">adapters/ — concrete I/O at the edges</h3>
+<p>Adapters implement the ports against the real world: a serial device, a UDP socket, a recorded fixture for CI, a GPU compute host, a renderer, an engine runtime. One port admits many adapters, so a single core output fans out to several destinations from one pass, and a recorded-fixture adapter stands in for live hardware under CI.</p>
+</section>
+<section id="cluster-composition-wiring-ports-across-the-seam" class="level3">
+<h3 class="anchored" data-anchor-id="cluster-composition-wiring-ports-across-the-seam">Cluster composition — wiring ports across the seam</h3>
+<p>Components compose by connecting one component’s sink to another’s source. An in-process dependency links the sibling directly; a cross-process dependency meets on a wire, a network protocol the two ends share. The wire is the integration contract, so a producer in one language and a consumer in another share no code, only the message format. Each component declares its sibling wiring alongside its ports.</p>
+</section>
+</section>
+<section id="consequences" class="level2">
+<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
 <ul>
-<li>Lead Architect / Fabric Maintainer</li>
+<li>A dependency-free core lets CI replay recorded fixtures through the domain logic with no device and no runtime.</li>
+<li>The wire seam decouples languages and processes, so any component is rewritable or replaceable as long as it keeps the message contract.</li>
+<li>A new output is a new sink adapter, with no change to the core that produced the data.</li>
+<li>The driving and driven labels keep the dependency direction explicit: adapters depend on the core through ports, and the core depends on nothing.</li>
+<li>The convention costs interface boilerplate, and across a process boundary it adds a serialize and parse step the in-process link avoids. That cost buys cross-language, cross-process composition.</li>
 </ul>
 </section>
-<section id="tags" class="level2">
-<h2 class="anchored" data-anchor-id="tags">Tags</h2>
-<ul>
-<li>maglev-cycle-2, observability, victoriatraces, victoriametrics, otel, galls-law, 20260506-maglev-cycle-2-observability, present-proposal-template</li>
-</ul>
-</section>
-<section id="further-reading" class="level2">
-<h2 class="anchored" data-anchor-id="further-reading">Further Reading</h2>
-<pre><code>@techreport{20260506_observability_victoriatraces,
-  title       = {Replace Jaeger with VictoriaTraces for trace storage},
-  institution = {V-Sekai Fire},
-  year        = {2026},
-  type        = {Architecture Decision Record},
-  note        = {decisions/20260506-observability-stack-victoriatraces.md}
-}
-
-@misc{v_sekai_2026,
-  title = {V-Sekai},
-  year  = {2026},
-  url   = {https://v-sekai.org/}
-}</code></pre>
+<section id="more-information" class="level2">
+<h2 class="anchored" data-anchor-id="more-information">More Information</h2>
+<p>The <code>sinew-mocap</code> cluster applies the pattern end to end. Each repository (<code>driver</code>, <code>mount_drift</code>, <code>solve</code>, <code>viewer</code>, <code>vr_bridge</code>) carries the <code>core/</code> + <code>ports/</code> + <code>adapters/</code> triad; ports are header-only C struct vtables labelled driving or driven and named <code>*_source.h</code> / <code>*_sink.h</code> (FrameSource, TrackerSink, PoseSink, HmdSource); adapters bind the serial dongle, a recorded <code>.rawlog</code>, UDP, polyscope, SteamVR, OpenVR, and Vulkan; and the repositories compose over the <code>/sinew</code> OSC wire (UDP 39539), with each <code>ports/sibling-repos.txt</code> declaring the wiring. The synthetic-data branch in <code>sinew-vrdance/pose_distill</code> applies the same triad in Python: core geometry and label cleaning, ports for the teacher pose model, renderer, and dataset sink, and adapters for the model, the Godot renderer, and the COCO sink.</p>
 
 
-</section>
-<section id="related" class="level2">
-<h2 class="anchored" data-anchor-id="related">Related</h2>
-<ul>
-<li><p><a href="20260506-maglev-intercept-smoke-test.html">Maglev Intercept: Cross-Platform Tilt-Shift Smoke Test</a></p></li>
-<li><p><a href="20260606-self-host-on-harvester-hci.html">Self-host on Harvester HCI instead of Fly.io</a></p></li>
-</ul>
 </section>
 
 </main> <!-- /main -->
@@ -889,7 +810,7 @@ ul.task-list li input[type="checkbox"] {
     </div>   
     <div class="nav-footer-center">
       &nbsp;
-    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/v-sekai-multiplayer-fabric/manuals/edit/main/decisions/20260506-maglev-cycle-2-observability.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/v-sekai-multiplayer-fabric/manuals/edit/main/decisions/20260610-hexagonal-core-ports-adapters.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
     <div class="nav-footer-right">
       <ul class="footer-items list-unstyled">
     <li class="nav-item compact">
