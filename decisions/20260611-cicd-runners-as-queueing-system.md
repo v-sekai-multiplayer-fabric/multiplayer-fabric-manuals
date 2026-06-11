@@ -48,28 +48,27 @@ urgent work behind stale work.
 
 The discipline:
 
-- **Bound concurrent matrices.** Two or three full matrices run at a time;
-  further work waits for a slot. A merge push waits until the in-flight run it
-  would concurrency-cancel finishes, so partially-completed long jobs are not
-  thrown away mid-service.
-- **Batch arrivals.** Fixes land as one commit per push where possible, and a
-  late-discovered fix joins an already-open PR branch rather than opening a new
-  one. One merge then validates the whole batch with a single matrix.
-- **Cancel zero-information runs immediately.** The push-event run that
+- Two or three full matrices run at a time; further work waits for a slot. A
+  merge push waits until the in-flight run it would concurrency-cancel
+  finishes, so partially-completed long jobs are not thrown away mid-service.
+- Arrivals are batched: fixes land as one commit per push where possible, and
+  a late-discovered fix joins an already-open PR branch rather than opening a
+  new one. One merge then validates the whole batch with a single matrix.
+- Zero-information runs are cancelled immediately: the push-event run that
   duplicates a PR's pull-request run, runs still queued on merged or deleted
   refs, runs whose remaining jobs have a known outcome, and workflow runs
   triggered by pushes to archive repositories (Actions stays disabled on
   `godot-archived`).
-- **Trim diagnostics to one job.** A throwaway branch edits the workflow down
-  to the single job that reproduces the problem, and reuses the warm build
-  cache by keeping the matrix entry's `cache-name`. The branch is deleted once
-  the answer is in hand.
-- **Never rerun a guaranteed failure.** A failed job reruns only after its fix
-  is on the branch; until then it occupies a server for its full service time
-  and returns a result that is already known.
-- **Admit backlog selectively.** Stale branches needing fresh signal enter the
-  queue worst-first, one or two at a time, when utilization is low — not as a
-  bulk rerun.
+- Diagnostics are trimmed to one job: a throwaway branch edits the workflow
+  down to the single job that reproduces the problem, and reuses the warm
+  build cache by keeping the matrix entry's `cache-name`. The branch is
+  deleted once the answer is in hand.
+- A failed job whose fix is not yet on the branch never reruns; until the fix
+  lands it would occupy a server for its full service time and return a result
+  that is already known.
+- Backlog is admitted selectively: stale branches needing fresh signal enter
+  the queue worst-first, one or two at a time, when utilization is low rather
+  than as a bulk rerun.
 
 ### Consequences
 
