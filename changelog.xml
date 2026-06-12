@@ -10,7 +10,36 @@
 <atom:link href="https://v-sekai-multiplayer-fabric.github.io/manuals/changelog.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.9.38</generator>
-<lastBuildDate>Fri, 12 Jun 2026 07:06:07 GMT</lastBuildDate>
+<lastBuildDate>Fri, 12 Jun 2026 07:09:34 GMT</lastBuildDate>
+<item>
+  <title></title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/changelog/2026/20260612-deck-log.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<section id="v-sekai-multiplayer-fabric-deck-log-2026-06-12-friday" class="level1">
+<h1>V-Sekai Multiplayer Fabric Deck Log — 2026-06-12 (Friday)</h1>
+<p>Date: 2026-06-12</p>
+<p>Recorded the instanced loot-action core-loop slice as MADRs: the product scope and the Quest 3 gate, the five hexagons, and the core architecture around Lean kernels lowered to SPIR-V over r128 fixed-point.</p>
+<section id="added" class="level2">
+<h2 class="anchored" data-anchor-id="added">Added</h2>
+<ul>
+<li>Product and process decisions: <a href="../../decisions/20260611-loot-action-core-loop-mvp-vertical-slice.html">MVP vertical slice</a>, <a href="../../decisions/20260611-quest-3-frame-floor-as-mvp-gate.html">Quest 3 frame-floor gate</a>, <a href="../../decisions/20260611-first-party-curated-content-zone-baker-budgets.html">first-party content budgets</a>, <a href="../../decisions/20260611-genre-generic-naming-no-trademarks.html">genre-generic naming</a>, <a href="../../decisions/20260611-cassie-desktop-curvenet-authoring.html">CASSIE desktop authoring</a>, and <a href="../../decisions/20260611-content-build-merged-double-precision-mcp.html">a merged build via the editor MCP</a>.</li>
+<li>Hexagon decisions (core, ports, adapters): <a href="../../decisions/20260611-hexagon-combat-core.html">combat</a>, <a href="../../decisions/20260611-hexagon-loot-core.html">loot</a>, <a href="../../decisions/20260611-hexagon-progression-core.html">progression</a>, <a href="../../decisions/20260611-hexagon-budgeter-core.html">budgeter</a>, and <a href="../../decisions/20260611-hexagon-presence-core.html">presence</a>, the last wrapping the existing presence decisions.</li>
+<li>Core architecture decisions: <a href="../../decisions/20260611-lean4-kernel-cores-flat-c-host-adapters.html">Lean kernel cores with flat-C adapters</a>, <a href="../../decisions/20260611-core-codegen-lean-slang.html">Lean to Slang to SPIR-V codegen</a>, <a href="../../decisions/20260612-r128-fixed-point-as-lean-library.html">r128 fixed-point as a Lean library</a>, <a href="../../decisions/20260611-core-contract-pure-reducer-byte-state.html">the pure-reducer byte-state contract</a>, <a href="../../decisions/20260611-deterministic-cores-integer-seeded-rng.html">deterministic state</a>, <a href="../../decisions/20260611-server-authoritative-simulation-deferred-rollback.html">server authority with deferred rollback</a>, <a href="../../decisions/20260611-generated-behavior-sandboxed-riscv.html">sandboxed RISC-V behavior</a>, <a href="../../decisions/20260611-forward-renderer-baked-light.html">the forward renderer</a>, and <a href="../../decisions/20260611-webtransportd-core-transport-adapter.html">the webtransportd transport adapter</a>.</li>
+</ul>
+
+
+</section>
+</section>
+
+ ]]></description>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/changelog/2026/20260612-deck-log.html</guid>
+  <pubDate>Fri, 12 Jun 2026 07:09:34 GMT</pubDate>
+</item>
 <item>
   <title></title>
   <link>https://v-sekai-multiplayer-fabric.github.io/manuals/changelog/2026/20260606-deck-log.html</link>
@@ -69,7 +98,7 @@
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/changelog/2026/20260606-deck-log.html</guid>
-  <pubDate>Fri, 12 Jun 2026 07:06:07 GMT</pubDate>
+  <pubDate>Fri, 12 Jun 2026 07:09:34 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -133,7 +162,7 @@
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/changelog/2026/20260507-deck-log.html</guid>
-  <pubDate>Fri, 12 Jun 2026 07:06:07 GMT</pubDate>
+  <pubDate>Fri, 12 Jun 2026 07:09:34 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -184,7 +213,7 @@
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/changelog/2026/20260506-deck-log.html</guid>
-  <pubDate>Fri, 12 Jun 2026 07:06:07 GMT</pubDate>
+  <pubDate>Fri, 12 Jun 2026 07:09:34 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -272,7 +301,7 @@
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/changelog/2026/20260425-deck-log.html</guid>
-  <pubDate>Fri, 12 Jun 2026 07:06:07 GMT</pubDate>
+  <pubDate>Fri, 12 Jun 2026 07:09:34 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -303,7 +332,7 @@
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/changelog/2026/20260421-deck-log.html</guid>
-  <pubDate>Fri, 12 Jun 2026 07:06:07 GMT</pubDate>
+  <pubDate>Fri, 12 Jun 2026 07:09:34 GMT</pubDate>
 </item>
 </channel>
 </rss>

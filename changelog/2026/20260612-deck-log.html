@@ -6,9 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2026-06-11">
 
-<title>Server-authoritative simulation with deferred rollback – V-Sekai Fire — Manuals</title>
+<title>deck-log – V-Sekai Fire — Manuals</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -27,27 +26,27 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="../site_libs/quarto-nav/headroom.min.js"></script>
-<script src="../site_libs/clipboard/clipboard.min.js"></script>
-<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="../site_libs/quarto-search/fuse.min.js"></script>
-<script src="../site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="../">
-<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../site_libs/quarto-html/popper.min.js"></script>
-<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="../site_libs/quarto-html/anchor.min.js"></script>
-<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
-<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-c8b36098594828138602e592b3b57366.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-c744e0ff86f5d87993c78b6cdbb23212.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-c8b36098594828138602e592b3b57366.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-c8b36098594828138602e592b3b57366.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-c744e0ff86f5d87993c78b6cdbb23212.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-c8b36098594828138602e592b3b57366.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -248,7 +247,7 @@ ul.task-list li input[type="checkbox"] {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="../index.html">
+    <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">V-Sekai Fire — Manuals</span>
     </a>
   </div>
@@ -259,15 +258,15 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../changelog.html"> 
+    <a class="nav-link" href="../../changelog.html"> 
 <span class="menu-text">Changes</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../decisions.html"> 
+    <a class="nav-link" href="../../decisions.html"> 
 <span class="menu-text">Decisions</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../references.html"> 
+    <a class="nav-link" href="../../references.html"> 
 <span class="menu-text">References</span></a>
   </li>  
 </ul>
@@ -287,76 +286,34 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#context-and-problem-statement" id="toc-context-and-problem-statement" class="nav-link active" data-scroll-target="#context-and-problem-statement">Context and Problem Statement</a></li>
-  <li><a href="#decision-outcome" id="toc-decision-outcome" class="nav-link" data-scroll-target="#decision-outcome">Decision Outcome</a></li>
-  <li><a href="#consequences" id="toc-consequences" class="nav-link" data-scroll-target="#consequences">Consequences</a></li>
-  <li><a href="#confirmation" id="toc-confirmation" class="nav-link" data-scroll-target="#confirmation">Confirmation</a></li>
-  <li><a href="#related" id="toc-related" class="nav-link" data-scroll-target="#related">Related</a></li>
+  <li><a href="#v-sekai-multiplayer-fabric-deck-log-2026-06-12-friday" id="toc-v-sekai-multiplayer-fabric-deck-log-2026-06-12-friday" class="nav-link active" data-scroll-target="#v-sekai-multiplayer-fabric-deck-log-2026-06-12-friday">V-Sekai Multiplayer Fabric Deck Log — 2026-06-12 (Friday)</a>
+  <ul class="collapse">
+  <li><a href="#added" id="toc-added" class="nav-link" data-scroll-target="#added">Added</a></li>
+  </ul></li>
   </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/v-sekai-multiplayer-fabric/manuals/edit/main/decisions/20260611-server-authoritative-simulation-deferred-rollback.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/v-sekai-multiplayer-fabric/manuals/edit/main/changelog/2026/20260612-deck-log.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
-
-
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">Server-authoritative simulation with deferred rollback</h1>
-</div>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
 
 
 
-<div class="quarto-title-meta">
-
-    
-    <div>
-    <div class="quarto-title-meta-heading">Published</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date">June 11, 2026</p>
-    </div>
-  </div>
-  
-    
-  </div>
-  
 
 
-</header>
-
-
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Server-authoritative simulation with deferred rollback</em></p>
-<p><strong>Status:</strong> accepted</p>
-<section id="context-and-problem-statement" class="level2">
-<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The loop needs one authority over combat state and loot contention. An earlier geometric Hilbert-zone authority attempt (<a href="../decisions/20260506-maglev-intercept-smoke-test.html">the Maglev intercept smoke test</a>) was rejected, and the one-week slice needs a simpler model that still resists client tampering.</p>
-</section>
-<section id="decision-outcome" class="level2">
-<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: the headless <code>zone-server</code> owns entity transforms, health, combat state, and loot contention, and clients reconcile to the server snapshot, because a single authority per instance keeps the slice simple and tamper-resistant.</p>
-<p>For the deadline the model is server-authoritative with client interpolation and no client prediction. The rollback adapter lands after the gate behind the same <code>input_source</code> and <code>state_sink</code>, so the swap never touches a core (<a href="../decisions/20260611-hexagon-combat-core.html">the combat hexagon</a>, <a href="../decisions/20260611-core-contract-pure-reducer-byte-state.html">the core contract</a>).</p>
-</section>
-<section id="consequences" class="level2">
-<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
+<section id="v-sekai-multiplayer-fabric-deck-log-2026-06-12-friday" class="level1">
+<h1>V-Sekai Multiplayer Fabric Deck Log — 2026-06-12 (Friday)</h1>
+<p>Date: 2026-06-12</p>
+<p>Recorded the instanced loot-action core-loop slice as MADRs: the product scope and the Quest 3 gate, the five hexagons, and the core architecture around Lean kernels lowered to SPIR-V over r128 fixed-point.</p>
+<section id="added" class="level2">
+<h2 class="anchored" data-anchor-id="added">Added</h2>
 <ul>
-<li>One authority per instance, so a per-connection transport child relays to that single core rather than holding state.</li>
-<li>Rollback is an adapter swap after the gate, not a rewrite.</li>
-<li>The deadline trades input snappiness for a far smaller build.</li>
+<li>Product and process decisions: <a href="../../decisions/20260611-loot-action-core-loop-mvp-vertical-slice.html">MVP vertical slice</a>, <a href="../../decisions/20260611-quest-3-frame-floor-as-mvp-gate.html">Quest 3 frame-floor gate</a>, <a href="../../decisions/20260611-first-party-curated-content-zone-baker-budgets.html">first-party content budgets</a>, <a href="../../decisions/20260611-genre-generic-naming-no-trademarks.html">genre-generic naming</a>, <a href="../../decisions/20260611-cassie-desktop-curvenet-authoring.html">CASSIE desktop authoring</a>, and <a href="../../decisions/20260611-content-build-merged-double-precision-mcp.html">a merged build via the editor MCP</a>.</li>
+<li>Hexagon decisions (core, ports, adapters): <a href="../../decisions/20260611-hexagon-combat-core.html">combat</a>, <a href="../../decisions/20260611-hexagon-loot-core.html">loot</a>, <a href="../../decisions/20260611-hexagon-progression-core.html">progression</a>, <a href="../../decisions/20260611-hexagon-budgeter-core.html">budgeter</a>, and <a href="../../decisions/20260611-hexagon-presence-core.html">presence</a>, the last wrapping the existing presence decisions.</li>
+<li>Core architecture decisions: <a href="../../decisions/20260611-lean4-kernel-cores-flat-c-host-adapters.html">Lean kernel cores with flat-C adapters</a>, <a href="../../decisions/20260611-core-codegen-lean-slang.html">Lean to Slang to SPIR-V codegen</a>, <a href="../../decisions/20260612-r128-fixed-point-as-lean-library.html">r128 fixed-point as a Lean library</a>, <a href="../../decisions/20260611-core-contract-pure-reducer-byte-state.html">the pure-reducer byte-state contract</a>, <a href="../../decisions/20260611-deterministic-cores-integer-seeded-rng.html">deterministic state</a>, <a href="../../decisions/20260611-server-authoritative-simulation-deferred-rollback.html">server authority with deferred rollback</a>, <a href="../../decisions/20260611-generated-behavior-sandboxed-riscv.html">sandboxed RISC-V behavior</a>, <a href="../../decisions/20260611-forward-renderer-baked-light.html">the forward renderer</a>, and <a href="../../decisions/20260611-webtransportd-core-transport-adapter.html">the webtransportd transport adapter</a>.</li>
 </ul>
-</section>
-<section id="confirmation" class="level2">
-<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
-<p>A divergent client reconciles to the server snapshot, and combat and loot resolve identically across the four clients.</p>
 
 
 </section>
-<section id="related" class="level2">
-<h2 class="anchored" data-anchor-id="related">Related</h2>
-<ul>
-<li><p><a href="../changelog/2026/20260612-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-12 (Friday)</a></p></li>
-<li><p><a href="20260506-maglev-intercept-smoke-test.html">Maglev Intercept: Cross-Platform Tilt-Shift Smoke Test</a></p></li>
-<li><p><a href="20260611-core-contract-pure-reducer-byte-state.html">Cores as pure reducers over byte-serialized state</a></p></li>
-<li><p><a href="20260611-hexagon-combat-core.html">Combat hexagon — core, ports, and adapters</a></p></li>
-</ul>
 </section>
 
 </main> <!-- /main -->
@@ -781,7 +738,7 @@ ul.task-list li input[type="checkbox"] {
     </div>   
     <div class="nav-footer-center">
       &nbsp;
-    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/v-sekai-multiplayer-fabric/manuals/edit/main/decisions/20260611-server-authoritative-simulation-deferred-rollback.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/v-sekai-multiplayer-fabric/manuals/edit/main/changelog/2026/20260612-deck-log.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
     <div class="nav-footer-right">
       <ul class="footer-items list-unstyled">
     <li class="nav-item compact">
