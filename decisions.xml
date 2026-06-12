@@ -12,6 +12,51 @@
 <generator>quarto-1.9.38</generator>
 <lastBuildDate>Fri, 12 Jun 2026 00:00:00 GMT</lastBuildDate>
 <item>
+  <title>Android template builds with Temurin JDK 21 and config.gradle-pinned SDK</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260612-android-template-temurin-jdk21.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Android template builds with Temurin JDK 21 and config.gradle-pinned SDK</em></p>
+<p><strong>Status:</strong> accepted</p>
+<section id="context-and-problem-statement" class="level2">
+<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
+<p>The Quest 3 gate needs an Android export template of the merged double-precision assembly. The box carries no Android SDK, and Fedora 44 packages only JDK 25 and 26; Gradle rejects Java 25 with “Unsupported class file major version 69”.</p>
+</section>
+<section id="decision-outcome" class="level2">
+<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
+<p>Chosen option: pin the Android toolchain to what the fork’s <code>platform/android/java/app/config.gradle</code> declares — NDK <code>29.0.14206865</code>, build-tools <code>36.1.0</code>, platform <code>android-36</code> — installed through <code>sdkmanager</code> from the command-line tools, and run Gradle on a Temurin JDK 21 tarball fetched from the Adoptium API, because the distribution ships no Gradle-compatible JDK and the tarball pins the version per checkout.</p>
+<p>The verified sequence: <code>scons platform=android target=template_release arch=arm64 precision=double</code> produces <code>libgodot_android.so</code> (about four minutes on the workstation), then <code>JAVA_HOME=&lt;temurin-21&gt; ./gradlew generateGodotTemplates</code> produces <code>bin/android_release.apk</code>.</p>
+</section>
+<section id="consequences" class="level2">
+<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
+<ul>
+<li>The Quest 3 export template exists days before the gate, retiring the toolchain risk.</li>
+<li><code>config.gradle</code> is the single source of truth for SDK versions; reading it first avoids guessing.</li>
+<li>The JDK is per-user (<code>~/jdks</code>), so system Java stays at the distribution default.</li>
+</ul>
+</section>
+<section id="confirmation" class="level2">
+<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
+<p><code>bin/android_release.apk</code> builds from the merged assembly and installs on a Quest 3.</p>
+
+
+</section>
+<section id="related" class="level2">
+<h2 class="anchored" data-anchor-id="related">Related</h2>
+<ul>
+<li><p><a href="../changelog/2026/20260612-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-12 (Friday)</a></p></li>
+</ul>
+</section>
+
+ ]]></description>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260612-android-template-temurin-jdk21.html</guid>
+  <pubDate>Fri, 12 Jun 2026 00:00:00 GMT</pubDate>
+</item>
+<item>
   <title>Headless OpenXR testing with Monado (null compositor + simulated HMD)</title>
   <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260612-headless-openxr-testing-with-monado.html</link>
   <description><![CDATA[ 
@@ -56,12 +101,101 @@
 <section id="related" class="level2">
 <h2 class="anchored" data-anchor-id="related">Related</h2>
 <ul>
+<li><p><a href="../changelog/2026/20260612-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-12 (Friday)</a></p></li>
 <li><p><a href="20260611-quest-3-frame-floor-as-mvp-gate.html">Quest 3 frame floor as the MVP performance gate</a></p></li>
 </ul>
 </section>
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260612-headless-openxr-testing-with-monado.html</guid>
+  <pubDate>Fri, 12 Jun 2026 00:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>One transport listener per authority pending http3 multi-session fixes</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260612-http3-listener-session-findings.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › One transport listener per authority pending http3 multi-session fixes</em></p>
+<p><strong>Status:</strong> accepted</p>
+<section id="context-and-problem-statement" class="level2">
+<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
+<p>The four-player contention smoke (the <code>loot</code> repo, <code>adapters/godot</code>) drives one <code>WebTransportPeer.create_server</code> listener in the merged assembly (<code>0518217f44</code>) with four concurrent client sessions. Three behaviors surface: incoming datagrams from every session multiplex into the server’s packet queue correctly; replies reach only one session regardless of <code>set_target_peer</code> / <code>get_packet_peer</code>; and a session teardown during traffic aborts the process with a double free (<code>quic_picoquic_backend.cpp</code>). A second <code>create_server</code> in the same process fails with “server already listening”, so the backend holds one listener per process.</p>
+</section>
+<section id="decision-outcome" class="level2">
+<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
+<p>Chosen option: until the module carries per-session peer routing and clean teardown, the loop runs one listener per authority process, attributes requesters in the message body rather than by transport peer id, and verifies the authority’s resolutions at the harness against the Lean golden vectors. The grant-delivery path back to each client is blocked on the module fixes, which are queued as engine work: per-session ids on the MultiplayerPeer surface, teardown without the double free, and ideally multiple listeners per process.</p>
+</section>
+<section id="consequences" class="level2">
+<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
+<ul>
+<li>The four-player smoke is verifying authoritative resolution (64 rounds matching the Lean golden vectors from four concurrent clients) while grant delivery waits on the reply-routing fix.</li>
+<li>The loot and combat wire parities are unaffected, because a single session per listener works end to end.</li>
+<li>Issues stay disabled on the engine fork, so this record carries the findings.</li>
+</ul>
+</section>
+<section id="confirmation" class="level2">
+<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
+<p>The four-player smoke passes at the harness, and a multi-session reply test starts passing per session when the module fix lands.</p>
+
+
+</section>
+<section id="related" class="level2">
+<h2 class="anchored" data-anchor-id="related">Related</h2>
+<ul>
+<li><p><a href="../changelog/2026/20260612-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-12 (Friday)</a></p></li>
+</ul>
+</section>
+
+ ]]></description>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260612-http3-listener-session-findings.html</guid>
+  <pubDate>Fri, 12 Jun 2026 00:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Verification smokes as a systemd podman quadlet queue</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260612-systemd-quadlet-verification-queue.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Verification smokes as a systemd podman quadlet queue</em></p>
+<p><strong>Status:</strong> accepted</p>
+<section id="context-and-problem-statement" class="level2">
+<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
+<p>The slice’s smokes — headless OpenXR, loot wire parity, combat wire parity, four-player contention — need to run as a repeatable queue on the workstation and on self-hosted runners, with ordering, logs, and per-job status, and the deployment decision already standardizes on podman quadlets.</p>
+</section>
+<section id="decision-outcome" class="level2">
+<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
+<p>Chosen option: run each smoke as a oneshot quadlet <code>.container</code> unit, serialized with <code>After=</code> into a <code>fabric-verify.target</code>, because systemd supplies the queue, the journal, and the status surface with no extra orchestrator. A small <code>fabric-smoke</code> image (Fedora plus fontconfig) runs the headless smokes; the merged double-precision Godot binary, the smoke scripts, and the Lean golden vectors bind-mount read-only, so the image stays generic and the artifacts stay host-owned. Every smoke asserts against Lean-emitted golden vectors, pinned by Plausible properties in the cores.</p>
+</section>
+<section id="consequences" class="level2">
+<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
+<ul>
+<li><code>systemctl --user start fabric-verify.target</code> runs the whole queue; <code>systemctl --user status 'fabric-smoke-*'</code> and the journal carry the results.</li>
+<li>The units install by file copy into <code>~/.config/containers/systemd</code>, matching the quadlet deployment convention.</li>
+<li>A failing smoke fails its unit, so the queue surfaces regressions per stage rather than as one opaque script.</li>
+</ul>
+</section>
+<section id="confirmation" class="level2">
+<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
+<p>The target runs all four smokes to success under systemd on the workstation. The image, the runners, and the units live in <a href="https://github.com/v-sekai-multiplayer-fabric/fabric-verify">fabric-verify</a>.</p>
+
+
+</section>
+<section id="related" class="level2">
+<h2 class="anchored" data-anchor-id="related">Related</h2>
+<ul>
+<li><p><a href="../changelog/2026/20260612-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-12 (Friday)</a></p></li>
+</ul>
+</section>
+
+ ]]></description>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260612-systemd-quadlet-verification-queue.html</guid>
   <pubDate>Fri, 12 Jun 2026 00:00:00 GMT</pubDate>
 </item>
 <item>
@@ -872,146 +1006,6 @@
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-loot-action-core-loop-mvp-vertical-slice.html</guid>
-  <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Presence hexagon — wrapping the existing presence stack</title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-hexagon-presence-core.html</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Presence hexagon — wrapping the existing presence stack</em></p>
-<p><strong>Tier:</strong> proof of concept · <strong>Status:</strong> accepted</p>
-<section id="context-and-problem-statement" class="level2">
-<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>Remote-avatar presence is already decided in depth: head and hand orbs (<a href="../decisions/20260606-multiplayer-presence-demo-orbs.html">the orb demo</a>), human-readable markers (<a href="../decisions/20260606-presence-marker-representation.html">the marker decision</a>), and a ghostly partial body (<a href="../decisions/20260606-ghostly-presence-body-model.html">the body-model decision</a>). The loop needs presence behind ports like the other cores, without redeciding the representation.</p>
-</section>
-<section id="decision-outcome" class="level2">
-<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: wrap the existing presence stack as a thin hexagon. The core interpolates remote head and hand poses between updates and keeps the visual hand separate from the logical combat hand, as a pure reducer.</p>
-<p>Driving port: <code>pose_source</code> (remote head and hand pose orbs). Driven port: <code>avatar_sink</code> (interpolated transforms for the rig). Adapter: <code>feat/module-xr-grid</code> feeds <code>pose_source</code> over WebTransport and drives the flatscreen path; a fixture adapter replays a recorded pose stream. The marker and body representation follow the existing presence decisions.</p>
-</section>
-<section id="consequences" class="level2">
-<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
-<ul>
-<li>The representation reuses the existing presence decisions, so this hexagon carries no new look.</li>
-<li>This is the thinnest hexagon, foldable into Combat after the gate.</li>
-<li>The pose channel rides its own stream, so a stalled input packet does not delay presence.</li>
-</ul>
-</section>
-<section id="confirmation" class="level2">
-<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
-<p>The core replays a recorded pose stream to interpolated transforms, with no network.</p>
-
-
-</section>
-<section id="related" class="level2">
-<h2 class="anchored" data-anchor-id="related">Related</h2>
-<ul>
-<li><p><a href="../changelog/2026/20260612-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-12 (Friday)</a></p></li>
-<li><p><a href="20260606-ghostly-presence-body-model.html">Ghostly partial-body presence avatar from ANNY via SOMA-X</a></p></li>
-<li><p><a href="20260606-multiplayer-presence-demo-orbs.html">Minimal multiplayer presence demo with head and hand orbs</a></p></li>
-<li><p><a href="20260606-presence-marker-representation.html">Human-readable presence markers with an orb debug mode</a></p></li>
-</ul>
-</section>
-
- ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-hexagon-presence-core.html</guid>
-  <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Progression hexagon — core, ports, and adapters</title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-hexagon-progression-core.html</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Progression hexagon — core, ports, and adapters</em></p>
-<p><strong>Tier:</strong> proof of concept · <strong>Status:</strong> accepted</p>
-<section id="context-and-problem-statement" class="level2">
-<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The profile and inventory rules — the profile, the valid inventory transitions, and the affinity gate on arts — need to be durable across a session and testable with no database.</p>
-</section>
-<section id="decision-outcome" class="level2">
-<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: structure progression as a hexagon. The core defines the profile and the inventory, the valid transitions, and the affinity gate, as a pure reducer.</p>
-<p>Driving port: <code>profile_source</code> (a profile load at login). Driven port: <code>commit_sink</code> (a durable write of the profile and the inventory). Adapters: <code>zone-backend</code> with <code>cockroach</code> commits through the mTLS store (<a href="../decisions/20260501-cockroachdb-with-mtls-role-separation.html">the CockroachDB decision</a>); <code>feat/module-sqlite</code> caches on the instance and stands in as a degraded commit; a fixture adapter holds a recorded profile for CI.</p>
-</section>
-<section id="consequences" class="level2">
-<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
-<ul>
-<li>The persistence degrades from the <code>cockroach</code> adapter to the <code>feat/module-sqlite</code> adapter behind one <code>commit_sink</code>, so a slipping commit path is not blocking the loop.</li>
-<li>Inventory transitions validate in the core, so a bad transition fails a fixture rather than a live write.</li>
-<li>The affinity gate holds an art out of reach below its requirement.</li>
-</ul>
-</section>
-<section id="confirmation" class="level2">
-<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
-<p>The core validates inventory transitions against a recorded profile fixture, and a drop commits through the adapter and survives a round trip.</p>
-
-
-</section>
-<section id="related" class="level2">
-<h2 class="anchored" data-anchor-id="related">Related</h2>
-<ul>
-<li><p><a href="../changelog/2026/20260612-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-12 (Friday)</a></p></li>
-<li><p><a href="20260501-cockroachdb-with-mtls-role-separation.html">CockroachDB with mTLS and role-separated access</a></p></li>
-</ul>
-</section>
-
- ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-hexagon-progression-core.html</guid>
-  <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Quest 3 frame floor as the MVP performance gate</title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-quest-3-frame-floor-as-mvp-gate.html</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Quest 3 frame floor as the MVP performance gate</em></p>
-<p><strong>Tier:</strong> baseline · <strong>Status:</strong> accepted</p>
-<section id="context-and-problem-statement" class="level2">
-<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The MVP runs on three candidate targets: the Meta Quest 3, the Valve Steam Frame, and the Steam Deck. The team needs one binding performance gate. Quest 3 stereo VR on the Adreno 740 is the hardest of the three, and the dev fleet holds one Quest 3, two Steam Decks, squad PCVR rigs, and an RTX 4090 workstation.</p>
-</section>
-<section id="decision-outcome" class="level2">
-<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: take the standalone Quest 3 build at 90 Hz with a 72 Hz floor as the single hard gate, and land the Steam Frame and the Steam Deck after the gate, because hitting the hardest target guarantees the easier two while the reverse does not hold.</p>
-<p>Daily iteration runs flatscreen on the Decks and the workstation, and VR iteration runs the Quest 3 tethered over Link, but the sign-off is the standalone Quest 3 build, because Link offloads rendering to the host and hides the Adreno cost.</p>
-</section>
-<section id="consequences" class="level2">
-<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
-<ul>
-<li>The budgets size for the Quest 3, so the later targets inherit headroom.</li>
-<li>A four-player Field room fits its geometry, four avatars, and props under roughly 500,000 visible triangles and 200 draw calls per eye.</li>
-<li>The standalone build is the only truth; a scene that runs over Link can still blow the standalone budget.</li>
-</ul>
-</section>
-<section id="confirmation" class="level2">
-<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
-<p>The full loop holds 72 Hz on a standalone Quest 3 build with real content.</p>
-
-
-</section>
-<section id="related" class="level2">
-<h2 class="anchored" data-anchor-id="related">Related</h2>
-<ul>
-<li><p><a href="../changelog/2026/20260612-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-12 (Friday)</a></p></li>
-<li><p><a href="20260612-headless-openxr-testing-with-monado.html">Headless OpenXR testing with Monado (null compositor + simulated HMD)</a></p></li>
-</ul>
-</section>
-
- ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-quest-3-frame-floor-as-mvp-gate.html</guid>
   <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
 </item>
 </channel>
