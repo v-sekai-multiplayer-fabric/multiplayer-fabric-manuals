@@ -6,9 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2026-05-01">
+<meta name="dcterms.date" content="2026-06-12">
 
-<title>Use WebTransport over QUIC for game traffic – V-Sekai Fire — Manuals</title>
+<title>r128 Q64.64 fixed-point as a Lean library for the cores – V-Sekai Fire — Manuals</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -287,12 +287,14 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#context" id="toc-context" class="nav-link active" data-scroll-target="#context">Context</a></li>
-  <li><a href="#decision" id="toc-decision" class="nav-link" data-scroll-target="#decision">Decision</a></li>
+  <li><a href="#context-and-problem-statement" id="toc-context-and-problem-statement" class="nav-link active" data-scroll-target="#context-and-problem-statement">Context and Problem Statement</a></li>
+  <li><a href="#considered-options" id="toc-considered-options" class="nav-link" data-scroll-target="#considered-options">Considered Options</a></li>
+  <li><a href="#decision-outcome" id="toc-decision-outcome" class="nav-link" data-scroll-target="#decision-outcome">Decision Outcome</a></li>
   <li><a href="#consequences" id="toc-consequences" class="nav-link" data-scroll-target="#consequences">Consequences</a></li>
+  <li><a href="#confirmation" id="toc-confirmation" class="nav-link" data-scroll-target="#confirmation">Confirmation</a></li>
   <li><a href="#related" id="toc-related" class="nav-link" data-scroll-target="#related">Related</a></li>
   </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/v-sekai-multiplayer-fabric/manuals/edit/main/decisions/20260501-webtransport-over-quic-for-game-traffic.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/v-sekai-multiplayer-fabric/manuals/edit/main/decisions/20260612-r128-fixed-point-as-lean-library.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -300,7 +302,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Use WebTransport over QUIC for game traffic</h1>
+<h1 class="title">r128 Q64.64 fixed-point as a Lean library for the cores</h1>
 </div>
 
 
@@ -311,7 +313,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">May 1, 2026</p>
+      <p class="date">June 12, 2026</p>
     </div>
   </div>
   
@@ -323,32 +325,43 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Use WebTransport over QUIC for game traffic</em></p>
-<p><strong>Tier:</strong> baseline · <strong>Status:</strong> accepted</p>
-<section id="context" class="level2">
-<h2 class="anchored" data-anchor-id="context">Context</h2>
-<p>The zone server needs low-latency bidirectional communication between clients and the Godot game server. HTTP/1.1 and WebSocket both run over TCP, which head-of-line blocks on packet loss and degrades real-time game state.</p>
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › r128 Q64.64 fixed-point as a Lean library for the cores</em></p>
+<p><strong>Status:</strong> accepted</p>
+<section id="context-and-problem-statement" class="level2">
+<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
+<p>The deterministic cores (<a href="../decisions/20260611-deterministic-cores-integer-seeded-rng.html">the determinism decision</a>) need Q64.64 fixed-point math inside the Lean kernels, which lower to SPIR-V through <a href="../decisions/20260611-core-codegen-lean-slang.html">lean-slang</a>. The engine already vendors the C <code>r128</code> library (<code>thirdparty/misc/r128</code>), but the kernels are authored in Lean.</p>
 </section>
-<section id="decision" class="level2">
-<h2 class="anchored" data-anchor-id="decision">Decision</h2>
-<p>Use WebTransport (HTTP/3 over QUIC) for all game traffic. Clients connect to the Elixir gateway on UDP port 443, which proxies into the Godot zone server on UDP port 7443.</p>
+<section id="considered-options" class="level2">
+<h2 class="anchored" data-anchor-id="considered-options">Considered Options</h2>
+<ul>
+<li>Call the vendored C <code>r128</code> from the host only and keep the kernels in floating point.</li>
+<li>Reimplement Q64.64 ad hoc inside each kernel.</li>
+<li>Port <code>r128</code> to a Lean library the kernels import.</li>
+</ul>
+</section>
+<section id="decision-outcome" class="level2">
+<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
+<p>Chosen option: provide <code>r128</code> as a Lean library that the cores import for their Q64.64 fixed-point math, because one Lean implementation feeds every kernel and lowers to SPIR-V over 64-bit integer pairs, while the vendored C <code>thirdparty/misc/r128</code> stays the host reference the Lean library matches. Keeping the kernels in floating point breaks determinism, and an ad-hoc Q64.64 per kernel drifts.</p>
 </section>
 <section id="consequences" class="level2">
 <h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
 <ul>
-<li>UDP eliminates TCP head-of-line blocking.</li>
-<li>Fly.io passes UDP without DNAT, so the app must bind to the same port clients connect to.</li>
-<li>Port 443 requires running as root (or CAP_NET_BIND_SERVICE). The gateway container runs as root.</li>
-<li>Datagrams are used for game state messages. Streams are avoided for ping/pong to sidestep stream half-close deadlock (client must close write side before server response fires).</li>
-<li>Cloudflare’s proxy cannot forward QUIC/UDP. All game-traffic DNS records must be DNS-only (no proxy).</li>
+<li>The cores share one fixed-point implementation, so the host reference and the SPIR-V kernels agree bit-for-bit.</li>
+<li>The Lean library lowers through lean-slang, so the fixed-point ops reach SPIR-V over 64-bit integer pairs.</li>
+<li>A Plausible suite checks the Lean <code>r128</code> against the vendored C <code>r128</code> for matching results.</li>
 </ul>
+</section>
+<section id="confirmation" class="level2">
+<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
+<p>The Lean <code>r128</code> library matches the vendored <code>thirdparty/misc/r128</code> on a Plausible cross-check, and the lowered SPIR-V reproduces the same results.</p>
 
 
 </section>
 <section id="related" class="level2">
 <h2 class="anchored" data-anchor-id="related">Related</h2>
 <ul>
-<li><p><a href="20260611-webtransportd-core-transport-adapter.html">webtransportd as the out-of-process core transport adapter</a></p></li>
+<li><p><a href="20260611-core-codegen-lean-slang.html">Core kernel codegen via lean-slang (Lean to Slang to SPIR-V)</a></p></li>
+<li><p><a href="20260611-deterministic-cores-integer-seeded-rng.html">Deterministic cores via r128 fixed-point and seeded RNG</a></p></li>
 </ul>
 </section>
 
@@ -774,7 +787,7 @@ ul.task-list li input[type="checkbox"] {
     </div>   
     <div class="nav-footer-center">
       &nbsp;
-    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/v-sekai-multiplayer-fabric/manuals/edit/main/decisions/20260501-webtransport-over-quic-for-game-traffic.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/v-sekai-multiplayer-fabric/manuals/edit/main/decisions/20260612-r128-fixed-point-as-lean-library.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
     <div class="nav-footer-right">
       <ul class="footer-items list-unstyled">
     <li class="nav-item compact">

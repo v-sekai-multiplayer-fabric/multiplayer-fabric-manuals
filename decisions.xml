@@ -10,7 +10,143 @@
 <atom:link href="https://v-sekai-multiplayer-fabric.github.io/manuals/decisions.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.9.38</generator>
-<lastBuildDate>Thu, 11 Jun 2026 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Fri, 12 Jun 2026 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>r128 Q64.64 fixed-point as a Lean library for the cores</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260612-r128-fixed-point-as-lean-library.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › r128 Q64.64 fixed-point as a Lean library for the cores</em></p>
+<p><strong>Status:</strong> accepted</p>
+<section id="context-and-problem-statement" class="level2">
+<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
+<p>The deterministic cores (<a href="../decisions/20260611-deterministic-cores-integer-seeded-rng.html">the determinism decision</a>) need Q64.64 fixed-point math inside the Lean kernels, which lower to SPIR-V through <a href="../decisions/20260611-core-codegen-lean-slang.html">lean-slang</a>. The engine already vendors the C <code>r128</code> library (<code>thirdparty/misc/r128</code>), but the kernels are authored in Lean.</p>
+</section>
+<section id="considered-options" class="level2">
+<h2 class="anchored" data-anchor-id="considered-options">Considered Options</h2>
+<ul>
+<li>Call the vendored C <code>r128</code> from the host only and keep the kernels in floating point.</li>
+<li>Reimplement Q64.64 ad hoc inside each kernel.</li>
+<li>Port <code>r128</code> to a Lean library the kernels import.</li>
+</ul>
+</section>
+<section id="decision-outcome" class="level2">
+<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
+<p>Chosen option: provide <code>r128</code> as a Lean library that the cores import for their Q64.64 fixed-point math, because one Lean implementation feeds every kernel and lowers to SPIR-V over 64-bit integer pairs, while the vendored C <code>thirdparty/misc/r128</code> stays the host reference the Lean library matches. Keeping the kernels in floating point breaks determinism, and an ad-hoc Q64.64 per kernel drifts.</p>
+</section>
+<section id="consequences" class="level2">
+<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
+<ul>
+<li>The cores share one fixed-point implementation, so the host reference and the SPIR-V kernels agree bit-for-bit.</li>
+<li>The Lean library lowers through lean-slang, so the fixed-point ops reach SPIR-V over 64-bit integer pairs.</li>
+<li>A Plausible suite checks the Lean <code>r128</code> against the vendored C <code>r128</code> for matching results.</li>
+</ul>
+</section>
+<section id="confirmation" class="level2">
+<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
+<p>The Lean <code>r128</code> library matches the vendored <code>thirdparty/misc/r128</code> on a Plausible cross-check, and the lowered SPIR-V reproduces the same results.</p>
+
+
+</section>
+<section id="related" class="level2">
+<h2 class="anchored" data-anchor-id="related">Related</h2>
+<ul>
+<li><p><a href="20260611-core-codegen-lean-slang.html">Core kernel codegen via lean-slang (Lean to Slang to SPIR-V)</a></p></li>
+<li><p><a href="20260611-deterministic-cores-integer-seeded-rng.html">Deterministic cores via r128 fixed-point and seeded RNG</a></p></li>
+</ul>
+</section>
+
+ ]]></description>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260612-r128-fixed-point-as-lean-library.html</guid>
+  <pubDate>Fri, 12 Jun 2026 00:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Budgeter hexagon — core, ports, and adapters</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-hexagon-budgeter-core.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Budgeter hexagon — core, ports, and adapters</em></p>
+<p><strong>Tier:</strong> proof of concept · <strong>Status:</strong> accepted</p>
+<section id="context-and-problem-statement" class="level2">
+<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
+<p>The slice needs graceful degradation under load on the mobile floor, dialing quality knobs per frame so the player stays inside the experience during a burst.</p>
+</section>
+<section id="decision-outcome" class="level2">
+<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
+<p>Chosen option: structure the budgeter as a hexagon. The core is a constraint solver mapping on-device measurements to knob settings — avatar level-of-detail, interpolation against extrapolation, voice radius, and audio sample quality — as a pure reducer; it dials the knobs every frame, never overrules itself, and never dictates how the artists work.</p>
+<p>Driving port: <code>measurement_source</code> (frame time, thermals, and entity counts). Driven port: <code>knob_sink</code> (the settings the runtime applies). Adapters: <code>feat/module-open-telemetry</code> feeds <code>measurement_source</code>; the engine runtime applies <code>knob_sink</code>; a fixture adapter replays a load spike for CI.</p>
+</section>
+<section id="consequences" class="level2">
+<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
+<ul>
+<li>As a hundred extra players land in the hub, the budgeter degrades gracefully, so the player stays inside the experience.</li>
+<li>The solve runs against a recorded spike in CI, so the knob response is testable with no device.</li>
+<li>The budgeter stays advisory, so it never overrules the artists.</li>
+</ul>
+</section>
+<section id="confirmation" class="level2">
+<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
+<p>The core replays a recorded load spike and asserts the knob response, with no device under it.</p>
+
+
+</section>
+
+ ]]></description>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-hexagon-budgeter-core.html</guid>
+  <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>CASSIE desktop curvenet authoring for content, no Blender</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-cassie-desktop-curvenet-authoring.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › CASSIE desktop curvenet authoring for content, no Blender</em></p>
+<p><strong>Status:</strong> accepted</p>
+<section id="context-and-problem-statement" class="level2">
+<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
+<p>The content pipeline needs budget-bounded geometry for the slice without standing up Blender. The <code>feat/module-cassie</code> curve-and-surface sketcher produces curve networks that triangulate to a controllable poly count.</p>
+</section>
+<section id="decision-outcome" class="level2">
+<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
+<p>Chosen option: author the Hub, the Field, and the enemy as CASSIE curvenets through the desktop path for the deadline, with no Blender, because a curvenet is a bounded, inspectable graph the <code>zone-baker</code> can cost, and the desktop path skips the in-headset ergonomics for the one-week build.</p>
+</section>
+<section id="consequences" class="level2">
+<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
+<ul>
+<li>The geometry arrives near budget, so it passes the baker with little rework.</li>
+<li>The in-headset sketching ergonomics land after the gate.</li>
+<li>The pipeline carries no Blender dependency.</li>
+</ul>
+</section>
+<section id="confirmation" class="level2">
+<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
+<p>The authored Hub and Field pass the <code>zone-baker</code> at budget.</p>
+
+
+</section>
+<section id="related" class="level2">
+<h2 class="anchored" data-anchor-id="related">Related</h2>
+<ul>
+<li><p><a href="20260611-content-build-merged-double-precision-mcp.html">Content creation in a single merged double-precision build via the editor MCP</a></p></li>
+</ul>
+</section>
+
+ ]]></description>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-cassie-desktop-curvenet-authoring.html</guid>
+  <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
+</item>
 <item>
   <title>CI/CD runners operate as a finite queueing system</title>
   <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-cicd-runners-as-queueing-system.html</link>
@@ -81,2145 +217,747 @@
   <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
 </item>
 <item>
-  <title>Hexagonal core/ports/adapters as the component convention</title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260610-hexagonal-core-ports-adapters.html</link>
+  <title>Combat hexagon — core, ports, and adapters</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-hexagon-combat-core.html</link>
   <description><![CDATA[ 
 
 
 
 
 
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Hexagonal core/ports/adapters as the component convention</em></p>
-<p><strong>Status:</strong> accepted</p>
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Combat hexagon — core, ports, and adapters</em></p>
+<p><strong>Tier:</strong> proof of concept · <strong>Status:</strong> accepted</p>
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>Components in the stack span several languages (C, C++, Python, Elixir, GDScript), run as separate processes, and each binds to hardware, a GPU, the network, or an engine runtime. A component has to stay testable without its device, replaceable without a rewrite of its callers, and composable with components written in another language. A shared monolith or a single in-memory object model does not hold across those boundaries.</p>
-</section>
-<section id="decision-drivers" class="level2">
-<h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
-<ul>
-<li>Real-time and pipeline paths cross process and language boundaries with no shared object model.</li>
-<li>Hardware, OS, GPU, network, and engine concerns have to stay out of the domain logic, or that logic becomes untestable away from the live system.</li>
-<li>CI runs the domain logic against recorded fixtures, without the device or the runtime.</li>
-<li>One computed result often feeds several outputs from a single pass.</li>
-</ul>
+<p>The combat concern — combo timing, hit validation, the enemy spawn-invulnerability window, and damage — needs to be deterministic and testable with no server and no headset. Per <a href="../decisions/20260610-hexagonal-core-ports-adapters.html">the hexagonal decision</a> it becomes a core behind narrow ports.</p>
 </section>
 <section id="decision-outcome" class="level2">
 <h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Each component is a hexagon with a uniform <code>core/</code> + <code>ports/</code> + <code>adapters/</code> layout, and components compose into a cluster by wiring ports across the boundary.</p>
-<section id="core-dependency-free-domain-logic" class="level3">
-<h3 class="anchored" data-anchor-id="core-dependency-free-domain-logic">core/ — dependency-free domain logic</h3>
-<p><code>core/</code> holds the component’s domain logic and nothing else: it opens no socket, reads no device, and links no framework. It carries its own <code>core/spec/</code> of tests that run in isolation against fixtures. A transport never reaches into the core.</p>
-</section>
-<section id="ports-interface-contracts-labelled-by-direction" class="level3">
-<h3 class="anchored" data-anchor-id="ports-interface-contracts-labelled-by-direction">ports/ — interface contracts, labelled by direction</h3>
-<p>A port is a narrow interface the core defines and an adapter implements. Each port is labelled by its side of the hexagon and by its data direction:</p>
-<ul>
-<li>driving (primary) ports carry input the outside world pushes into the core;</li>
-<li>driven (secondary) ports carry the core’s output back out to the outside world;</li>
-<li>by data flow, a <code>*_source</code> port reads data in and a <code>*_sink</code> port writes data out.</li>
-</ul>
-<p>A port stays at the lowest common denominator every binding language can implement: a C-ABI struct of function pointers where the cluster crosses languages, a language-native interface where it does not. One header then binds C, C++, and Python adapters alike.</p>
-</section>
-<section id="adapters-concrete-io-at-the-edges" class="level3">
-<h3 class="anchored" data-anchor-id="adapters-concrete-io-at-the-edges">adapters/ — concrete I/O at the edges</h3>
-<p>Adapters implement the ports against the real world: a serial device, a UDP socket, a recorded fixture for CI, a GPU compute host, a renderer, an engine runtime. One port admits many adapters, so a single core output fans out to several destinations from one pass, and a recorded-fixture adapter stands in for live hardware under CI.</p>
-</section>
-<section id="cluster-composition-wiring-ports-across-the-seam" class="level3">
-<h3 class="anchored" data-anchor-id="cluster-composition-wiring-ports-across-the-seam">Cluster composition — wiring ports across the seam</h3>
-<p>Components compose by connecting one component’s sink to another’s source. An in-process dependency links the sibling directly; a cross-process dependency meets on a wire, a network protocol the two ends share. The wire is the integration contract, so a producer in one language and a consumer in another share no code, only the message format. Each component declares its sibling wiring alongside its ports.</p>
-</section>
+<p>Chosen option: structure combat as a hexagon. The core resolves the combo timing, validates each hit against the authoritative positions, holds the enemy invulnerable for its spawn window, and deducts health, as a pure reducer (<a href="../decisions/20260611-core-contract-pure-reducer-byte-state.html">the core contract</a>) over deterministic state (<a href="../decisions/20260611-deterministic-cores-integer-seeded-rng.html">the determinism decision</a>).</p>
+<p>Driving ports: <code>input_source</code> (player commands with timestamps and targets), <code>tick_source</code> (the constant-step clock), <code>behavior_source</code> (enemy intents). Driven ports: <code>state_sink</code> (authoritative entity state), <code>event_sink</code> (hits, deaths, door unlocks). Adapters: <code>feat/module-http3</code> feeds <code>input_source</code>; the <code>zone-server</code> hosts the core and drives <code>tick_source</code> under <a href="../decisions/20260611-server-authoritative-simulation-deferred-rollback.html">server authority</a>; <a href="../decisions/20260611-generated-behavior-sandboxed-riscv.html">sandboxed behavior</a> implements <code>behavior_source</code>; a fixture adapter replays recorded inputs for CI.</p>
 </section>
 <section id="consequences" class="level2">
 <h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
 <ul>
-<li>A dependency-free core lets CI replay recorded fixtures through the domain logic with no device and no runtime.</li>
-<li>The wire seam decouples languages and processes, so any component is rewritable or replaceable as long as it keeps the message contract.</li>
-<li>A new output is a new sink adapter, with no change to the core that produced the data.</li>
-<li>The driving and driven labels keep the dependency direction explicit: adapters depend on the core through ports, and the core depends on nothing.</li>
-<li>The convention costs interface boilerplate, and across a process boundary it adds a serialize and parse step the in-process link avoids. That cost buys cross-language, cross-process composition.</li>
+<li>The server-authoritative adapter binds <code>input_source</code> and <code>state_sink</code> with interpolation and no prediction for the deadline; the rollback adapter lands after the gate behind the same ports.</li>
+<li>The combat core runs headless against fixtures, so a flaky adapter fails in isolation.</li>
+<li>The melee archetype ships first; the ranged and caster archetypes land after the gate.</li>
 </ul>
 </section>
-<section id="more-information" class="level2">
-<h2 class="anchored" data-anchor-id="more-information">More Information</h2>
-<p>The <code>sinew-mocap</code> cluster applies the pattern end to end. Each repository (<code>driver</code>, <code>mount_drift</code>, <code>solve</code>, <code>viewer</code>, <code>vr_bridge</code>) carries the <code>core/</code> + <code>ports/</code> + <code>adapters/</code> triad; ports are header-only C struct vtables labelled driving or driven and named <code>*_source.h</code> / <code>*_sink.h</code> (FrameSource, TrackerSink, PoseSink, HmdSource); adapters bind the serial dongle, a recorded <code>.rawlog</code>, UDP, polyscope, SteamVR, OpenVR, and Vulkan; and the repositories compose over the <code>/sinew</code> OSC wire (UDP 39539), with each <code>ports/sibling-repos.txt</code> declaring the wiring. The synthetic-data branch in <code>sinew-vrdance/pose_distill</code> applies the same triad in Python: core geometry and label cleaning, ports for the teacher pose model, renderer, and dataset sink, and adapters for the model, the Godot renderer, and the COCO sink.</p>
+<section id="confirmation" class="level2">
+<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
+<p>The combat core passes its fixtures, and a melee combo lands a hit under server authority on a Quest 3.</p>
 
 
+</section>
+<section id="related" class="level2">
+<h2 class="anchored" data-anchor-id="related">Related</h2>
+<ul>
+<li><p><a href="20260610-hexagonal-core-ports-adapters.html">Hexagonal core/ports/adapters as the component convention</a></p></li>
+<li><p><a href="20260611-core-contract-pure-reducer-byte-state.html">Cores as pure reducers over byte-serialized state</a></p></li>
+<li><p><a href="20260611-deterministic-cores-integer-seeded-rng.html">Deterministic cores via r128 fixed-point and seeded RNG</a></p></li>
+<li><p><a href="20260611-generated-behavior-sandboxed-riscv.html">Generated behavior runs as sandboxed RISC-V</a></p></li>
+<li><p><a href="20260611-server-authoritative-simulation-deferred-rollback.html">Server-authoritative simulation with deferred rollback</a></p></li>
+</ul>
 </section>
 
  ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260610-hexagonal-core-ports-adapters.html</guid>
-  <pubDate>Wed, 10 Jun 2026 00:00:00 GMT</pubDate>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-hexagon-combat-core.html</guid>
+  <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
 </item>
 <item>
-  <title>An umbrella package installs every component in one command</title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260609-umbrella-package-installs-all-components.html</link>
+  <title>Content creation in a single merged double-precision build via the editor MCP</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-content-build-merged-double-precision-mcp.html</link>
   <description><![CDATA[ 
 
 
 
 
 
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › An umbrella package installs every component in one command</em></p>
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Content creation in a single merged double-precision build via the editor MCP</em></p>
 <p><strong>Status:</strong> accepted</p>
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>A project ships as several components, each with its own install entry. The sinew mocap stack publishes one scoop manifest and one Homebrew formula per app (<code>sinew-tui</code>, <code>sinew-vr-bridge</code>, <code>sinew-viewer</code>), and the zone backend runs several services (cockroach, redis, uro, nextjs, caddy). A person who wants the whole set runs one install command per component and needs to know every component name. How does a person install or run the full set in one step?</p>
-</section>
-<section id="decision-drivers" class="level2">
-<h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
-<ul>
-<li>A newcomer knows the project name, not the name of each component.</li>
-<li>A list of the components lives in one place, so a reader sees the full set without assembling it.</li>
-<li>The package managers and the compose runtime already resolve dependencies, so an aggregate entry reuses machinery that exists.</li>
-</ul>
-</section>
-<section id="considered-options" class="level2">
-<h2 class="anchored" data-anchor-id="considered-options">Considered Options</h2>
-<ul>
-<li>Documentation that lists every per-component install command.</li>
-<li>A shell script that runs the per-component commands in order.</li>
-<li>An umbrella entry per channel that declares the components as dependencies.</li>
-</ul>
+<p>Content creation needs the full engine, every <code>feat/*</code> capability at double precision, without Blender, and the team budgets a single such build for the slice.</p>
 </section>
 <section id="decision-outcome" class="level2">
 <h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: an umbrella entry per channel that declares the components as dependencies, because the channel’s own resolver installs the set and the umbrella holds the full list in one file that a reader and a tool both read.</p>
-<p>Each distribution channel carries one thin umbrella that depends on every component and installs nothing of its own:</p>
-<ul>
-<li>Scoop carries a metapackage manifest whose <code>depends</code> names each app, so <code>scoop install sinew/sinew</code> installs them all.</li>
-<li>Homebrew carries a formula whose <code>depends_on</code> names each app, so <code>brew install sinew-mocap/sinew/sinew</code> installs them all.</li>
-<li>The zone backend carries a <code>docker-compose.yml</code> whose <code>services</code> name each backend process, so <code>docker compose up</code> starts the whole stack.</li>
-</ul>
-<p>The umbrella holds the component list and no build steps, so adding a component touches one line in the umbrella beside the new component’s own entry.</p>
-<section id="consequences" class="level3">
-<h3 class="anchored" data-anchor-id="consequences">Consequences</h3>
-<ul>
-<li>Good, because a newcomer installs or runs the whole project from its name alone.</li>
-<li>Good, because the umbrella reads as the canonical list of what the project contains.</li>
-<li>Bad, because the umbrella tracks the component set by hand, so a new component that skips the umbrella stays out of the one-command install.</li>
-<li>Bad, because the umbrella version and the component versions drift apart unless a release updates both.</li>
-</ul>
-</section>
-<section id="confirmation" class="level3">
-<h3 class="anchored" data-anchor-id="confirmation">Confirmation</h3>
-<p>A one-command install on a clean machine brings up every component: <code>scoop install sinew/sinew</code>, <code>brew install sinew-mocap/sinew/sinew</code>, and <code>docker compose up</code> each produce the full set.</p>
-</section>
-</section>
-<section id="more-information" class="level2">
-<h2 class="anchored" data-anchor-id="more-information">More Information</h2>
-<p>The sinew mocap buckets carry the metapackage at <code>scoop-bucket/bucket/sinew.json</code> and <code>homebrew-sinew/Formula/sinew.rb</code>, and the zone backend carries the compose file. Each umbrella sits beside the per-component entries it aggregates.</p>
-
-
-</section>
-
- ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260609-umbrella-package-installs-all-components.html</guid>
-  <pubDate>Tue, 09 Jun 2026 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Commit messages use sentence case without Conventional Commits prefixes</title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260609-commit-messages-sentence-case.html</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Commit messages use sentence case without Conventional Commits prefixes</em></p>
-<p><strong>Status:</strong> accepted</p>
-<section id="context-and-problem-statement" class="level2">
-<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>A commit subject is the first line a reader meets in <code>git log</code>, a blame, or a release note. Two conventions compete for how it reads. Conventional Commits prefixes each subject with a machine-readable type and optional scope, such as <code>feat:</code> or <code>fix(parser):</code>, and lower-cases the summary that follows. Plain prose writes the subject as an ordinary capitalised sentence. How should a commit subject in this repo read?</p>
-</section>
-<section id="decision-drivers" class="level2">
-<h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
-<ul>
-<li>A reader scans the subject as a sentence first, and the meaning sits at the front rather than after a colon.</li>
-<li>The repos here run no tooling that consumes a commit type: no semantic-release, no changelog keyed on <code>feat</code> or <code>fix</code>.</li>
-<li>One rule covers every commit, so review needs no judgement about which type applies.</li>
-</ul>
-</section>
-<section id="considered-options" class="level2">
-<h2 class="anchored" data-anchor-id="considered-options">Considered Options</h2>
-<ul>
-<li>Conventional Commits, with a <code>type(scope):</code> prefix on every subject.</li>
-<li>Sentence-case prose subjects with no prefix.</li>
-<li>Free choice of style per author.</li>
-</ul>
-</section>
-<section id="decision-outcome" class="level2">
-<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: sentence-case prose with no prefix, because the subject stays a sentence a reader understands on sight, and the repos gain nothing from a commit type that no tool reads.</p>
-<p>A commit subject opens with a capital letter and reads as a plain sentence, such as <code>Add the macOS and Windows release workflows</code>. It carries no <code>feat:</code>, <code>fix:</code>, <code>chore:</code>, or <code>type(scope):</code> prefix, and no trailing period. The body, where present, states what the change makes true of the system and why.</p>
-<section id="consequences" class="level3">
-<h3 class="anchored" data-anchor-id="consequences">Consequences</h3>
-<ul>
-<li>Good, because the subject reads as a summary on its own, with nothing to strip before the meaning.</li>
-<li>Good, because the rule holds for every commit, so no author weighs whether a change counts as a <code>feat</code> or a <code>fix</code>.</li>
-<li>Bad, because a changelog tool that groups commits by type finds no signal here, so adopting one later needs a different marker or a history rewrite.</li>
-</ul>
-</section>
-<section id="confirmation" class="level3">
-<h3 class="anchored" data-anchor-id="confirmation">Confirmation</h3>
-<p>Review reads each subject as a capitalised sentence with no type prefix and no trailing period. The history after this decision shows subjects in that form.</p>
-</section>
-</section>
-<section id="more-information" class="level2">
-<h2 class="anchored" data-anchor-id="more-information">More Information</h2>
-<p>This pairs with the tenseless continuous-present voice (<a href="../decisions/20260607-tenseless-continuous-present-voice.html">20260607-tenseless-continuous-present-voice.md</a>): a commit body states what the change makes true of the system, the same way comments and docs do.</p>
-
-
-</section>
-<section id="related" class="level2">
-<h2 class="anchored" data-anchor-id="related">Related</h2>
-<ul>
-<li><p><a href="20260607-tenseless-continuous-present-voice.html">Comments and docs use a tenseless continuous-present voice</a></p></li>
-</ul>
-</section>
-
- ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260609-commit-messages-sentence-case.html</guid>
-  <pubDate>Tue, 09 Jun 2026 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Comments and docs use a tenseless continuous-present voice</title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260607-tenseless-continuous-present-voice.html</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Comments and docs use a tenseless continuous-present voice</em></p>
-<p><strong>Status:</strong> accepted</p>
-<section id="context-and-problem-statement" class="level2">
-<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>Comments and documentation drift out of sync with code as the system changes. A comment written as history (“added a cache”, “we removed the old path”) or as a plan (“will solve this”, “TODO: wire X”) describes a moment that has passed or has not yet arrived, so a reader cannot check it against the code in front of them. How should prose in this repo phrase what it says about the system?</p>
-</section>
-<section id="decision-drivers" class="level2">
-<h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
-<ul>
-<li>A reader trusts a comment when it matches the code as it stands.</li>
-<li>History lives in git; plans live in issues and decision records.</li>
-<li>The rule stays mechanical enough to apply in review without debate.</li>
-</ul>
-</section>
-<section id="considered-options" class="level2">
-<h2 class="anchored" data-anchor-id="considered-options">Considered Options</h2>
-<ul>
-<li>Free choice of tense per author.</li>
-<li>Past-tense changelog voice inside code comments.</li>
-<li>A tenseless continuous-present voice where every sentence states what is currently true of the system.</li>
-</ul>
-</section>
-<section id="decision-outcome" class="level2">
-<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: “a tenseless continuous-present voice”, because a sentence that states a present truth stays correct as long as the code it describes stays the same, and goes stale visibly the moment the code changes.</p>
-<p>Every comment and documentation sentence states what is currently true of the system. Prose describes behaviour (“the parser streams tokens”), and an unfinished area reads as a present gap (“the parser handles no Unicode escapes yet”) rather than as a task or a past edit. The voice covers code comments, doc pages, and decision records alike.</p>
-<p>The voice rules out three habits:</p>
-<ul>
-<li>Past-tense narration of edits, such as “removed the legacy path” or “we switched to a queue”.</li>
-<li>Future or imperative planning, such as “will add validation” or “TODO: handle retries”.</li>
-<li>Temporal qualifiers that age, such as “now”, “currently changed”, or “previously”.</li>
-</ul>
-<p>A TODO document states each open item as a present gap, so the file reads as a description of where the system stands rather than a logbook of intentions.</p>
-<section id="consequences" class="level3">
-<h3 class="anchored" data-anchor-id="consequences">Consequences</h3>
-<ul>
-<li>Good, because a stale sentence signals a real divergence from the code, which makes review catch it.</li>
-<li>Good, because one voice covers code comments, doc pages, and decision records.</li>
-<li>Bad, because a present-gap phrasing reads less naturally than an imperative TODO, and authors need practice to phrase work that way.</li>
-</ul>
-</section>
-<section id="confirmation" class="level3">
-<h3 class="anchored" data-anchor-id="confirmation">Confirmation</h3>
-<p>Review checks that new comments and prose state present truths, with no past-tense edit narration, no future or imperative planning, and no aging temporal qualifiers. The existing decision records in this repo already read this way.</p>
-</section>
-</section>
-<section id="more-information" class="level2">
-<h2 class="anchored" data-anchor-id="more-information">More Information</h2>
-<p>This generalizes the house rule applied across the sinew Lean spec and its native viewer prose, where comments describe current behaviour and <code>todo.md</code> lists each open item as a present gap.</p>
-
-
-</section>
-<section id="related" class="level2">
-<h2 class="anchored" data-anchor-id="related">Related</h2>
-<ul>
-<li><p><a href="20260609-commit-messages-sentence-case.html">Commit messages use sentence case without Conventional Commits prefixes</a></p></li>
-</ul>
-</section>
-
- ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260607-tenseless-continuous-present-voice.html</guid>
-  <pubDate>Sun, 07 Jun 2026 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Amend a PR before it enters the merge queue, not after</title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-amend-pr-before-it-enters-the-queue.html</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Amend a PR before it enters the merge queue, not after</em></p>
-<p><strong>Status:</strong> accepted</p>
-<section id="context-and-problem-statement" class="level2">
-<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The <a href="../decisions/20260606-require-pr-and-merge-queue-on-main.html">merge queue</a> captures a PR’s head commit the moment its checks pass and it is enqueued. While drafting the <a href="../decisions/20260606-gitassembly-tag-release.html">gitassembly tag MADR</a>, a correction was pushed to the PR branch seconds after enqueueing; the queue had already snapshotted the earlier commit, so it merged the draft and orphaned the fix. The correction had to land as a <a href="../decisions/20260606-gitassembly-tag-release.html">second PR</a>. How should a late fix to an in-flight PR be sequenced so it is not lost to the queue?</p>
-</section>
-<section id="decision-drivers" class="level2">
-<h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
-<ul>
-<li>A pushed correction must be the commit that actually merges.</li>
-<li>Avoid a follow-up PR that exists only to redo a missed fix.</li>
-<li>Keep the cost of the rule near zero for the common case (no late fix).</li>
-</ul>
-</section>
-<section id="considered-options" class="level2">
-<h2 class="anchored" data-anchor-id="considered-options">Considered Options</h2>
-<ul>
-<li>Push the fix and assume the queue picks up the new tip (status quo that failed).</li>
-<li>Confirm the PR is still <code>OPEN</code> after the corrective push, before relying on it.</li>
-<li>Dequeue the PR, push the fix, then re-enqueue.</li>
-</ul>
-</section>
-<section id="decision-outcome" class="level2">
-<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: “Confirm <code>OPEN</code> after the push, and dequeue first when already enqueued”, because once a PR is in the queue a later push races the merge.</p>
-<ul>
-<li>Do not enqueue a PR until it is final. Enqueue (<code>gh pr merge --auto</code>) is a commit that the next change is ready, not a parking spot.</li>
-<li>If a fix is needed after enqueueing, dequeue first (<code>gh pr merge --disable-auto</code>), push the fix, then re-enqueue.</li>
-<li>After any corrective push to an in-flight PR, verify it is still <code>OPEN</code> (<code>gh pr view &lt;n&gt; --json state</code>) before assuming the new commit will merge; a <code>MERGED</code> state means the fix was missed and needs its own PR.</li>
-</ul>
-<section id="consequences" class="level3">
-<h3 class="anchored" data-anchor-id="consequences">Consequences</h3>
-<ul>
-<li>Good: the commit that merges is the one intended, with no orphaned fixes.</li>
-<li>Good: no redundant follow-up PRs to reapply a missed correction.</li>
-<li>Bad: a small habit of checking state or dequeuing adds a step when editing a PR that is already in flight.</li>
-</ul>
-</section>
-<section id="confirmation" class="level3">
-<h3 class="anchored" data-anchor-id="confirmation">Confirmation</h3>
-<p>A late fix to an enqueued PR is preceded by a dequeue or followed by an <code>OPEN</code> state check; the merged commit on <code>main</code> contains the fix, with no follow-up PR that only reapplies it.</p>
-</section>
-</section>
-<section id="more-information" class="level2">
-<h2 class="anchored" data-anchor-id="more-information">More Information</h2>
-<p>This refines the <a href="../decisions/20260606-require-pr-and-merge-queue-on-main.html">merge queue policy</a> and is the work-in-progress discipline the <a href="../decisions/20260606-bounded-llm-steering-queue.html">bounded steering queue</a> relies on: one finished concern per PR, merged before the next.</p>
-
-
-</section>
-<section id="related" class="level2">
-<h2 class="anchored" data-anchor-id="related">Related</h2>
-<ul>
-<li><p><a href="20260606-bounded-llm-steering-queue.html">Bound the LLM steering queue to avoid context overflow</a></p></li>
-<li><p><a href="20260606-gitassembly-tag-release.html">Cut gitassembly tag releases for the assembled engine</a></p></li>
-<li><p><a href="20260606-require-pr-and-merge-queue-on-main.html">Require pull requests and a merge queue on main</a></p></li>
-</ul>
-</section>
-
- ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-amend-pr-before-it-enters-the-queue.html</guid>
-  <pubDate>Sat, 06 Jun 2026 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Archival file naming convention for committed assets</title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-archival-file-naming-convention.html</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Archival file naming convention for committed assets</em></p>
-<p><strong>Tier:</strong> baseline · <strong>Status:</strong> accepted</p>
-<section id="context-and-problem-statement" class="level2">
-<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The manuals repo now commits binary assets alongside prose, starting with screenshots under <code>decisions/attachments/</code>. Ad-hoc names like <code>image.png</code> collide, sort poorly, and lose their provenance once they leave the page that referenced them. What naming convention should committed assets follow so they stay unique, sortable, and self-describing?</p>
-</section>
-<section id="decision-drivers" class="level2">
-<h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
-<ul>
-<li>Names should be unique and not collide across decisions.</li>
-<li>Names should sort chronologically and read as self-describing.</li>
-<li>Names should survive being copied out of the repo (provenance in the name).</li>
-<li>The convention should match established digital-preservation guidance.</li>
-</ul>
-</section>
-<section id="considered-options" class="level2">
-<h2 class="anchored" data-anchor-id="considered-options">Considered Options</h2>
-<ul>
-<li>Keep source names (<code>image.png</code>, <code>screenshot (1).png</code>).</li>
-<li>Content hash names (<code>a1b2c3.png</code>).</li>
-<li>A Library of Congress style descriptive convention.</li>
-</ul>
-</section>
-<section id="decision-outcome" class="level2">
-<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: “A Library of Congress style descriptive convention”, because it follows recognized preservation guidance and yields names that sort and explain themselves.</p>
-<p>The pattern:</p>
-<pre><code>YYYYMMDD_project_description_NNNN.ext</code></pre>
-<p>Following the Library of Congress file-naming guidance:</p>
-<ul>
-<li>Lowercase ASCII only; no spaces or special characters.</li>
-<li>ISO 8601 date first (<code>YYYYMMDD</code>) so names sort chronologically.</li>
-<li>Facets separated by underscores (<code>_</code>); words within a facet by hyphens (<code>-</code>).</li>
-<li>A zero-padded sequence (<code>NNNN</code>) to keep same-day captures unique and ordered.</li>
-<li>Descriptive but reasonably short.</li>
-</ul>
-<p>Example, used for the first committed screenshot:</p>
-<pre><code>20260606_vsekai-mpf_xr-grid-debug-orbs_0001.png</code></pre>
-<p>Each committed asset also gets a BibTeX entry in <code>references.bib</code> recording its capture date and archived path, so the References page lists it.</p>
-<section id="consequences" class="level3">
-<h3 class="anchored" data-anchor-id="consequences">Consequences</h3>
-<ul>
-<li>Good: assets are unique, sort by date, and carry their provenance in the name.</li>
-<li>Good: the convention matches preservation practice and is mechanical to apply.</li>
-<li>Bad: names are longer than source names, and renaming on import is a manual step.</li>
-</ul>
-</section>
-<section id="confirmation" class="level3">
-<h3 class="anchored" data-anchor-id="confirmation">Confirmation</h3>
-<p>Assets under <code>decisions/attachments/</code> match <code>YYYYMMDD_project_description_NNNN.ext</code> and have a matching <code>references.bib</code> entry. The first example is <code>20260606_vsekai-mpf_xr-grid-debug-orbs_0001.png</code>, cited from the <a href="../decisions/20260606-multiplayer-presence-demo-orbs.html">presence-demo decision</a>.</p>
-</section>
-</section>
-<section id="more-information" class="level2">
-<h2 class="anchored" data-anchor-id="more-information">More Information</h2>
-<p>Based on the Library of Congress guidance on file naming for digital preservation (descriptive, no spaces, lowercase, ISO dates, zero-padded sequences).</p>
-
-
-</section>
-<section id="related" class="level2">
-<h2 class="anchored" data-anchor-id="related">Related</h2>
-<ul>
-<li><p><a href="../changelog/2026/20260606-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-06 (Saturday)</a></p></li>
-<li><p><a href="20260606-multiplayer-presence-demo-orbs.html">Minimal multiplayer presence demo with head and hand orbs</a></p></li>
-</ul>
-</section>
-
- ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-archival-file-naming-convention.html</guid>
-  <pubDate>Sat, 06 Jun 2026 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Bound the LLM steering queue to avoid context overflow</title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-bounded-llm-steering-queue.html</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Bound the LLM steering queue to avoid context overflow</em></p>
-<p><strong>Tier:</strong> baseline · <strong>Status:</strong> accepted</p>
-<section id="context-and-problem-statement" class="level2">
-<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>We steer an LLM by appending tasks to a queue as we go — this manuals session is the canonical example, with dozens of incremental requests. An unbounded queue overflows two scarce resources: the operator’s personal context (you lose track of what is pending versus done) and the model’s context window. How do we keep steering open-ended without overflowing either?</p>
-</section>
-<section id="decision-drivers" class="level2">
-<h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
-<ul>
-<li>Keep adding tasks freely as ideas arrive.</li>
-<li>Bound what is held in volatile conversation context.</li>
-<li>Never lose the record of what was decided or done.</li>
-</ul>
-</section>
-<section id="considered-options" class="level2">
-<h2 class="anchored" data-anchor-id="considered-options">Considered Options</h2>
-<ul>
-<li>Unbounded queue held in the conversation (status quo).</li>
-<li>A hard task cap that drops tasks past a limit.</li>
-<li>Externalize the queue, bound work in progress, and compact finished work.</li>
-</ul>
-</section>
-<section id="decision-outcome" class="level2">
-<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: “Externalize, bound, and compact.”</p>
-<ul>
-<li>Externalize: decisions land as MADRs in the manuals and in-flight work as PRs or issues. The conversation holds the active item, and the backlog lives in durable, searchable storage rather than the transcript.</li>
-<li>Bound work in progress: one concern per PR, merged through the <a href="../decisions/20260606-require-pr-and-merge-queue-on-main.html">main merge queue</a> before the next, so the in-flight set stays small.</li>
-<li>Compact: completed work is folded into durable artifacts (a changelog deck log or an MADR) and dropped from the working set, so finished items leave the context window. A periodic summary checkpoint resets the working context.</li>
-</ul>
-<section id="consequences" class="level3">
-<h3 class="anchored" data-anchor-id="consequences">Consequences</h3>
-<ul>
-<li>Good: the backlog and the record live in durable docs, not working memory, so the operator’s attention and the model’s context window both stay bounded.</li>
-<li>Good: each finished item is findable later in the manuals.</li>
-<li>Bad: it takes discipline to externalize and compact instead of holding everything in the conversation.</li>
-</ul>
-</section>
-<section id="confirmation" class="level3">
-<h3 class="anchored" data-anchor-id="confirmation">Confirmation</h3>
-<p>At any time the conversation holds roughly one active task; completed work is found in the manuals (decisions and changelog) rather than the transcript; and the number of open PRs stays small.</p>
-</section>
-</section>
-<section id="more-information" class="level2">
-<h2 class="anchored" data-anchor-id="more-information">More Information</h2>
-<p>The merge queue and the one-concern-per-PR rule are the work-in-progress bound; the changelog and MADR practice is the compaction step.</p>
-
-
-</section>
-<section id="related" class="level2">
-<h2 class="anchored" data-anchor-id="related">Related</h2>
-<ul>
-<li><p><a href="../changelog/2026/20260606-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-06 (Saturday)</a></p></li>
-<li><p><a href="20260606-amend-pr-before-it-enters-the-queue.html">Amend a PR before it enters the merge queue, not after</a></p></li>
-<li><p><a href="20260606-require-pr-and-merge-queue-on-main.html">Require pull requests and a merge queue on main</a></p></li>
-</ul>
-</section>
-
- ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-bounded-llm-steering-queue.html</guid>
-  <pubDate>Sat, 06 Jun 2026 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Checking the sccache build cache</title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-checking-sccache.html</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Checking the sccache build cache</em></p>
-<p><strong>Tier:</strong> baseline · <strong>Status:</strong> accepted</p>
-<section id="context-and-problem-statement" class="level2">
-<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>Native builds route compilation through <a href="https://github.com/mozilla/sccache">sccache</a> backed by a shared DigitalOcean Spaces bucket (<code>chibifire-sccache</code>, region <code>tor1</code>), so object files are cached across machines and CI (see <a href="../decisions/20260606-compiling-godot-engine.html">Compiling the Godot engine</a>). The failure mode is silent: if the <code>SCCACHE_*</code> environment is missing, the credentials are wrong, or the region/endpoint is off, sccache quietly falls back to a local disk cache — or records read/write errors — while the build still succeeds. The shared-cache benefit is lost with no obvious signal. How does someone confirm sccache is actually using the remote bucket and is healthy?</p>
-</section>
-<section id="decision-drivers" class="level2">
-<h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
-<ul>
-<li>A misconfigured cache degrades silently (local disk, or errored requests) without failing the build, so “the build worked” is not evidence the cache worked.</li>
-<li>The check should be one command, not a ritual or a log dive.</li>
-<li>Credentials are scoped to the <code>do-tor1</code> AWS profile, not global environment variables, so the check must not require exporting secrets.</li>
-<li>It should read the same on Windows (PowerShell) and WSL/Linux.</li>
-</ul>
-</section>
-<section id="considered-options" class="level2">
-<h2 class="anchored" data-anchor-id="considered-options">Considered Options</h2>
-<ul>
-<li>Infer from build times (implicit, unreliable, no backend visibility).</li>
-<li>Enable <code>SCCACHE_LOG=debug</code> and read the per-request log every build.</li>
-<li>Read <code>sccache --show-stats</code> and check the backend and error counters.</li>
-</ul>
-</section>
-<section id="decision-outcome" class="level2">
-<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: “Read <code>sccache --show-stats</code>”, because it surfaces the cache backend and health in one command without secrets or log parsing.</p>
-<p>Check three lines of the output:</p>
-<ul>
-<li><code>Cache location</code> must be <code>s3, name: chibifire-sccache</code> (with the project’s key prefix, e.g.&nbsp;<code>/godot/</code>). If it says <code>Local disk</code>, the <code>SCCACHE_*</code> env vars are not set in that shell and the shared cache is not in use.</li>
-<li><code>Cache errors</code> (and read/write errors) must be <code>0</code>. Non-zero means a credentials, endpoint, or connectivity problem.</li>
-<li><code>Cache hits</code> versus <code>Cache misses</code> are the payoff; the hit rate rises across builds.</li>
-</ul>
-<p>On Windows this is wrapped as a <code>sccheck</code> PowerShell function (alias <code>scc</code>) in the user profile; aliases cannot carry logic, hence a function plus a <code>Set-Alias</code> shim:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb1-1"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">function</span> sccheck <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span></span>
-<span id="cb1-2">    sccache <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">--</span>show-stats <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|</span></span>
-<span id="cb1-3">        <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">Select-String</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span>Pattern <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Compile requests|Cache hits|Cache misses|Cache .*errors|Cache location'</span></span>
-<span id="cb1-4"><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">}</span></span>
-<span id="cb1-5"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">Set-Alias</span> scc sccheck</span></code></pre></div></div>
-<p>The bash equivalent is <code>sccache --show-stats</code> filtered with <code>grep</code>. To measure a single build, reset first: <code>sccache --zero-stats; &lt;build&gt;; sccache --show-stats</code>.</p>
-<section id="consequences" class="level3">
-<h3 class="anchored" data-anchor-id="consequences">Consequences</h3>
-<ul>
-<li>Good: one command shows the backend and health; no secrets needed, since stats read the running server’s own counters.</li>
-<li>Good: works identically across shells; the PowerShell <code>sccheck</code>/<code>scc</code> shortcut makes it a reflex.</li>
-<li>Bad: the counters are per-server-session — they reset when the sccache server restarts or on <code>--zero-stats</code>, so they are not lifetime bucket totals.</li>
-<li>Bad: <code>--show-stats</code> alone does not prove S3 connectivity; only a compile (or a full build) exercises read/write. <code>Cache errors = 0</code> <em>after</em> a build is the real confirmation that auth and the endpoint are correct.</li>
-</ul>
-</section>
-<section id="confirmation" class="level3">
-<h3 class="anchored" data-anchor-id="confirmation">Confirmation</h3>
-<p>Running <code>sccheck</code> reported <code>Cache location  s3, name: chibifire-sccache, prefix: /godot/</code>, <code>Cache errors 0</code>, and hits accumulating during a Godot rebuild — so the remote backend, region, and <code>do-tor1</code> credentials are all working.</p>
-</section>
-</section>
-<section id="more-information" class="level2">
-<h2 class="anchored" data-anchor-id="more-information">More Information</h2>
-<ul>
-<li>The non-secret <code>SCCACHE_*</code> variables (<code>SCCACHE_BUCKET</code>, <code>SCCACHE_ENDPOINT</code>, <code>SCCACHE_REGION</code>, <code>SCCACHE_S3_USE_SSL</code>, <code>SCCACHE_S3_KEY_PREFIX</code>) are set globally; credentials live in the <code>do-tor1</code> profile (<code>~/.aws/credentials</code>) and are applied only for the duration of a build, so the real AWS CLI is never shadowed.</li>
-<li>Per-project key prefixes keep objects from colliding in the one bucket (e.g. <code>godot</code> vs <code>idtx-flow</code>).</li>
-<li>To debug a non-zero error count, set <code>SCCACHE_LOG=debug</code> and <code>SCCACHE_ERROR_LOG</code> before restarting the server (<code>sccache --stop-server; sccache --start-server</code>).</li>
-</ul>
-
-
-</section>
-<section id="related" class="level2">
-<h2 class="anchored" data-anchor-id="related">Related</h2>
-<ul>
-<li><p><a href="20260606-compiling-godot-engine.html">Compiling the Godot engine</a></p></li>
-<li><p><a href="20260606-windows-background-services-nssm.html">Running background services on Windows with nssm</a></p></li>
-</ul>
-</section>
-
- ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-checking-sccache.html</guid>
-  <pubDate>Sat, 06 Jun 2026 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Cold-boot dependencies for the presence-marker demo</title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-presence-demo-cold-boot-dependencies.html</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Cold-boot dependencies for the presence-marker demo</em></p>
-<p><strong>Tier:</strong> proof of concept · <strong>Status:</strong> proposed</p>
-<section id="context-and-problem-statement" class="level2">
-<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The <a href="../decisions/20260606-presence-marker-representation.html">presence-marker demo</a> (and its <a href="../decisions/20260606-ghostly-presence-body-model.html">ghostly ANNY/SOMA-X body</a> refinement) needs a reproducible setup from nothing. What is the minimal dependency set to cold boot the development environment for it?</p>
-</section>
-<section id="decision-drivers" class="level2">
-<h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
-<ul>
-<li>A new machine should reach a running demo from a checkout and a short script.</li>
-<li>Reuse the engine and transport the stack already standardises on.</li>
-<li>Keep the heavy ML pipeline optional until the ghostly body is worked on.</li>
-</ul>
-</section>
-<section id="decision-outcome" class="level2">
-<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Cold-boot dependencies, by layer:</p>
-<section id="engine-pick-one" class="level3">
-<h3 class="anchored" data-anchor-id="engine-pick-one">1. Engine (pick one)</h3>
-<ul>
-<li>Prebuilt: pull the editor image from <a href="https://github.com/v-sekai-multiplayer-fabric/godot-images">godot-images</a> (GHCR), built at the <a href="../decisions/20260606-pin-engine-to-frozen-godot-4-7.html">pinned Godot 4.7 commit</a>.</li>
-<li>From source: the <a href="../decisions/20260606-compiling-godot-engine.html">compiling SOP</a> toolchain (<code>git</code>, Python 3, SCons, sccache, MinGW-w64 on Windows / <code>build-essential</code> on Linux), plus <a href="https://github.com/v-sekai-multiplayer-fabric/merge">merge</a> (Elixir <code>gitassembly</code>) to assemble <code>feat/module-xr-grid</code>, <code>feat/module-cassie</code>, and <code>feat/module-http3</code> onto the pinned base. Check out a <a href="../decisions/20260606-gitassembly-tag-release.html">gitassembly tag release</a> (<code>v2026.06.06.1853-multiplayer-fabric</code>) rather than the moving branch tips for a reproducible assembly.</li>
-</ul>
-</section>
-<section id="demo-project" class="level3">
-<h3 class="anchored" data-anchor-id="demo-project">2. Demo project</h3>
-<ul>
-<li>The <a href="https://github.com/v-sekai-multiplayer-fabric/xr-grid">xr-grid</a> checkout: the scene with the skinned-mesh hero-asset landmark and the head/hand pose orbs.</li>
-</ul>
-</section>
-<section id="networking" class="level3">
-<h3 class="anchored" data-anchor-id="networking">3. Networking</h3>
-<ul>
-<li><a href="../decisions/20260606-webtransport-http3-transport.html">WebTransport over HTTP/3</a> is compiled into the engine (<code>modules/http3</code>, picoquic), so local loopback needs nothing extra. The Elixir gateway (on V-Sekai-fire) is only needed for call-scale runs.</li>
-</ul>
-</section>
-<section id="ghostly-body-pipeline-optional-for-the-marker-upgrade" class="level3">
-<h3 class="anchored" data-anchor-id="ghostly-body-pipeline-optional-for-the-marker-upgrade">4. Ghostly body pipeline (optional, for the marker upgrade)</h3>
-<ul>
-<li>A Python 3 environment with <a href="https://github.com/naver/anny">ANNY</a> and <a href="https://github.com/NVlabs/SOMA-X">SOMA-X</a> (<code>py-soma-x</code>), PyTorch, and NVIDIA Warp on a CUDA GPU. Persona and body assets auto-download from Hugging Face.</li>
-</ul>
-</section>
-<section id="vr-runtime-optional" class="level3">
-<h3 class="anchored" data-anchor-id="vr-runtime-optional">5. VR runtime (optional)</h3>
-<ul>
-<li>An OpenXR runtime and headset for in-headset use; the desktop debug window runs without one.</li>
-</ul>
-</section>
-<section id="consequences" class="level3">
-<h3 class="anchored" data-anchor-id="consequences">Consequences</h3>
-<ul>
-<li>Good: layers 1–2 alone boot a local, single-peer demo; networking and the ML body pipeline are additive.</li>
-<li>Bad: the from-source path pulls in an Elixir assembly step and a GPU/PyTorch stack, so the full cold boot is heavy.</li>
-</ul>
-</section>
-<section id="confirmation" class="level3">
-<h3 class="anchored" data-anchor-id="confirmation">Confirmation</h3>
-<p>A fresh machine reaches the desktop debug window of the xr-grid demo using the prebuilt engine plus the xr-grid checkout; adding the Python ANNY/SOMA-X stack enables the ghostly body.</p>
-</section>
-</section>
-<section id="more-information" class="level2">
-<h2 class="anchored" data-anchor-id="more-information">More Information</h2>
-<p>Layers reuse the <a href="../decisions/20260606-compiling-godot-engine.html">compiling SOP</a>, the <a href="../decisions/20260606-pin-engine-to-frozen-godot-4-7.html">engine pin</a>, and the <a href="../decisions/20260606-webtransport-http3-transport.html">WebTransport transport</a>.</p>
-
-
-</section>
-<section id="related" class="level2">
-<h2 class="anchored" data-anchor-id="related">Related</h2>
-<ul>
-<li><p><a href="20260606-compiling-godot-engine.html">Compiling the Godot engine</a></p></li>
-<li><p><a href="20260606-ghostly-presence-body-model.html">Ghostly partial-body presence avatar from ANNY via SOMA-X</a></p></li>
-<li><p><a href="20260606-gitassembly-tag-release.html">Cut gitassembly tag releases for the assembled engine</a></p></li>
-<li><p><a href="20260606-pin-engine-to-frozen-godot-4-7.html">Pin the engine to a frozen Godot 4.7 commit</a></p></li>
-<li><p><a href="20260606-presence-marker-representation.html">Human-readable presence markers with an orb debug mode</a></p></li>
-<li><p><a href="20260606-webtransport-http3-transport.html">WebTransport over HTTP/3 transport</a></p></li>
-</ul>
-</section>
-
- ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-presence-demo-cold-boot-dependencies.html</guid>
-  <pubDate>Sat, 06 Jun 2026 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Compiling the Godot engine</title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-compiling-godot-engine.html</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Compiling the Godot engine</em></p>
-<p><strong>Tier:</strong> baseline · <strong>Status:</strong> accepted</p>
-<section id="context" class="level2">
-<h2 class="anchored" data-anchor-id="context">Context</h2>
-<p>Developers build the V-Sekai multiplayer-fabric Godot engine on two hosts from one workstation: <strong>Windows (PowerShell + MinGW)</strong> and <strong>WSL / Linux (<code>linuxbsd</code>)</strong>. Without a shared, persistent compiler cache, each host rebuilds from scratch and cache hits are lost whenever a checkout is moved or renamed.</p>
-</section>
-<section id="decision" class="level2">
-<h2 class="anchored" data-anchor-id="decision">Decision</h2>
-<p>Standardise on <a href="https://github.com/mozilla/sccache"><code>sccache</code></a> as the <strong>only</strong> object cache, wired in as the SCons compiler launcher. Wrap the build in a <code>gscons</code> shell function on each host.</p>
-<p><strong>Do not also enable SCons’s own <code>CacheDir</code></strong> (<code>cache_path=</code>). sccache already caches every compiled object before SCons’s cache would see it, so running both double-caches the same artefacts — wasted disk and I/O for no extra hits. sccache is the single source of truth.</p>
-<p>Cross-host sharing is handled by sccache’s <strong>S3-compatible storage backend</strong>, not by a shared filesystem directory. Credentials come from a local AWS profile (<code>~/.aws/credentials</code>) and are <strong>never committed</strong> — only the non-secret bucket coordinates are configured, via environment variables, so this guide hardcodes no absolute paths and no secrets:</p>
-<ul>
-<li><code>GODOT_SRC</code> — the engine checkout root.</li>
-<li><code>SCCACHE_BUCKET</code> / <code>SCCACHE_ENDPOINT</code> / <code>SCCACHE_REGION</code> — your S3 bucket coordinates.</li>
-<li><code>AWS_PROFILE</code> — the named profile holding the access keys, read from <code>~/.aws/credentials</code>. The keys themselves stay on the developer’s machine.</li>
-</ul>
-<section id="prerequisites" class="level3">
-<h3 class="anchored" data-anchor-id="prerequisites">Prerequisites</h3>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 11%">
-<col style="width: 43%">
-<col style="width: 44%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Tool</th>
-<th>Windows</th>
-<th>WSL (Ubuntu 24.04)</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Python 3</td>
-<td><code>scoop install python</code></td>
-<td>system <code>python3</code></td>
-</tr>
-<tr class="even">
-<td>SCons</td>
-<td><code>python -m pip install scons</code></td>
-<td><code>python3 -m pip install scons</code></td>
-</tr>
-<tr class="odd">
-<td>Compiler</td>
-<td>MinGW-w64 (<code>use_mingw=yes</code>)</td>
-<td><code>build-essential</code> (gcc/g++)</td>
-</tr>
-<tr class="even">
-<td>sccache</td>
-<td><code>scoop install sccache</code></td>
-<td><code>brew install sccache</code></td>
-</tr>
-<tr class="odd">
-<td>Git</td>
-<td><code>scoop install git</code></td>
-<td>system <code>git</code></td>
-</tr>
-</tbody>
-</table>
-<p>Verify <code>sccache --version</code> resolves in each shell. The verified setup uses <strong>sccache 0.15.0</strong>.</p>
-</section>
-<section id="storage-backend" class="level3">
-<h3 class="anchored" data-anchor-id="storage-backend">Storage backend</h3>
-<p>sccache picks its backend from environment variables. Two options:</p>
-<ul>
-<li>To share the cache across hosts (recommended), use an S3-compatible bucket: set the <code>SCCACHE_BUCKET</code> / <code>SCCACHE_ENDPOINT</code> / <code>SCCACHE_REGION</code> coordinates and point <code>AWS_PROFILE</code> at a profile in <code>~/.aws/credentials</code>. sccache keys include the compiler, target triple, and flags, so Windows/MinGW and Linux objects coexist in one bucket without colliding. A <code>SCCACHE_S3_KEY_PREFIX</code> namespaces these objects so they never collide with other projects sharing the bucket.</li>
-<li>For a single host, use a local directory instead: set <code>SCCACHE_DIR</code> and <code>SCCACHE_CACHE_SIZE</code>, and sccache uses local disk with no S3 config needed.</li>
-</ul>
-<blockquote class="blockquote">
-<p><strong>Secrets policy:</strong> only the bucket <em>name, endpoint, region, and key prefix</em> — none of which are secrets — appear in committed config. The access key and secret are never committed to any repo, dotfile, or build log. They live in one of two places depending on where the build runs:</p>
-<ul>
-<li><strong>Locally:</strong> <code>~/.aws/credentials</code> under a named profile (<code>AWS_PROFILE</code>).</li>
-<li><strong>CI:</strong> GitHub Actions <strong>secret variables</strong>, injected at runtime via the <code>${{ secrets.* }}</code> context. Storing the keys there is fine — they are encrypted and never land in the repo. What is <em>not</em> fine is pasting a literal key into a workflow YAML, a script, or this manual.</li>
-</ul>
-</blockquote>
-</section>
-<section id="ci-github-actions" class="level3">
-<h3 class="anchored" data-anchor-id="ci-github-actions">CI — GitHub Actions</h3>
-<p>In a workflow, read the credentials from secret variables into the sccache S3 environment for the build step. Only the secret <em>names</em> appear in the committed YAML — the values are stored in the repo/org Actions secrets:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb1-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">env</span><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">:</span></span>
-<span id="cb1-2"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">  </span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">SCCACHE_BUCKET</span><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">:</span><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;"> &lt;your-sccache-bucket&gt;</span><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"> # non-secret coordinates</span></span>
-<span id="cb1-3"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">  </span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">SCCACHE_ENDPOINT</span><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">:</span><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;"> &lt;region&gt;.example-object-store.com</span></span>
-<span id="cb1-4"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">  </span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">SCCACHE_REGION</span><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">:</span><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;"> &lt;region&gt;</span></span>
-<span id="cb1-5"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">  </span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">SCCACHE_S3_KEY_PREFIX</span><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">:</span><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;"> godot</span></span>
-<span id="cb1-6"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">  </span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">AWS_ACCESS_KEY_ID</span><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">:</span><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;"> ${{ secrets.SCCACHE_AWS_ACCESS_KEY_ID }}</span><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"> # from Actions secrets</span></span>
-<span id="cb1-7"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">  </span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">AWS_SECRET_ACCESS_KEY</span><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">:</span><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;"> ${{ secrets.SCCACHE_AWS_SECRET_ACCESS_KEY }}</span></span></code></pre></div></div>
-<p>sccache reads <code>AWS_ACCESS_KEY_ID</code> / <code>AWS_SECRET_ACCESS_KEY</code> directly, so CI needs no <code>~/.aws/credentials</code> file or <code>AWS_PROFILE</code>.</p>
-<p><code>SCCACHE_BASEDIRS</code> (the equivalent of ccache’s <code>CCACHE_BASEDIR</code>) strips a leading absolute prefix before hashing so hits survive a moved/renamed checkout. Point it at <code>GODOT_SRC</code>. Paths must be <strong>absolute</strong>; separate multiple dirs with <code>;</code> on Windows and <code>:</code> elsewhere (longest matching prefix wins). The server reads it at startup — run <code>sccache --stop-server</code> after changing it.</p>
-</section>
-<section id="windows-powershell-profile" class="level3">
-<h3 class="anchored" data-anchor-id="windows-powershell-profile">Windows — PowerShell profile</h3>
-<p>Set <code>GODOT_SRC</code> and the S3 coordinates to your values, then add to <code>Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1</code>. The function sets the sccache env only for the duration of the build and restores it afterwards, so the interactive session and the real AWS CLI are never shadowed:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb2-1"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">if</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">(-not</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">$env</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">GODOT_SRC</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">)</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">$env</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">GODOT_SRC</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">$env</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">USERPROFILE</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">\godot"</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">}</span></span>
-<span id="cb2-2"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">function</span> gscons <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span></span>
-<span id="cb2-3">    <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">$envset</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">[</span>ordered<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">]</span>@<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span></span>
-<span id="cb2-4">        SCCACHE_BUCKET        <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'&lt;your-sccache-bucket&gt;'</span></span>
-<span id="cb2-5">        SCCACHE_ENDPOINT      <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'&lt;region&gt;.example-object-store.com'</span></span>
-<span id="cb2-6">        SCCACHE_REGION        <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'&lt;region&gt;'</span></span>
-<span id="cb2-7">        SCCACHE_S3_USE_SSL    <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'true'</span></span>
-<span id="cb2-8">        SCCACHE_S3_KEY_PREFIX <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'godot'</span></span>
-<span id="cb2-9">        SCCACHE_BASEDIRS      <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">$env</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">GODOT_SRC</span></span>
-<span id="cb2-10">        AWS_PROFILE           <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'&lt;your-s3-profile&gt;'</span>   <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># keys live in ~/.aws/credentials, never committed</span></span>
-<span id="cb2-11">    <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">}</span></span>
-<span id="cb2-12">    <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">$saved</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> @<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{}</span></span>
-<span id="cb2-13">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">foreach</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">(</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">$k</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">$envset</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">Keys</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">)</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">$saved</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">[</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">$k</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">]</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">[</span>Environment<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">]::</span>GetEnvironmentVariable<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">(</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">$k</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">,</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Process'</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">);</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">Set-Item</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"env:</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">$k</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">$envset</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">[</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">$k</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">]</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">}</span></span>
-<span id="cb2-14">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">try</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span></span>
-<span id="cb2-15">        python <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span>m SCons platform<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>windows use_mingw<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>yes compiledb<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>yes target<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>editor precision<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>double `</span>
-<span id="cb2-16">            c_compiler_launcher<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>sccache cpp_compiler_launcher<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>sccache <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span>j16 @args</span>
-<span id="cb2-17">    <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">}</span> <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">finally</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span></span>
-<span id="cb2-18">        <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">foreach</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">(</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">$k</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">$envset</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">Keys</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">)</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span> <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">if</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">(</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">$null</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-eq</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">$saved</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">[</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">$k</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">])</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">Remove-Item</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"env:</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">$k</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span>ErrorAction SilentlyContinue <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">}</span> <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">else</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">Set-Item</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"env:</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">$k</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">$saved</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">[</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">$k</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">]</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">}</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">}</span></span>
-<span id="cb2-19">    <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">}</span></span>
-<span id="cb2-20"><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">}</span></span></code></pre></div></div>
-</section>
-<section id="wsl-linux-.bashrc" class="level3">
-<h3 class="anchored" data-anchor-id="wsl-linux-.bashrc">WSL / Linux — <code>~/.bashrc</code></h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Godot V-Sekai linuxbsd build. sccache is the only object cache; S3 backend shares it across hosts.</span></span>
-<span id="cb3-2"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">export</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">GODOT_SRC</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">${GODOT_SRC</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:-</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">$HOME</span>/godot<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">}</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>                 <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># engine checkout</span></span>
-<span id="cb3-3"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">export</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">SCCACHE_BUCKET</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">${SCCACHE_BUCKET</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:-</span>&lt;your-sccache-bucket&gt;<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">}</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span></span>
-<span id="cb3-4"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">export</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">SCCACHE_ENDPOINT</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">${SCCACHE_ENDPOINT</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:-</span>&lt;region&gt;.example-object-store.com<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">}</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span></span>
-<span id="cb3-5"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">export</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">SCCACHE_REGION</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">${SCCACHE_REGION</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:-</span>&lt;region&gt;<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">}</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span></span>
-<span id="cb3-6"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">export</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">SCCACHE_S3_USE_SSL</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">${SCCACHE_S3_USE_SSL</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:-</span>true<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">}</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span></span>
-<span id="cb3-7"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">export</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">SCCACHE_S3_KEY_PREFIX</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">${SCCACHE_S3_KEY_PREFIX</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:-</span>godot<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">}</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span></span>
-<span id="cb3-8"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">export</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">AWS_PROFILE</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">${AWS_PROFILE</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:-</span>&lt;your-s3-profile&gt;<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">}</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>       <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># keys in ~/.aws/credentials, never committed</span></span>
-<span id="cb3-9"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Strip the checkout root from compile paths so cache hits survive a moved/renamed build dir.</span></span>
-<span id="cb3-10"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">export</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">SCCACHE_BASEDIRS</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">${SCCACHE_BASEDIRS</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:-</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">$GODOT_SRC}</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span></span>
-<span id="cb3-11"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">gscons()</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">{</span></span>
-<span id="cb3-12">    <span class="ex" style="color: null;
-background-color: null;
-font-style: inherit;">python3</span> <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">-m</span> SCons compiledb=yes target=editor precision=double <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">\</span></span>
-<span id="cb3-13">        c_compiler_launcher=sccache cpp_compiler_launcher=sccache <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">\</span></span>
-<span id="cb3-14">        debug_symbols=yes tests=yes <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">-j</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">$(</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">nproc</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">)</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">$@</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span></span>
-<span id="cb3-15"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">}</span></span></code></pre></div></div>
-<p>Open a fresh shell (or <code>source ~/.bashrc</code> / <code>. $PROFILE</code>) so <code>gscons</code> is defined.</p>
-</section>
-<section id="building" class="level3">
-<h3 class="anchored" data-anchor-id="building">Building</h3>
-<p>From your engine checkout (<code>$GODOT_SRC</code>):</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><span class="ex" style="color: null;
-background-color: null;
-font-style: inherit;">gscons</span>                      <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># full editor build</span></span>
-<span id="cb4-2"><span class="ex" style="color: null;
-background-color: null;
-font-style: inherit;">gscons</span> verbose=yes          <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># extra args pass straight through to SCons</span></span></code></pre></div></div>
-<p>Output binary:</p>
-<ul>
-<li>Windows: <code>bin\godot.windows.editor.double.x86_64.exe</code></li>
-<li>WSL: <code>bin/godot.linuxbsd.editor.double.x86_64</code></li>
-</ul>
-<p>The two functions differ only where the platform requires it: Windows pins <code>platform=windows use_mingw=yes</code> and <code>-j16</code>; WSL infers <code>platform=linuxbsd</code>, uses <code>-j$(nproc)</code>, and adds <code>debug_symbols=yes tests=yes</code>. Both share <code>compiledb=yes target=editor precision=double</code> and the sccache launchers — and <strong>neither</strong> enables a SCons <code>CacheDir</code>.</p>
-</section>
-<section id="verifying-and-maintaining-the-cache" class="level3">
-<h3 class="anchored" data-anchor-id="verifying-and-maintaining-the-cache">Verifying and maintaining the cache</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><span class="ex" style="color: null;
-background-color: null;
-font-style: inherit;">sccache</span> <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">--show-stats</span>        <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># "Compile requests" / "Cache hits" climb across builds</span></span>
-<span id="cb5-2"><span class="ex" style="color: null;
-background-color: null;
-font-style: inherit;">sccache</span> <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">--stop-server</span>       <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># apply changed SCCACHE_* / AWS_PROFILE env vars</span></span>
-<span id="cb5-3"><span class="ex" style="color: null;
-background-color: null;
-font-style: inherit;">sccache</span> <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">--zero-stats</span>        <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># reset counters</span></span></code></pre></div></div>
-<p>A clean first build is mostly misses; a second build of the same tree shows a high hit rate and finishes substantially faster. With the S3 backend, a build on the <em>other</em> host hits the same objects once they are uploaded.</p>
-</section>
+<p>Chosen option: produce one Godot build by merging all <code>feat/*</code> branches with the <code>merge</code> tool at <code>precision=double</code> (<a href="../decisions/20260501-godot-double-precision-template-release-for-zone.html">the double-precision decision</a>, <a href="../decisions/20260606-compiling-godot-engine.html">the compiling decision</a>), and drive content creation through the <code>vsekai-godot-mcp</code> editor server, where the Godot editor is the MCP server over streamable-HTTP, because one merged build covers authoring and the MCP lets a content tool drive the editor directly. The pipeline uses no Blender (<a href="../decisions/20260611-cassie-desktop-curvenet-authoring.html">the CASSIE authoring decision</a>).</p>
 </section>
 <section id="consequences" class="level2">
 <h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
 <ul>
-<li>There is one object cache, not two: sccache is the sole cache; the SCons <code>CacheDir</code> is deliberately not enabled, so the same objects are never stored twice.</li>
-<li>One S3 bucket serves both hosts; management is a single location, and a checkout can move or be renamed without losing hits (<code>SCCACHE_BASEDIRS</code>).</li>
-<li>No secrets live in the repo; bucket coordinates are non-secret config. Access keys live in <code>~/.aws/credentials</code> locally and in GitHub Actions secret variables in CI, never in committed files or build logs.</li>
-<li>The engine <code>SConstruct</code> recognises only <code>cache_path</code> and <code>cache_limit</code> for the SCons cache. We intentionally pass neither. <code>scons_cache=</code> is <strong>not</strong> valid and is silently ignored.</li>
-<li>Common failures: no hits between builds → server started before the env vars, run <code>sccache --stop-server</code>; no hits after relocating a checkout → set <code>SCCACHE_BASEDIRS</code> to the checkout root; S3 auth errors → wrong/expired <code>AWS_PROFILE</code> or missing <code>~/.aws/credentials</code> entry.</li>
+<li>One merged double-precision build covers content authoring for the slice.</li>
+<li>A content tool drives the editor through the MCP over streamable-HTTP.</li>
+<li>The pipeline carries no Blender dependency.</li>
 </ul>
 </section>
-<section id="further-reading" class="level2">
-<h2 class="anchored" data-anchor-id="further-reading">Further reading</h2>
-<ul>
-<li><a href="https://github.com/mozilla/sccache/blob/main/docs/S3.md">sccache S3 storage (<code>SCCACHE_BUCKET</code>, <code>SCCACHE_ENDPOINT</code>, <code>SCCACHE_S3_KEY_PREFIX</code>)</a></li>
-<li><a href="https://github.com/mozilla/sccache/blob/main/docs/Configuration.md">sccache configuration (<code>SCCACHE_BASEDIRS</code>)</a></li>
-<li><a href="https://github.com/godotengine/godot/blob/master/SConstruct">Godot <code>SConstruct</code></a></li>
-</ul>
+<section id="confirmation" class="level2">
+<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
+<p>The merged double-precision build opens and the MCP drives an authoring round trip.</p>
 
 
 </section>
 <section id="related" class="level2">
 <h2 class="anchored" data-anchor-id="related">Related</h2>
 <ul>
-<li><p><a href="../changelog/2026/20260606-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-06 (Saturday)</a></p></li>
-<li><p><a href="20260606-checking-sccache.html">Checking the sccache build cache</a></p></li>
-<li><p><a href="20260606-presence-demo-cold-boot-dependencies.html">Cold-boot dependencies for the presence-marker demo</a></p></li>
-<li><p><a href="20260606-windows-background-services-nssm.html">Running background services on Windows with nssm</a></p></li>
+<li><p><a href="20260501-godot-double-precision-template-release-for-zone.html">Godot double precision template_release for zone servers</a></p></li>
+<li><p><a href="20260606-compiling-godot-engine.html">Compiling the Godot engine</a></p></li>
+<li><p><a href="20260611-cassie-desktop-curvenet-authoring.html">CASSIE desktop curvenet authoring for content, no Blender</a></p></li>
 </ul>
 </section>
 
  ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-compiling-godot-engine.html</guid>
-  <pubDate>Sat, 06 Jun 2026 00:00:00 GMT</pubDate>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-content-build-merged-double-precision-mcp.html</guid>
+  <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
 </item>
 <item>
-  <title>Cut gitassembly tag releases for the assembled engine</title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-gitassembly-tag-release.html</link>
+  <title>Core kernel codegen via lean-slang (Lean to Slang to SPIR-V)</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-core-codegen-lean-slang.html</link>
   <description><![CDATA[ 
 
 
 
 
 
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Cut gitassembly tag releases for the assembled engine</em></p>
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Core kernel codegen via lean-slang (Lean to Slang to SPIR-V)</em></p>
 <p><strong>Status:</strong> accepted</p>
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The <a href="https://github.com/v-sekai-multiplayer-fabric/merge"><code>merge</code></a> repo’s <code>gitassembly</code> recipe builds the engine by merging feature branches (<code>feat/module-xr-grid</code>, <code>feat/module-cassie</code>, <code>feat/module-http3</code>, and the rest) onto the <a href="../decisions/20260606-pin-engine-to-frozen-godot-4-7.html">frozen Godot 4.7 base</a>. The base is pinned, but the feature branch tips are not: an assembly run today and one next week can merge different branch SHAs and produce a different engine. The <a href="../decisions/20260606-presence-demo-cold-boot-dependencies.html">cold-boot dependencies</a> refer to the branches by name, so “assemble these branches” alone is not a reproducible artifact. What is the shareable, fixed reference for the assembled engine?</p>
+<p>The cores carry compute kernels — hit raycasts, the budgeter solve, geometry costing — that need to be verified once and run as GPU compute, with the dispatch wrapped behind the flat C ABI port (<a href="../decisions/20260611-lean4-kernel-cores-flat-c-host-adapters.html">the Lean cores decision</a>). Hand-porting a kernel from a separate spec to a shader drifts.</p>
 </section>
 <section id="decision-drivers" class="level2">
 <h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
 <ul>
-<li>Reproducibility: a name that resolves to one exact assembled tree, not moving tips.</li>
-<li>A single reference the demo, <code>godot-images</code>, and CI can all build from.</li>
-<li>Cheap to cut so releases keep pace with the feature branches.</li>
-<li>Do not steamroll prior assemblies that other work already builds against.</li>
+<li>One verified Lean source per kernel, with no separate shader to drift.</li>
+<li>The kernel runs on the GPU and integrates with GPU convergence; the CPU Slang target lacks that integration.</li>
+<li>Integer ops keep the kernel deterministic across conformant devices.</li>
 </ul>
 </section>
 <section id="considered-options" class="level2">
 <h2 class="anchored" data-anchor-id="considered-options">Considered Options</h2>
 <ul>
-<li>Keep referring to branch names; each consumer assembles the tips itself.</li>
-<li>Force-push the assembled <code>multiplayer-fabric</code> branch as the shared reference.</li>
-<li>Push an immutable, timestamped tag of the assembled tree (the existing <code>merge</code> tooling already does this).</li>
+<li>Hand-write each kernel as a shader from a separate spec.</li>
+<li>Lower a CPU host target through Slang.</li>
+<li>Author the kernel in Lean and lower it to SPIR-V.</li>
 </ul>
 </section>
 <section id="decision-outcome" class="level2">
 <h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: “Push an immutable, timestamped tag”, because it gives one reference that resolves to an exact tree without overwriting prior assemblies. This adopts the behavior the <code>merge</code> tooling already implements rather than inventing a new scheme.</p>
+<p>Chosen option: author the compute kernels in Lean and lower them to Slang through <a href="https://github.com/V-Sekai-fire/lean-slang">lean-slang</a>, then run <code>slangc -target spirv</code> to SPIR-V (<code>.spv</code>), and dispatch the <code>.spv</code> behind the flat C ABI, because SPIR-V runs the kernel on the GPU with the convergence integration the CPU Slang target lacks, and one verified Lean source produces the shipped kernel. The <code>idtx-flow</code> repository already depends on <code>LeanSlang</code> and byte-pins the emitted Slang against committed source with <code>native_decide</code>.</p>
+</section>
+<section id="consequences" class="level2">
+<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
 <ul>
-<li><code>elixir update_godot_v_sekai.exs</code> (run from <code>main</code>) fetches the remotes, runs the vendored <code>git-assembler</code> over the <code>gitassembly</code> recipe, then tags the assembled <code>multiplayer-fabric</code> branch and pushes <strong>only the tag</strong> to <code>v-sekai-multiplayer-fabric/godot</code>. The moving branch stays local, so a release never steamrolls anyone working off a previous tip.</li>
-<li>Tag format (CalVer, UTC): <code>v&lt;YYYY.MM.DD.HHMM&gt;-multiplayer-fabric</code>. The timestamp is the only thing that changes between runs; the assembler is deterministic, so the same inputs produce the same tree.</li>
-<li>The current cold-boot reference is <code>v2026.06.06.1853-multiplayer-fabric</code> (commit <code>9ea526ab</code>), assembled onto the pinned 4.7 base with the full recipe, including <code>feat/module-xr-grid</code>, <code>feat/module-cassie</code>, and <code>feat/module-http3</code>.</li>
-<li>Consumers pin to a tag, not to branch names. <code>godot-images</code> builds its GHCR editor image from a tag, and the <a href="../decisions/20260606-presence-demo-cold-boot-dependencies.html">cold-boot steps</a> reference that tag.</li>
-<li>Iterate with <code>--dry-run</code> (assembles locally, no push) before cutting a release.</li>
-</ul>
-<section id="consequences" class="level3">
-<h3 class="anchored" data-anchor-id="consequences">Consequences</h3>
-<ul>
-<li>Good: a tag resolves to one exact assembled engine, so demo, image, and CI build the same tree.</li>
-<li>Good: tag-only push keeps every prior assembly intact and addressable.</li>
-<li>Bad: the CalVer tag carries no semantic version, so the assembled Godot version is implicit in the <a href="../decisions/20260606-pin-engine-to-frozen-godot-4-7.html">pinned base</a>.</li>
-<li>Bad: tags must be cut deliberately, so a stale tag can lag the live branches.</li>
+<li>One Lean kernel source produces the <code>.spv</code>, so the spec and the shipped kernel stay one artifact.</li>
+<li>The lowered Slang and the <code>.spv</code> are committed and byte-pinned, so a regen that drifts fails the pin.</li>
+<li>The kernels use integer ops, so the SPIR-V stays deterministic across conformant devices (<a href="../decisions/20260611-deterministic-cores-integer-seeded-rng.html">the determinism decision</a>).</li>
 </ul>
 </section>
-<section id="confirmation" class="level3">
-<h3 class="anchored" data-anchor-id="confirmation">Confirmation</h3>
-<p><code>git ls-remote --tags v-sekai-multiplayer-fabric/godot</code> lists <code>v&lt;YYYY.MM.DD.HHMM&gt;-multiplayer-fabric</code> tags, a <code>godot-images</code> build from a tag reproduces the same editor, and the cold-boot steps reference a tag rather than branch names.</p>
-</section>
-</section>
-<section id="more-information" class="level2">
-<h2 class="anchored" data-anchor-id="more-information">More Information</h2>
-<p>The tag sits on top of the <a href="../decisions/20260606-pin-engine-to-frozen-godot-4-7.html">engine pin</a>: the pin fixes the base, and the tag fixes the assembly merged onto it. It is the reproducible artifact the <a href="../decisions/20260606-presence-demo-cold-boot-dependencies.html">cold-boot dependencies</a> build from. The tag format and workflow are documented in the <code>merge</code> repo’s <code>CONTRIBUTING.md</code>.</p>
+<section id="confirmation" class="level2">
+<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
+<p>The emitted Slang matches its committed byte-pin, and the dispatched <code>.spv</code> kernel passes the core fixtures.</p>
 
 
 </section>
 <section id="related" class="level2">
 <h2 class="anchored" data-anchor-id="related">Related</h2>
 <ul>
-<li><p><a href="20260606-amend-pr-before-it-enters-the-queue.html">Amend a PR before it enters the merge queue, not after</a></p></li>
-<li><p><a href="20260606-pin-engine-to-frozen-godot-4-7.html">Pin the engine to a frozen Godot 4.7 commit</a></p></li>
-<li><p><a href="20260606-presence-demo-cold-boot-dependencies.html">Cold-boot dependencies for the presence-marker demo</a></p></li>
+<li><p><a href="20260611-core-contract-pure-reducer-byte-state.html">Cores as pure reducers over byte-serialized state</a></p></li>
+<li><p><a href="20260611-deterministic-cores-integer-seeded-rng.html">Deterministic cores via r128 fixed-point and seeded RNG</a></p></li>
+<li><p><a href="20260611-lean4-kernel-cores-flat-c-host-adapters.html">Lean 4 build-time kernel cores with flat-C host adapters</a></p></li>
+<li><p><a href="20260612-r128-fixed-point-as-lean-library.html">r128 Q64.64 fixed-point as a Lean library for the cores</a></p></li>
 </ul>
 </section>
 
  ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-gitassembly-tag-release.html</guid>
-  <pubDate>Sat, 06 Jun 2026 00:00:00 GMT</pubDate>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-core-codegen-lean-slang.html</guid>
+  <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
 </item>
 <item>
-  <title>Feature classification — proof of concept, baseline, stretch</title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-feature-classification-poc-baseline-stretch.html</link>
+  <title>Cores as pure reducers over byte-serialized state</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-core-contract-pure-reducer-byte-state.html</link>
   <description><![CDATA[ 
 
 
 
 
 
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Feature classification — proof of concept, baseline, stretch</em></p>
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Cores as pure reducers over byte-serialized state</em></p>
+<p><strong>Status:</strong> accepted</p>
+<section id="context-and-problem-statement" class="level2">
+<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
+<p>Every hexagonal core (<a href="../decisions/20260610-hexagonal-core-ports-adapters.html">the hexagonal decision</a>) needs to be replayable, snapshot-able, fixture-testable, and transport-agnostic. A core that hides mutable state behind methods defeats all four.</p>
+</section>
+<section id="considered-options" class="level2">
+<h2 class="anchored" data-anchor-id="considered-options">Considered Options</h2>
+<ul>
+<li>Stateful objects whose internal state lives behind methods.</li>
+<li>A pure reducer over an explicit, serializable state value.</li>
+</ul>
+</section>
+<section id="decision-outcome" class="level2">
+<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
+<p>Chosen option: model each core as a pure reducer, <code>step : State -&gt; Event -&gt; State x Effects</code>, with <code>State</code>, <code>Event</code>, and <code>Effects</code> serialized to bytes deterministically, so the core is bytes to bytes. The flat C ABI exposes <code>step</code> plus <code>snapshot</code> and <code>restore</code> over the byte state, and the compute kernels lower through <a href="../decisions/20260611-core-codegen-lean-slang.html">lean-slang</a> to SPIR-V, dispatched on the GPU. Hidden mutable state defeats snapshots and exact fixtures, so the first option loses replay and rollback.</p>
+<p>With <a href="../decisions/20260611-deterministic-cores-integer-seeded-rng.html">the determinism decision</a>, this makes replay byte-exact and snapshots a value copy.</p>
+</section>
+<section id="consequences" class="level2">
+<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
+<ul>
+<li>Snapshots and rollback are copies of the state bytes.</li>
+<li>Fixtures pin exact output bytes, so a divergence shows up as a failing fixture.</li>
+<li>The same <code>step</code> backs every adapter, so <code>webtransportd</code> and the engine carry the same bytes.</li>
+</ul>
+</section>
+<section id="confirmation" class="level2">
+<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
+<p>Replaying an event log reproduces the state bytes on every target.</p>
+
+
+</section>
+<section id="related" class="level2">
+<h2 class="anchored" data-anchor-id="related">Related</h2>
+<ul>
+<li><p><a href="20260610-hexagonal-core-ports-adapters.html">Hexagonal core/ports/adapters as the component convention</a></p></li>
+<li><p><a href="20260611-core-codegen-lean-slang.html">Core kernel codegen via lean-slang (Lean to Slang to SPIR-V)</a></p></li>
+<li><p><a href="20260611-deterministic-cores-integer-seeded-rng.html">Deterministic cores via r128 fixed-point and seeded RNG</a></p></li>
+<li><p><a href="20260611-hexagon-combat-core.html">Combat hexagon — core, ports, and adapters</a></p></li>
+<li><p><a href="20260611-server-authoritative-simulation-deferred-rollback.html">Server-authoritative simulation with deferred rollback</a></p></li>
+</ul>
+</section>
+
+ ]]></description>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-core-contract-pure-reducer-byte-state.html</guid>
+  <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Deterministic cores via r128 fixed-point and seeded RNG</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-deterministic-cores-integer-seeded-rng.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Deterministic cores via r128 fixed-point and seeded RNG</em></p>
+<p><strong>Status:</strong> accepted</p>
+<section id="context-and-problem-statement" class="level2">
+<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
+<p>Replay, recorded fixtures, and the future rollback adapter need the authoritative cores to be bit-exact across the RTX 4090 workstation, the Quest 3, and the Steam Deck. IEEE-754 floating point diverges across platforms through fused multiply-add, instruction reordering, and transcendental functions, so a float in the authoritative path breaks replay silently.</p>
+</section>
+<section id="decision-outcome" class="level2">
+<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
+<p>Chosen option: the authoritative cores use r128 Q64.64 fixed-point and a seeded RNG threaded through state, with no floating point, because fixed-point over 64-bit integers reproduces bit-exact across machines while an explicit seed in the state makes the loot roll replayable. The cores import r128 as a Lean library (<a href="../decisions/20260612-r128-fixed-point-as-lean-library.html">the r128 Lean library decision</a>) that lowers to SPIR-V, and the engine’s vendored <code>thirdparty/misc/r128</code> stays the host reference.</p>
+</section>
+<section id="consequences" class="level2">
+<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
+<ul>
+<li>Replay and snapshots stay byte-exact, so the rollback adapter becomes cheap.</li>
+<li>The fixtures pin exact outputs, so a divergence shows up as a failing fixture rather than a silent drift.</li>
+<li>The loot roll is reproducible from the seed in the state.</li>
+</ul>
+</section>
+<section id="confirmation" class="level2">
+<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
+<p>Replaying an input log reproduces the state hash on every target.</p>
+
+
+</section>
+<section id="related" class="level2">
+<h2 class="anchored" data-anchor-id="related">Related</h2>
+<ul>
+<li><p><a href="20260611-core-codegen-lean-slang.html">Core kernel codegen via lean-slang (Lean to Slang to SPIR-V)</a></p></li>
+<li><p><a href="20260611-core-contract-pure-reducer-byte-state.html">Cores as pure reducers over byte-serialized state</a></p></li>
+<li><p><a href="20260611-hexagon-combat-core.html">Combat hexagon — core, ports, and adapters</a></p></li>
+<li><p><a href="20260612-r128-fixed-point-as-lean-library.html">r128 Q64.64 fixed-point as a Lean library for the cores</a></p></li>
+</ul>
+</section>
+
+ ]]></description>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-deterministic-cores-integer-seeded-rng.html</guid>
+  <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>First-party curated content with zone-baker budgets</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-first-party-curated-content-zone-baker-budgets.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › First-party curated content with zone-baker budgets</em></p>
 <p><strong>Tier:</strong> baseline · <strong>Status:</strong> accepted</p>
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The capabilities table lists features with a free-text status (“working”, “loses about 90%”). Free text does not say whether a feature is a throwaway experiment, a committed part of the product, or a nice-to-have. The team needs one shared vocabulary for how far along and how committed a feature is, so planning and the docs agree on what “done” means for each one.</p>
+<p>A user-generated-content runtime carries arbitrary, unpredictable per-frame cost, which is fatal on a mobile GPU holding a stereo VR frame. The MVP needs predictable cost and the freedom to co-optimize content against the engine.</p>
 </section>
-<section id="decision-drivers" class="level2">
-<h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
+<section id="decision-outcome" class="level2">
+<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
+<p>Chosen option: ship first-party curated content only, with no user-generated-content runtime, and let the <code>zone-baker</code> enforce hard budgets at bake time, because curated content lets the engine co-optimize with the art and lets the baker reject anything over budget before it reaches a device.</p>
+</section>
+<section id="consequences" class="level2">
+<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
 <ul>
-<li>One vocabulary shared between planning and the manuals.</li>
-<li>A reader should know at a glance whether a feature is committed or exploratory.</li>
-<li>Cheap to apply and to move as a feature matures.</li>
+<li>A four-player Field room holds its geometry, four avatars, and props under roughly 500,000 visible triangles and 200 draw calls per eye on the Quest 3.</li>
+<li>The baker rejects any asset that exceeds the budget, so cost stays predictable.</li>
+<li>The content surface stays small, which keeps the determinism and the budgeter tractable.</li>
 </ul>
+</section>
+<section id="confirmation" class="level2">
+<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
+<p>Every shipped asset passes the <code>zone-baker</code> at budget, and a four-player room holds the per-eye limits on a standalone Quest 3.</p>
+
+
+</section>
+
+ ]]></description>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-first-party-curated-content-zone-baker-budgets.html</guid>
+  <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Forward renderer with baked light for the mobile floor</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-forward-renderer-baked-light.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Forward renderer with baked light for the mobile floor</em></p>
+<p><strong>Status:</strong> accepted</p>
+<section id="context-and-problem-statement" class="level2">
+<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
+<p>The Quest 3 rations bandwidth across file, memory, and network IO, and deferred rendering competes for it. The slice needs predictable frame cost regardless of light count on the mobile tile renderer.</p>
 </section>
 <section id="considered-options" class="level2">
 <h2 class="anchored" data-anchor-id="considered-options">Considered Options</h2>
 <ul>
-<li>Keep free-text status only.</li>
-<li>A maturity ladder (alpha / beta / stable).</li>
-<li>A three-tier commitment classification: proof of concept, baseline, stretch.</li>
+<li>Deferred rendering.</li>
+<li>A simple forward renderer with baked global illumination.</li>
 </ul>
 </section>
 <section id="decision-outcome" class="level2">
 <h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: “A three-tier commitment classification”, because it captures commitment, not just maturity, which is what planning needs.</p>
-<p>The tiers:</p>
-<ol type="1">
-<li>A proof of concept demonstrates the idea works end to end, in partial or throwaway form. It may be unreliable or lossy, and nothing depends on it yet.</li>
-<li>The baseline is the committed minimum the product ships. It works reliably across the target platforms, and is the bar.</li>
-<li>A stretch goal goes beyond baseline. It is pursued if time allows; cutting it does not block the release.</li>
-</ol>
-<p>Each feature in the <a href="../index.html#capabilities-and-where-they-live">capabilities table</a> carries one tier. A feature moves between tiers as it matures or as commitment changes; the tier is the current call, not a permanent label.</p>
-<section id="initial-triage" class="level3">
-<h3 class="anchored" data-anchor-id="initial-triage">Initial triage</h3>
+<p>Chosen option: a simple forward renderer with baked global illumination and light probes for static geometry, a dedicated shadow pass for avatars, and probe lighting for dynamic entities, because the frame cost stays predictable regardless of light count. Deferred rendering pressures the bandwidth the mobile tile renderer rations.</p>
+</section>
+<section id="consequences" class="level2">
+<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
 <ul>
-<li>Native video playback — baseline.</li>
-<li>Scene baking via OpenUSD — baseline.</li>
-<li>Spatial audio (HRTF + audio probes) — baseline.</li>
-<li>Speech — baseline.</li>
-<li>Pen stroke creation (cassie) — proof of concept (patch surface creation loses about 90%).</li>
+<li>Frame cost stays predictable, so artists place many lights without watching the budget.</li>
+<li>Dynamic entities take lower-fidelity probe lighting.</li>
+<li>The renderer removes one axis the small team otherwise tunes by hand.</li>
 </ul>
 </section>
-<section id="consequences" class="level3">
-<h3 class="anchored" data-anchor-id="consequences">Consequences</h3>
-<ul>
-<li>Good: planning and docs share one word per feature for its commitment level.</li>
-<li>Good: the tier is a small, reversible edit as features move.</li>
-<li>Bad: a tier is a judgement call and can drift from reality if the table is not kept current.</li>
-</ul>
-</section>
-<section id="confirmation" class="level3">
-<h3 class="anchored" data-anchor-id="confirmation">Confirmation</h3>
-<p>The capabilities table has a Tier column, and every row carries one of the three tiers. New capabilities are added with a tier.</p>
+<section id="confirmation" class="level2">
+<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
+<p>The Field room holds 72 Hz on a standalone Quest 3 with many lights placed.</p>
 
 
 </section>
+
+ ]]></description>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-forward-renderer-baked-light.html</guid>
+  <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Generated behavior runs as sandboxed RISC-V</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-generated-behavior-sandboxed-riscv.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Generated behavior runs as sandboxed RISC-V</em></p>
+<p><strong>Status:</strong> accepted</p>
+<section id="context-and-problem-statement" class="level2">
+<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
+<p>Enemy and ability behavior may be generated, and running generated logic in-process risks the whole instance. The combat hexagon’s <code>behavior_source</code> port needs a safe implementation.</p>
+</section>
+<section id="decision-outcome" class="level2">
+<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
+<p>Chosen option: run generated enemy and art behavior as sandboxed RISC-V programs through <code>feat/sandbox</code>, implementing the combat <code>behavior_source</code> port, because the sandbox contains a misbehaving program rather than letting it take down the instance. This is the runtime guarantee under the bounded, declarative vocabulary the AI emits.</p>
+</section>
+<section id="consequences" class="level2">
+<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
+<ul>
+<li>Generated logic is isolated, so a bad program degrades one entity rather than the instance.</li>
+<li>Behavior is an adapter behind a port, so a fixture adapter replays scripted intents for CI.</li>
+<li>The same port accepts hand-written and generated behavior.</li>
+</ul>
+</section>
+<section id="confirmation" class="level2">
+<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
+<p>A misbehaving generated program is contained without taking down the instance, and the fixture adapter reproduces scripted intents with no sandbox.</p>
+
+
 </section>
 <section id="related" class="level2">
 <h2 class="anchored" data-anchor-id="related">Related</h2>
 <ul>
-<li><p><a href="../changelog/2026/20260606-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-06 (Saturday)</a></p></li>
-<li><p><a href="20260606-art-game-loop-steel-thread.html">Recursive art-game loop and its minimal steel thread</a></p></li>
-<li><p><a href="20260606-multiplayer-presence-demo-orbs.html">Minimal multiplayer presence demo with head and hand orbs</a></p></li>
-<li><p><a href="20260606-presence-demo-networking-internals.html">Presence demo pose networking</a></p></li>
-<li><p><a href="20260606-presence-marker-representation.html">Human-readable presence markers with an orb debug mode</a></p></li>
+<li><p><a href="20260611-hexagon-combat-core.html">Combat hexagon — core, ports, and adapters</a></p></li>
 </ul>
 </section>
 
  ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-feature-classification-poc-baseline-stretch.html</guid>
-  <pubDate>Sat, 06 Jun 2026 00:00:00 GMT</pubDate>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-generated-behavior-sandboxed-riscv.html</guid>
+  <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
 </item>
 <item>
-  <title>Ghostly partial-body presence avatar from ANNY via SOMA-X</title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-ghostly-presence-body-model.html</link>
+  <title>Genre-generic naming, no trademarked proper nouns</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-genre-generic-naming-no-trademarks.html</link>
   <description><![CDATA[ 
 
 
 
 
 
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Ghostly partial-body presence avatar from ANNY via SOMA-X</em></p>
-<p><strong>Tier:</strong> proof of concept · <strong>Status:</strong> proposed</p>
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Genre-generic naming, no trademarked proper nouns</em></p>
+<p><strong>Status:</strong> accepted</p>
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The <a href="../decisions/20260606-presence-marker-representation.html">presence marker decision</a> calls for a vague ghostly humanoid that conveys position and heading. CHI-298 proposed fitting personas with SOMA (unifying parametric body models) and ANNY; the Linear issue is canceled, but the concept is the natural basis for that ghostly form. We track only three points (head and two hands), so a full posed body is under-constrained and risks the uncanny valley. Which body model do we use, and how much of the body do we show?</p>
-</section>
-<section id="decision-drivers" class="level2">
-<h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
-<ul>
-<li>A recognizable human form from three tracked points.</li>
-<li>Stay clear of the uncanny valley in a head-mounted display.</li>
-<li>Render only what we track; do not fabricate an untracked lower body.</li>
-<li>Scale to a Discord call, and retarget personas across body models.</li>
-</ul>
-</section>
-<section id="considered-options" class="level2">
-<h2 class="anchored" data-anchor-id="considered-options">Considered Options</h2>
-<ul>
-<li>Full parametric body (ANNY) posed from three points via IK.</li>
-<li>Partial body: head plus bust (shoulders and chest) plus hands, ghostly shading.</li>
-<li>Floating head and hand markers only (the prior markers).</li>
-</ul>
+<p>The core loop draws on a trademarked action RPG. The project reuses none of that game’s trademarks, so the docs and the game need a neutral vocabulary that carries the mechanics without the marks.</p>
 </section>
 <section id="decision-outcome" class="level2">
 <h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: “Partial body — head, bust, and hands”, built from ANNY and retargeted through SOMA-X, shaded as a translucent ghostly form.</p>
-<p>Can we show only hands and a bust? Yes. ANNY is one parametric mesh with a unified topology plus a dedicated hand model, and SOMA-X offers level-of-detail meshes and a shared rig, so we render a masked subset — head, shoulders and chest, hands — and drop the lower-body vertices we cannot track.</p>
-<p>Recommendations:</p>
+<p>Chosen option: use genre-generic vocabulary throughout the docs, the filenames, and the game, because generic terms describe the mechanics while carrying no trademark.</p>
+<p>The vocabulary: Hub for the social staging area, Field for a combat instance, melee, ranged, and caster for the archetypes, art for a learnable ability, affinity for the gating stat, and energy for the ability resource.</p>
+</section>
+<section id="consequences" class="level2">
+<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
 <ul>
-<li>Default to a translucent, stylized ghost bust and hands driven by the 3-point pose; the head carries heading; the hands keep a distinct shape.</li>
-<li>Keep it abstract. Translucency and stylization sit on the safe side of the uncanny valley, and fluid motion helps more than facial realism.</li>
-<li>Use SOMA-X as the pivot so personas authored in ANNY, MHR, or SMPL-X retarget to one rig.</li>
-<li>Licensing: ANNY core is Apache 2.0 and its MPFB2 data is CC0, while the SMPL-X topology is non-commercial. Ship on ANNY or MHR topology; keep SMPL-X to research.</li>
-<li>Keep the orb debug mode from the marker decision.</li>
-</ul>
-<p>Uncanny-valley guidance, ranked for this use case:</p>
-<ol type="1">
-<li>Schwind et al.&nbsp;on the uncanny valley in HCI <span class="citation" data-cites="schwind2018uncanny">(Schwind et al. 2018)</span> — abstraction helps, and the valley is deeper in HMDs.</li>
-<li>Aspects of visual avatar appearance <span class="citation" data-cites="avatarappearance2021">(<span>“Aspects of Visual Avatar Appearance”</span> 2021)</span> — realistic reads as more human yet uncannier; abstraction is the safer default.</li>
-<li>Stein and Ohler, the uncanny valley of mind <span class="citation" data-cites="stein2017uncanny">(Stein and Ohler 2017)</span> — limit mind-attribution cues such as faked eyes or expressions.</li>
-<li>Mori’s original uncanny valley <span class="citation" data-cites="mori2012uncanny">(Mori et al. 2012)</span> — motion shifts the curve.</li>
-</ol>
-<section id="consequences" class="level3">
-<h3 class="anchored" data-anchor-id="consequences">Consequences</h3>
-<ul>
-<li>Good: a human, heading-bearing presence that stays uncanny-safe and renders only the tracked region.</li>
-<li>Good: SOMA-X retargets personas across body models.</li>
-<li>Bad: it adds a body model and a Python/Warp persona pipeline.</li>
-<li>Bad: the SMPL-X topology license rules that topology out for shipping.</li>
+<li>No trademarked proper nouns appear in filenames, docs, or content.</li>
+<li>The docs read as their own product.</li>
+<li>New writing reuses the same neutral terms, so the vocabulary stays consistent.</li>
 </ul>
 </section>
-<section id="confirmation" class="level3">
-<h3 class="anchored" data-anchor-id="confirmation">Confirmation</h3>
-<p>A translucent bust-and-hands avatar renders from the 3-point pose at call scale and reads as human without tripping the uncanny valley in an HMD.</p>
-</section>
-</section>
-<section id="more-information" class="level2">
-<h2 class="anchored" data-anchor-id="more-information">More Information</h2>
-<p>Refines the <a href="../decisions/20260606-presence-marker-representation.html">presence marker decision</a> and revives <a href="https://linear.app/chibifire/issue/CHI-298/use-soma-and-anny-to-fit-concepts-to-personas">CHI-298</a>. Models: <a href="https://github.com/naver/anny">ANNY</a>, <a href="https://github.com/NVlabs/SOMA-X">SOMA-X</a>.</p>
+<section id="confirmation" class="level2">
+<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
+<p>A trademark scan over the project docs returns clean.</p>
 
 
 </section>
-<section id="related" class="level2">
-<h2 class="anchored" data-anchor-id="related">Related</h2>
-<ul>
-<li><p><a href="../changelog/2026/20260606-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-06 (Saturday)</a></p></li>
-<li><p><a href="20260606-presence-demo-cold-boot-dependencies.html">Cold-boot dependencies for the presence-marker demo</a></p></li>
-<li><p><a href="20260606-presence-marker-representation.html">Human-readable presence markers with an orb debug mode</a></p></li>
-</ul>
 
-</section>
-
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent">
-<div id="ref-avatarappearance2021" class="csl-entry">
-<span>“Aspects of Visual Avatar Appearance: Self-Representation, Display Type, and Uncanny Valley.”</span> 2021. <em>The Visual Computer</em>, ahead of print. <a href="https://doi.org/10.1007/s00371-021-02151-0">https://doi.org/10.1007/s00371-021-02151-0</a>.
-</div>
-<div id="ref-mori2012uncanny" class="csl-entry">
-Mori, Masahiro, Karl F. MacDorman, and Norri Kageki. 2012. <span>“The Uncanny Valley [from the Field].”</span> <em>IEEE Robotics &amp; Automation Magazine</em> 19 (2): 98–100. <a href="https://doi.org/10.1109/MRA.2012.2192811">https://doi.org/10.1109/MRA.2012.2192811</a>.
-</div>
-<div id="ref-schwind2018uncanny" class="csl-entry">
-Schwind, Valentin, Katrin Wolf, and Niels Henze. 2018. <span>“Implications of the Uncanny Valley of Avatars and Virtual Characters for Human-Computer Interaction.”</span> <em>Human–Computer Interaction</em>. <a href="https://www.semanticscholar.org/paper/bbcb5ed4d1d26f9767dbdffb9bb4b60b668a49cb">https://www.semanticscholar.org/paper/bbcb5ed4d1d26f9767dbdffb9bb4b60b668a49cb</a>.
-</div>
-<div id="ref-stein2017uncanny" class="csl-entry">
-Stein, Jan-Philipp, and Peter Ohler. 2017. <span>“Venturing into the Uncanny Valley of Mind — the Influence of Mind Attribution on the Acceptance of Human-Like Characters in a Virtual Reality Setting.”</span> <em>Cognition</em> 160: 43–50. <a href="https://doi.org/10.1016/j.cognition.2016.12.010">https://doi.org/10.1016/j.cognition.2016.12.010</a>.
-</div>
-</div></section></div> ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-ghostly-presence-body-model.html</guid>
-  <pubDate>Sat, 06 Jun 2026 00:00:00 GMT</pubDate>
+ ]]></description>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-genre-generic-naming-no-trademarks.html</guid>
+  <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
 </item>
 <item>
-  <title>Human-readable presence markers with an orb debug mode</title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-presence-marker-representation.html</link>
+  <title>Lean 4 build-time kernel cores with flat-C host adapters</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-lean4-kernel-cores-flat-c-host-adapters.html</link>
   <description><![CDATA[ 
 
 
 
 
 
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Human-readable presence markers with an orb debug mode</em></p>
-<p><strong>Tier:</strong> proof of concept · <strong>Status:</strong> proposed</p>
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Lean 4 build-time kernel cores with flat-C host adapters</em></p>
+<p><strong>Status:</strong> accepted</p>
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The <a href="../decisions/20260606-multiplayer-presence-demo-orbs.html">orb presence demo</a> draws each participant as head and hand orb clusters. In review, the orbs read as too similar: a head cluster and a hand cluster look alike, so they are easy to conflate, and a bare cluster conveys position better than heading. The 3-point model and the networking are sound; the visual marker is the weak part. What should the default marker be?</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/attachments/20260606_vsekai-mpf_xr-grid-debug-orbs_0001.png" class="img-fluid figure-img"></p>
-<figcaption>The <code>xr-grid</code> debug scene: each remote participant drawn as head and hand orb clusters. These become the debug mode. <span class="citation" data-cites="vsekai_xrgrid_debug_2026">(V-Sekai Multiplayer Fabric 2026)</span></figcaption>
-</figure>
-</div>
-</section>
-<section id="decision-drivers" class="level2">
-<h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
-<ul>
-<li>Tell head from hands at a glance.</li>
-<li>Convey heading (orientation), not only position.</li>
-<li>Keep the cheap 3-point pose and its compact wire format.</li>
-<li>Keep a raw view for debugging.</li>
-</ul>
+<p>The hexagonal cores (<a href="../decisions/20260610-hexagonal-core-ports-adapters.html">the hexagonal decision</a>) hold dependency-free domain logic that Godot, the Elixir backend, and a CLI all bind. The team wants strong spec and proof guarantees on that logic without linking a heavy language runtime into every host. The <code>idtx-flow</code> repository already explores this shape in its <code>LEAN_KERNELS_HOST_ADAPTERS</code> investigation.</p>
 </section>
 <section id="considered-options" class="level2">
 <h2 class="anchored" data-anchor-id="considered-options">Considered Options</h2>
 <ul>
-<li>Raw orb clusters as the default (current).</li>
-<li>A vague ghostly or cartoony head plus distinct hand markers that show heading.</li>
-<li>A floating “TV head” showing the user’s Steam avatar.</li>
+<li>Link the Lean runtime into each host and call exported Lean functions over a C ABI.</li>
+<li>Hand-write the cores in flat C with no Lean involvement.</li>
+<li>Use Lean 4 at build time for the spec and code generation, and ship a flat-C runtime core.</li>
 </ul>
 </section>
 <section id="decision-outcome" class="level2">
 <h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: “A vague ghostly or cartoony head plus distinct hand markers”. The default marker is a soft humanoid head that shows position and heading, with hand markers shaped differently from the head so the three points stay legible. The raw orb clusters stay as a debug mode the viewer can flip to.</p>
+<p>Chosen option: use Lean 4 at build time as the kernel, the spec, and the code generator, and ship each runtime core as a flat C ABI behind the port ring with no Lean runtime linked into any host, because this keeps the proof leverage while the hosts bind only a flat C surface. The first option links a heavy runtime and marshals Lean objects across every boundary; the second option loses the spec and proof leverage.</p>
+<p>Each core models a pure reducer over byte-serialized state, so it is bytes to bytes. The compute kernels are authored in Lean and lowered to Slang through <a href="https://github.com/V-Sekai-fire/lean-slang">lean-slang</a>, then <code>slangc -target spirv</code> lowers the Slang to SPIR-V, and the runtime core dispatches the <code>.spv</code> compute kernel behind the flat C ABI, byte-pinned beside the core (<a href="../decisions/20260611-core-codegen-lean-slang.html">the codegen decision</a>). The spec suite drives the C ABI through Python ctypes, the property tests run on Plausible, and a handful of theorems pin the invariants that never break. This mirrors <code>idtx-flow</code>, where <code>flow/core</code> compiles to a flat-C library, <code>flow/ports</code> is the flat C ABI, and <code>flow/core/spec</code> drives that ABI through ctypes with no engine and no hardware.</p>
+</section>
+<section id="consequences" class="level2">
+<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
 <ul>
-<li>Default: a ghostly/cartoony head (position + heading) and distinct hand markers.</li>
-<li>Debug: the orb clusters from the superseded demo, toggleable.</li>
-<li>Stretch: a floating TV head showing the user’s Steam avatar.</li>
-<li>Unchanged: 3-point tracking, poses over <a href="../decisions/20260606-presence-demo-networking-internals.html">WebTransport datagrams</a> in a compact binary form, and <a href="../decisions/20260606-feature-classification-poc-baseline-stretch.html">cassie</a> pen signing for optional identity.</li>
-</ul>
-<section id="consequences" class="level3">
-<h3 class="anchored" data-anchor-id="consequences">Consequences</h3>
-<ul>
-<li>Good: head and hands are distinguishable, and heading is visible.</li>
-<li>Good: the orb mode is kept for debugging the underlying poses.</li>
-<li>Bad: the humanoid and hand markers are assets that have to be authored and shipped.</li>
+<li>A host binds only the flat C ABI and never sees core internals or a Lean runtime.</li>
+<li>CI runs the cores headless on the workstation, with no engine and no device.</li>
+<li>Lean stays a build-time tool, so the runtime carries no Lean dependency.</li>
 </ul>
 </section>
-<section id="confirmation" class="level3">
-<h3 class="anchored" data-anchor-id="confirmation">Confirmation</h3>
-<p>A session shows each participant as a heading-bearing head marker and distinct hand markers; a debug toggle falls back to the orb clusters.</p>
-</section>
-</section>
-<section id="more-information" class="level2">
-<h2 class="anchored" data-anchor-id="more-information">More Information</h2>
-<p>Supersedes <a href="../decisions/20260606-multiplayer-presence-demo-orbs.html">Minimal multiplayer presence demo with head and hand orbs</a>. The orb representation is retained as the debug mode. UX input from Joseph. Refined by <a href="../decisions/20260606-ghostly-presence-body-model.html">Ghostly partial-body presence avatar from ANNY via SOMA-X</a>.</p>
+<section id="confirmation" class="level2">
+<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
+<p>Each core passes its ctypes fixture suite and its Plausible properties in CI, and no host binary links a Lean runtime.</p>
 
 
 </section>
 <section id="related" class="level2">
 <h2 class="anchored" data-anchor-id="related">Related</h2>
 <ul>
-<li><p><a href="../changelog/2026/20260606-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-06 (Saturday)</a></p></li>
-<li><p><a href="20260606-feature-classification-poc-baseline-stretch.html">Feature classification — proof of concept, baseline, stretch</a></p></li>
+<li><p><a href="20260610-hexagonal-core-ports-adapters.html">Hexagonal core/ports/adapters as the component convention</a></p></li>
+<li><p><a href="20260611-core-codegen-lean-slang.html">Core kernel codegen via lean-slang (Lean to Slang to SPIR-V)</a></p></li>
+</ul>
+</section>
+
+ ]]></description>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-lean4-kernel-cores-flat-c-host-adapters.html</guid>
+  <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Loot hexagon — core, ports, and adapters</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-hexagon-loot-core.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Loot hexagon — core, ports, and adapters</em></p>
+<p><strong>Tier:</strong> proof of concept · <strong>Status:</strong> accepted</p>
+<section id="context-and-problem-statement" class="level2">
+<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
+<p>Loot generation and first-touch contention need to be deterministic and replayable, so a drop and its winner reproduce from the seed and the receipt order.</p>
+</section>
+<section id="decision-outcome" class="level2">
+<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
+<p>Chosen option: structure loot as a hexagon. The core rolls drops from loot tables keyed by enemy type and difficulty using a seeded generator, and resolves first-touch contention by receipt timestamp, granting the first requester and rejecting the rest, as a pure reducer over deterministic state.</p>
+<p>Driving port: <code>loot_request_source</code> (an interact event with a receipt timestamp and a requester id). Driven ports: <code>grant_sink</code> (the award or rejection per requester), <code>inventory_delta_sink</code> (the change to persist). Adapters: the <code>zone-server</code> orders requests by receipt; the progression persistence adapter applies <code>inventory_delta_sink</code>; a fixture adapter replays contention races for CI.</p>
+</section>
+<section id="consequences" class="level2">
+<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
+<ul>
+<li>The Hub shop degrades to a free starting kit behind this core, so a slipping economy is not blocking the loop.</li>
+<li>The roll reproduces from the seed in the state.</li>
+<li>Contention resolves on the server, so two clients see one winner.</li>
+</ul>
+</section>
+<section id="confirmation" class="level2">
+<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
+<p>The core replays a recorded contention race to one grant against the rest rejected, with no network.</p>
+
+
+</section>
+
+ ]]></description>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-hexagon-loot-core.html</guid>
+  <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Loot-action core-loop MVP vertical slice</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-loot-action-core-loop-mvp-vertical-slice.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Loot-action core-loop MVP vertical slice</em></p>
+<p><strong>Tier:</strong> proof of concept · <strong>Status:</strong> accepted</p>
+<section id="context-and-problem-statement" class="level2">
+<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
+<p>The fabric needs a first playable that exercises the whole stack end to end: a social hub, an instanced combat zone, and the round trip between them, on the Quest 3. The team needs one bounded target small enough for a one-week build yet complete enough to prove the loop.</p>
+</section>
+<section id="decision-outcome" class="level2">
+<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
+<p>Chosen option: ship one vertical slice of an instanced, four-player loot-action core loop, because a single bounded loop proves the transport, the authority, the persistence, and the budget together without an open content surface.</p>
+<p>In scope: one Hub deck with a shop, a four-player party teleporting into one Field room, the melee archetype with a timed combo against one enemy, one loot drop, and persistence of the result. Out of scope: more Fields, boss fights, the full economy, trading, and avatar customization. The deadline is 2026-06-18, and AI generates the cores, the fixtures, the adapters, and the content in parallel while the squad reviews and integrates.</p>
+</section>
+<section id="consequences" class="level2">
+<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
+<ul>
+<li>The slice proves the loop on the Quest 3 frame floor with placeholder content.</li>
+<li>The ranged archetype, the caster archetype, the second platforms, and the in-headset authoring land after the gate.</li>
+<li>The build follows the hexagonal core/ports/adapters structure, per <a href="../decisions/20260610-hexagonal-core-ports-adapters.html">the hexagonal decision</a>, with one core per loop concern behind narrow ports.</li>
+</ul>
+</section>
+<section id="confirmation" class="level2">
+<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
+<p>The slice is complete when a four-player party forms on the Hub, clears the enemy, grabs one drop under first-touch contention, and returns with the result committing to the store, at 72 Hz on a Quest 3.</p>
+
+
+</section>
+<section id="related" class="level2">
+<h2 class="anchored" data-anchor-id="related">Related</h2>
+<ul>
+<li><p><a href="20260610-hexagonal-core-ports-adapters.html">Hexagonal core/ports/adapters as the component convention</a></p></li>
+</ul>
+</section>
+
+ ]]></description>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-loot-action-core-loop-mvp-vertical-slice.html</guid>
+  <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Presence hexagon — wrapping the existing presence stack</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-hexagon-presence-core.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Presence hexagon — wrapping the existing presence stack</em></p>
+<p><strong>Tier:</strong> proof of concept · <strong>Status:</strong> accepted</p>
+<section id="context-and-problem-statement" class="level2">
+<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
+<p>Remote-avatar presence is already decided in depth: head and hand orbs (<a href="../decisions/20260606-multiplayer-presence-demo-orbs.html">the orb demo</a>), human-readable markers (<a href="../decisions/20260606-presence-marker-representation.html">the marker decision</a>), and a ghostly partial body (<a href="../decisions/20260606-ghostly-presence-body-model.html">the body-model decision</a>). The loop needs presence behind ports like the other cores, without redeciding the representation.</p>
+</section>
+<section id="decision-outcome" class="level2">
+<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
+<p>Chosen option: wrap the existing presence stack as a thin hexagon. The core interpolates remote head and hand poses between updates and keeps the visual hand separate from the logical combat hand, as a pure reducer.</p>
+<p>Driving port: <code>pose_source</code> (remote head and hand pose orbs). Driven port: <code>avatar_sink</code> (interpolated transforms for the rig). Adapter: <code>feat/module-xr-grid</code> feeds <code>pose_source</code> over WebTransport and drives the flatscreen path; a fixture adapter replays a recorded pose stream. The marker and body representation follow the existing presence decisions.</p>
+</section>
+<section id="consequences" class="level2">
+<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
+<ul>
+<li>The representation reuses the existing presence decisions, so this hexagon carries no new look.</li>
+<li>This is the thinnest hexagon, foldable into Combat after the gate.</li>
+<li>The pose channel rides its own stream, so a stalled input packet does not delay presence.</li>
+</ul>
+</section>
+<section id="confirmation" class="level2">
+<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
+<p>The core replays a recorded pose stream to interpolated transforms, with no network.</p>
+
+
+</section>
+<section id="related" class="level2">
+<h2 class="anchored" data-anchor-id="related">Related</h2>
+<ul>
 <li><p><a href="20260606-ghostly-presence-body-model.html">Ghostly partial-body presence avatar from ANNY via SOMA-X</a></p></li>
 <li><p><a href="20260606-multiplayer-presence-demo-orbs.html">Minimal multiplayer presence demo with head and hand orbs</a></p></li>
-<li><p><a href="20260606-presence-demo-cold-boot-dependencies.html">Cold-boot dependencies for the presence-marker demo</a></p></li>
-<li><p><a href="20260606-presence-demo-networking-internals.html">Presence demo pose networking</a></p></li>
-</ul>
-
-</section>
-
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent">
-<div id="ref-vsekai_xrgrid_debug_2026" class="csl-entry">
-V-Sekai Multiplayer Fabric. 2026. <em><span class="nocase">xr-grid</span> Debug Scene: Hero-Asset Landmark with Head and Hand Orientation-and-Translation Orbs</em>.
-</div>
-</div></section></div> ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-presence-marker-representation.html</guid>
-  <pubDate>Sat, 06 Jun 2026 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Minimal multiplayer presence demo with head and hand orbs</title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-multiplayer-presence-demo-orbs.html</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Minimal multiplayer presence demo with head and hand orbs</em></p>
-<p><strong>Tier:</strong> proof of concept · <strong>Status:</strong> superseded by <a href="20260606-presence-marker-representation.html">20260606-presence-marker-representation</a></p>
-<section id="context-and-problem-statement" class="level2">
-<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The <code>xr-grid</code> debug scene shows one skinned-mesh hero asset (a rigged mesh with a skeleton, not a VRM) on the grid as a visual landmark; it does not represent a player. Around it float clusters of small colored orbs, each encoding the pose (translation and orientation) of one tracked point — head, hand, hand — for a remote participant. What is the smallest piece that proves shared presence at the scale of a full V-Sekai Discord call?</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/attachments/20260606_vsekai-mpf_xr-grid-debug-orbs_0001.png" class="img-fluid figure-img"></p>
-<figcaption>The <code>xr-grid</code> debug scene, 2026-06-06: a skinned-mesh hero asset as a visual landmark, with each remote participant drawn as head and hand orientation-and-translation orb clusters. <span class="citation" data-cites="vsekai_xrgrid_debug_2026">(V-Sekai Multiplayer Fabric 2026)</span></figcaption>
-</figure>
-</div>
-</section>
-<section id="decision-drivers" class="level2">
-<h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
-<ul>
-<li>Smallest demonstrable multiplayer increment on top of the existing scene.</li>
-<li>Real presence for a Discord call’s worth of participants.</li>
-<li>Cheap per-player representation that still reads as a person.</li>
-<li>Identity should be optional, not a login wall.</li>
-</ul>
-</section>
-<section id="considered-options" class="level2">
-<h2 class="anchored" data-anchor-id="considered-options">Considered Options</h2>
-<ul>
-<li>Full networked character (skinned mesh) for every participant.</li>
-<li>Head plus two hand orbs per participant (3-point tracking).</li>
-<li>Text nameplates with no embodiment.</li>
-</ul>
-</section>
-<section id="decision-outcome" class="level2">
-<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: “Head plus two hand orbs per participant”, because three tracked points convey presence and gesture cheaply enough to scale to a whole call.</p>
-<ul>
-<li>Every participant, including the local player, is three orb clusters (head, hand, hand), each encoding a pose. The hero asset stays as a landmark only.</li>
-<li>The room scales to a Discord call’s worth of participants.</li>
-<li>Identity is opt-in: a participant signs with the <a href="../decisions/20260606-feature-classification-poc-baseline-stretch.html">cassie</a> pen; unsigned ones stay anonymous orbs.</li>
-<li>Poses go over low-level <a href="../decisions/20260606-presence-demo-networking-internals.html">WebTransport datagrams</a>, not high-level replication.</li>
-<li>Built on <a href="https://github.com/v-sekai-multiplayer-fabric/xr-grid">xr-grid</a>.</li>
-</ul>
-<section id="consequences" class="level3">
-<h3 class="anchored" data-anchor-id="consequences">Consequences</h3>
-<ul>
-<li>Good: presence and gesture for many people at low per-player cost.</li>
-<li>Good: identity is opt-in, so there is no login step.</li>
-<li>Bad: orbs are not full avatars, so avatar networking and IK go unexercised.</li>
-<li>Neutral: signing rides cassie’s pen stroke creation, which is solid; only its patch surface creation is buggy, and signing does not use that.</li>
-</ul>
-</section>
-<section id="confirmation" class="level3">
-<h3 class="anchored" data-anchor-id="confirmation">Confirmation</h3>
-<p>A session shows multiple participants as head and hand orb clusters tracking their poses at call scale, and signing produces a visible mark by that participant.</p>
-
-
-</section>
-</section>
-<section id="related" class="level2">
-<h2 class="anchored" data-anchor-id="related">Related</h2>
-<ul>
-<li><p><a href="../changelog/2026/20260606-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-06 (Saturday)</a></p></li>
-<li><p><a href="20260606-archival-file-naming-convention.html">Archival file naming convention for committed assets</a></p></li>
-<li><p><a href="20260606-art-game-loop-steel-thread.html">Recursive art-game loop and its minimal steel thread</a></p></li>
-<li><p><a href="20260606-feature-classification-poc-baseline-stretch.html">Feature classification — proof of concept, baseline, stretch</a></p></li>
-<li><p><a href="20260606-presence-demo-networking-internals.html">Presence demo pose networking</a></p></li>
 <li><p><a href="20260606-presence-marker-representation.html">Human-readable presence markers with an orb debug mode</a></p></li>
 </ul>
-
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent">
-<div id="ref-vsekai_xrgrid_debug_2026" class="csl-entry">
-V-Sekai Multiplayer Fabric. 2026. <em><span class="nocase">xr-grid</span> Debug Scene: Hero-Asset Landmark with Head and Hand Orientation-and-Translation Orbs</em>.
-</div>
-</div></section></div> ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-multiplayer-presence-demo-orbs.html</guid>
-  <pubDate>Sat, 06 Jun 2026 00:00:00 GMT</pubDate>
+ ]]></description>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-hexagon-presence-core.html</guid>
+  <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
 </item>
 <item>
-  <title>Pin the engine to a frozen Godot 4.7 commit</title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-pin-engine-to-frozen-godot-4-7.html</link>
+  <title>Progression hexagon — core, ports, and adapters</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-hexagon-progression-core.html</link>
   <description><![CDATA[ 
 
 
 
 
 
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Pin the engine to a frozen Godot 4.7 commit</em></p>
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Progression hexagon — core, ports, and adapters</em></p>
+<p><strong>Tier:</strong> proof of concept · <strong>Status:</strong> accepted</p>
+<section id="context-and-problem-statement" class="level2">
+<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
+<p>The profile and inventory rules — the profile, the valid inventory transitions, and the affinity gate on arts — need to be durable across a session and testable with no database.</p>
+</section>
+<section id="decision-outcome" class="level2">
+<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
+<p>Chosen option: structure progression as a hexagon. The core defines the profile and the inventory, the valid transitions, and the affinity gate, as a pure reducer.</p>
+<p>Driving port: <code>profile_source</code> (a profile load at login). Driven port: <code>commit_sink</code> (a durable write of the profile and the inventory). Adapters: <code>zone-backend</code> with <code>cockroach</code> commits through the mTLS store (<a href="../decisions/20260501-cockroachdb-with-mtls-role-separation.html">the CockroachDB decision</a>); <code>feat/module-sqlite</code> caches on the instance and stands in as a degraded commit; a fixture adapter holds a recorded profile for CI.</p>
+</section>
+<section id="consequences" class="level2">
+<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
+<ul>
+<li>The persistence degrades from the <code>cockroach</code> adapter to the <code>feat/module-sqlite</code> adapter behind one <code>commit_sink</code>, so a slipping commit path is not blocking the loop.</li>
+<li>Inventory transitions validate in the core, so a bad transition fails a fixture rather than a live write.</li>
+<li>The affinity gate holds an art out of reach below its requirement.</li>
+</ul>
+</section>
+<section id="confirmation" class="level2">
+<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
+<p>The core validates inventory transitions against a recorded profile fixture, and a drop commits through the adapter and survives a round trip.</p>
+
+
+</section>
+<section id="related" class="level2">
+<h2 class="anchored" data-anchor-id="related">Related</h2>
+<ul>
+<li><p><a href="20260501-cockroachdb-with-mtls-role-separation.html">CockroachDB with mTLS and role-separated access</a></p></li>
+</ul>
+</section>
+
+ ]]></description>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-hexagon-progression-core.html</guid>
+  <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Quest 3 frame floor as the MVP performance gate</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-quest-3-frame-floor-as-mvp-gate.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Quest 3 frame floor as the MVP performance gate</em></p>
 <p><strong>Tier:</strong> baseline · <strong>Status:</strong> accepted</p>
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The engine fork carries many feature branches (cassie, resonance audio, native media, speech, spatial audio, the fabric modules) that the <code>merge</code> recipe assembles onto a base. If that base tracks a moving upstream, every assembly can shift under the patches, so a green build one day can break the next from upstream churn alone. What base should the feature branches and the assembly build on?</p>
-</section>
-<section id="decision-drivers" class="level2">
-<h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
-<ul>
-<li>A stable base so assembly and CI are reproducible.</li>
-<li>Patch branches that do not have to chase upstream API changes mid-cycle.</li>
-<li>A known engine version for the docs and for downstream images.</li>
-</ul>
-</section>
-<section id="considered-options" class="level2">
-<h2 class="anchored" data-anchor-id="considered-options">Considered Options</h2>
-<ul>
-<li>Track upstream <code>godotengine/godot</code> <code>master</code>.</li>
-<li>Track an upstream release branch.</li>
-<li>Pin the fork’s <code>master</code> to one frozen upstream Godot 4.7 commit.</li>
-</ul>
+<p>The MVP runs on three candidate targets: the Meta Quest 3, the Valve Steam Frame, and the Steam Deck. The team needs one binding performance gate. Quest 3 stereo VR on the Adreno 740 is the hardest of the three, and the dev fleet holds one Quest 3, two Steam Decks, squad PCVR rigs, and an RTX 4090 workstation.</p>
 </section>
 <section id="decision-outcome" class="level2">
 <h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: “Pin the fork’s <code>master</code> to one frozen upstream Godot 4.7 commit”, because it gives the patch branches and the assembly a fixed target, so builds are reproducible and upstream churn cannot break an assembly.</p>
+<p>Chosen option: take the standalone Quest 3 build at 90 Hz with a 72 Hz floor as the single hard gate, and land the Steam Frame and the Steam Deck after the gate, because hitting the hardest target guarantees the easier two while the reverse does not hold.</p>
+<p>Daily iteration runs flatscreen on the Decks and the workstation, and VR iteration runs the Quest 3 tethered over Link, but the sign-off is the standalone Quest 3 build, because Link offloads rendering to the host and hides the Adreno cost.</p>
+</section>
+<section id="consequences" class="level2">
+<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
 <ul>
-<li>The fork’s <code>master</code> is the frozen base. Its tip is <code>8a337510</code> (Godot <code>4.7.0-beta</code>, per <code>version.py</code>).</li>
-<li>Every feature branch in the <a href="https://github.com/v-sekai-multiplayer-fabric/merge"><code>merge</code></a> <code>gitassembly</code> recipe stands alone on <code>master</code>; the recipe merges them onto the assembled branch from that base.</li>
-<li>The pin moves only by a deliberate update to <code>master</code>, not by following upstream.</li>
-</ul>
-<section id="consequences" class="level3">
-<h3 class="anchored" data-anchor-id="consequences">Consequences</h3>
-<ul>
-<li>Good: assemblies and CI are reproducible against a fixed engine.</li>
-<li>Good: feature branches target one fixed engine API.</li>
-<li>Bad: upstream fixes after the pin are not picked up until <code>master</code> is advanced on purpose.</li>
-<li>Bad: the longer the pin sits on a beta, the larger the eventual catch-up to a later 4.7.</li>
+<li>The budgets size for the Quest 3, so the later targets inherit headroom.</li>
+<li>A four-player Field room fits its geometry, four avatars, and props under roughly 500,000 visible triangles and 200 draw calls per eye.</li>
+<li>The standalone build is the only truth; a scene that runs over Link can still blow the standalone budget.</li>
 </ul>
 </section>
-<section id="confirmation" class="level3">
-<h3 class="anchored" data-anchor-id="confirmation">Confirmation</h3>
-<p><code>version.py</code> on the fork reports <code>4.7.0-beta</code>, and the <code>gitassembly</code> recipe bases its branches on <code>master</code>. Advancing the engine is a single, reviewable change to the <code>master</code> pin.</p>
-</section>
-</section>
-<section id="more-information" class="level2">
-<h2 class="anchored" data-anchor-id="more-information">More Information</h2>
-<p>This pin is why the <a href="../decisions/20260606-spatial-audio-patched-resonance-audio.html">spatial audio decision</a> notes the module targets a fixed engine API. The exact upstream commit that <code>master</code> mirrors lives in the godot fork’s git history.</p>
+<section id="confirmation" class="level2">
+<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
+<p>The full loop holds 72 Hz on a standalone Quest 3 build with real content.</p>
 
 
-</section>
-<section id="related" class="level2">
-<h2 class="anchored" data-anchor-id="related">Related</h2>
-<ul>
-<li><p><a href="../changelog/2026/20260606-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-06 (Saturday)</a></p></li>
-<li><p><a href="20260606-gitassembly-tag-release.html">Cut gitassembly tag releases for the assembled engine</a></p></li>
-<li><p><a href="20260606-presence-demo-cold-boot-dependencies.html">Cold-boot dependencies for the presence-marker demo</a></p></li>
-<li><p><a href="20260606-self-host-on-harvester-hci.html">Self-host on Harvester HCI instead of Fly.io</a></p></li>
-<li><p><a href="20260606-spatial-audio-patched-resonance-audio.html">Spatial audio via a patched Resonance Audio (HRTF and audio probes)</a></p></li>
-<li><p><a href="20260606-webtransport-http3-transport.html">WebTransport over HTTP/3 transport</a></p></li>
-</ul>
 </section>
 
  ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-pin-engine-to-frozen-godot-4-7.html</guid>
-  <pubDate>Sat, 06 Jun 2026 00:00:00 GMT</pubDate>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-quest-3-frame-floor-as-mvp-gate.html</guid>
+  <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
 </item>
 <item>
-  <title>Presence demo pose networking</title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-presence-demo-networking-internals.html</link>
+  <title>Server-authoritative simulation with deferred rollback</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-server-authoritative-simulation-deferred-rollback.html</link>
   <description><![CDATA[ 
 
 
 
 
 
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Presence demo pose networking</em></p>
-<p><strong>Tier:</strong> baseline · <strong>Status:</strong> accepted</p>
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Server-authoritative simulation with deferred rollback</em></p>
+<p><strong>Status:</strong> accepted</p>
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The <a href="../decisions/20260606-multiplayer-presence-demo-orbs.html">presence demo</a> sends head and hand poses to peers over the <a href="../decisions/20260606-webtransport-http3-transport.html">WebTransport transport</a>. How are those poses sourced, encoded, and sent?</p>
-</section>
-<section id="decision-drivers" class="level2">
-<h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
-<ul>
-<li>High-rate pose streams must be compact.</li>
-<li>Reuse the engine’s XR trackers and WebTransport datagrams.</li>
-<li>Avoid the per-property bookkeeping of automatic scene replication.</li>
-</ul>
-</section>
-<section id="considered-options" class="level2">
-<h2 class="anchored" data-anchor-id="considered-options">Considered Options</h2>
-<ul>
-<li>High-level scene replication (<code>MultiplayerSynchronizer</code> / <code>MultiplayerSpawner</code>).</li>
-<li>Explicit RPC with Variant-encoded arguments.</li>
-<li>Hand-rolled compact binary over WebTransport datagrams.</li>
-</ul>
+<p>The loop needs one authority over combat state and loot contention. An earlier geometric Hilbert-zone authority attempt (<a href="../decisions/20260506-maglev-intercept-smoke-test.html">the Maglev intercept smoke test</a>) was rejected, and the one-week slice needs a simpler model that still resists client tampering.</p>
 </section>
 <section id="decision-outcome" class="level2">
 <h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: “Hand-rolled compact binary over WebTransport datagrams”.</p>
+<p>Chosen option: the headless <code>zone-server</code> owns entity transforms, health, combat state, and loot contention, and clients reconcile to the server snapshot, because a single authority per instance keeps the slice simple and tamper-resistant.</p>
+<p>For the deadline the model is server-authoritative with client interpolation and no client prediction. The rollback adapter lands after the gate behind the same <code>input_source</code> and <code>state_sink</code>, so the swap never touches a core (<a href="../decisions/20260611-hexagon-combat-core.html">the combat hexagon</a>, <a href="../decisions/20260611-core-contract-pure-reducer-byte-state.html">the core contract</a>).</p>
+</section>
+<section id="consequences" class="level2">
+<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
 <ul>
-<li>Pose source: <code>XRPositionalTracker</code> / <code>XRHandTracker</code> / <code>XRPose</code> (<code>servers/xr/</code>) give a <code>Transform3D</code>, velocity, and tracking confidence; a hand has 26 joints.</li>
-<li>Encoding: a compact binary layout, not <code>MultiplayerAPI</code>’s Variant encoding, which is too fat for high-rate poses.</li>
-<li>Vetoed: the high-level nodes in <code>modules/multiplayer</code> (<code>MultiplayerSynchronizer</code>, <code>MultiplayerSpawner</code>, <code>SceneReplicationInterface</code>).</li>
-<li>Identity: the <a href="../decisions/20260606-feature-classification-poc-baseline-stretch.html">cassie</a> pen supplies optional signing (stretch).</li>
-</ul>
-<section id="consequences" class="level3">
-<h3 class="anchored" data-anchor-id="consequences">Consequences</h3>
-<ul>
-<li>Good: poses ride compact datagrams on the same WebTransport the gateway uses.</li>
-<li>Bad: the encoding, send rate, and interpolation are hand-written and maintained.</li>
+<li>One authority per instance, so a per-connection transport child relays to that single core rather than holding state.</li>
+<li>Rollback is an adapter swap after the gate, not a rewrite.</li>
+<li>The deadline trades input snappiness for a far smaller build.</li>
 </ul>
 </section>
-<section id="confirmation" class="level3">
-<h3 class="anchored" data-anchor-id="confirmation">Confirmation</h3>
-<p>The demo reads local head and hand poses, sends them as datagrams, and a remote peer renders orbs from the decoded transforms.</p>
-
-
-</section>
-</section>
-<section id="related" class="level2">
-<h2 class="anchored" data-anchor-id="related">Related</h2>
-<ul>
-<li><p><a href="../changelog/2026/20260606-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-06 (Saturday)</a></p></li>
-<li><p><a href="20260606-feature-classification-poc-baseline-stretch.html">Feature classification — proof of concept, baseline, stretch</a></p></li>
-<li><p><a href="20260606-multiplayer-presence-demo-orbs.html">Minimal multiplayer presence demo with head and hand orbs</a></p></li>
-<li><p><a href="20260606-presence-marker-representation.html">Human-readable presence markers with an orb debug mode</a></p></li>
-<li><p><a href="20260606-webtransport-http3-transport.html">WebTransport over HTTP/3 transport</a></p></li>
-</ul>
-</section>
-
- ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-presence-demo-networking-internals.html</guid>
-  <pubDate>Sat, 06 Jun 2026 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Recursive art-game loop and its minimal steel thread</title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-art-game-loop-steel-thread.html</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Recursive art-game loop and its minimal steel thread</em></p>
-<p><strong>Tier:</strong> proof of concept · <strong>Status:</strong> proposed</p>
-<section id="context-and-problem-statement" class="level2">
-<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>We want a small workspace where friends make tiny art-games together, watch them, and improve them on a tight loop. Players show up in the space as tracker orbs (the <a href="../decisions/20260606-multiplayer-presence-demo-orbs.html">presence demo</a>), with drawing pens (<a href="../decisions/20260606-feature-classification-poc-baseline-stretch.html">cassie</a>) as a stretch goal. Before building the workspace out, we need the smallest end-to-end thread that proves the loop runs at all. What is that thread?</p>
-</section>
-<section id="decision-drivers" class="level2">
-<h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
-<ul>
-<li>A tight, local-first feedback loop friends can actually turn.</li>
-<li>Visible results each pass, so friction is obvious.</li>
-<li>One friction note and one patch at a time, not a backlog.</li>
-<li>The smallest path that touches every link from runtime to verified change.</li>
-</ul>
-</section>
-<section id="considered-options" class="level2">
-<h2 class="anchored" data-anchor-id="considered-options">Considered Options</h2>
-<ul>
-<li>Build the full tool-chain and content pipeline first.</li>
-<li>A minimal steel thread that exercises every link once, then grow it.</li>
-<li>Hand-run the loop with no tooling.</li>
-</ul>
-</section>
-<section id="decision-outcome" class="level2">
-<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: “A minimal steel thread that exercises every link once”, because it proves the whole loop end to end before we invest in any one part.</p>
-<section id="the-recursive-art-game-loop" class="level3">
-<h3 class="anchored" data-anchor-id="the-recursive-art-game-loop">The recursive art-game loop</h3>
-<ol type="1">
-<li>Friends create a tiny art-game.</li>
-<li>They play and observe it, capturing friction.</li>
-<li>We patch the art-game or the tools.</li>
-<li>We replay the improved version.</li>
-<li>Repeat.</li>
-</ol>
-<p>Players appear as tracker orbs; drawing pens are a stretch goal layered on once the loop turns.</p>
-</section>
-<section id="the-minimal-steel-thread" class="level3">
-<h3 class="anchored" data-anchor-id="the-minimal-steel-thread">The minimal steel thread</h3>
-<ol type="1">
-<li>Start a local Godot runtime/editor.</li>
-<li>Connect <a href="https://github.com/v-sekai-multiplayer-fabric/vsekai-godot-mcp">Godot MCP</a>.</li>
-<li>Run one <a href="https://github.com/v-sekai-multiplayer-fabric/godot-sandbox-programs">Godot Sandbox</a> command/program.</li>
-<li>Create or modify one visible art object.</li>
-<li>Record one friction note.</li>
-<li>Patch one tiny behavior in the art-game or tools.</li>
-<li>Re-run and verify the visible result changed.</li>
-</ol>
-<p>This builds on the <a href="https://github.com/v-sekai-multiplayer-fabric/friends-art-game-loop">friends-art-game-loop</a> workspace.</p>
-</section>
-<section id="consequences" class="level3">
-<h3 class="anchored" data-anchor-id="consequences">Consequences</h3>
-<ul>
-<li>Good: every link from runtime to verified change is exercised once, so gaps surface early.</li>
-<li>Good: the loop produces a visible change and one friction note per pass, which keeps scope honest.</li>
-<li>Bad: the first thread is deliberately thin and does no real game design yet.</li>
-<li>Bad: it leans on Godot MCP and the sandbox, so a break in either stalls the loop.</li>
-</ul>
-</section>
-<section id="confirmation" class="level3">
-<h3 class="anchored" data-anchor-id="confirmation">Confirmation</h3>
-<p>The steel thread completes from a cold local editor through to a re-run that shows a changed visible result, with one friction note and one patch recorded.</p>
-</section>
-</section>
-<section id="more-information" class="level2">
-<h2 class="anchored" data-anchor-id="more-information">More Information</h2>
-<p>This composes the <a href="../decisions/20260606-multiplayer-presence-demo-orbs.html">presence demo</a> (tracker orbs) and the cassie pen (stretch) into a working loop, run through Godot MCP and the Godot Sandbox.</p>
+<section id="confirmation" class="level2">
+<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
+<p>A divergent client reconciles to the server snapshot, and combat and loot resolve identically across the four clients.</p>
 
 
 </section>
 <section id="related" class="level2">
 <h2 class="anchored" data-anchor-id="related">Related</h2>
 <ul>
-<li><p><a href="../changelog/2026/20260606-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-06 (Saturday)</a></p></li>
-<li><p><a href="20260606-feature-classification-poc-baseline-stretch.html">Feature classification — proof of concept, baseline, stretch</a></p></li>
-<li><p><a href="20260606-multiplayer-presence-demo-orbs.html">Minimal multiplayer presence demo with head and hand orbs</a></p></li>
+<li><p><a href="20260506-maglev-intercept-smoke-test.html">Maglev Intercept: Cross-Platform Tilt-Shift Smoke Test</a></p></li>
+<li><p><a href="20260611-core-contract-pure-reducer-byte-state.html">Cores as pure reducers over byte-serialized state</a></p></li>
+<li><p><a href="20260611-hexagon-combat-core.html">Combat hexagon — core, ports, and adapters</a></p></li>
 </ul>
 </section>
 
  ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-art-game-loop-steel-thread.html</guid>
-  <pubDate>Sat, 06 Jun 2026 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Require pull requests and a merge queue on main</title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-require-pr-and-merge-queue-on-main.html</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Require pull requests and a merge queue on main</em></p>
-<p><strong>Tier:</strong> baseline · <strong>Status:</strong> accepted</p>
-<section id="context-and-problem-statement" class="level2">
-<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The <code>manuals</code> repo had no branch protection on <code>main</code>. Changes landed by pushing directly or by manually merging pull requests one at a time, with no serialization between concurrent PRs. As the number of in-flight documentation PRs grows, two PRs can each pass against an older <code>main</code> and then conflict or break the Quarto build once both land. How should changes reach <code>main</code> so that every merge is reviewable and tested against the tip it will actually join?</p>
-</section>
-<section id="decision-drivers" class="level2">
-<h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
-<ul>
-<li>Every change to <code>main</code> should arrive through a pull request, not a direct push.</li>
-<li>Concurrent PRs should serialize so each is validated against the latest <code>main</code>.</li>
-<li>The team is small, so the process should add little ceremony (no mandatory second reviewer).</li>
-<li>The setting should be declarative and recorded, not click-ops folklore.</li>
-</ul>
-</section>
-<section id="considered-options" class="level2">
-<h2 class="anchored" data-anchor-id="considered-options">Considered Options</h2>
-<ul>
-<li>Leave <code>main</code> unprotected (status quo).</li>
-<li>Branch protection requiring a pull request only.</li>
-<li>A repository ruleset requiring a pull request plus a merge queue.</li>
-</ul>
-</section>
-<section id="decision-outcome" class="level2">
-<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: “A repository ruleset requiring a pull request plus a merge queue”, because it serializes merges and keeps <code>main</code> PR-only without forcing a second reviewer.</p>
-<p>The ruleset targets the default branch with these rules:</p>
-<ul>
-<li>Block branch deletion and non-fast-forward pushes.</li>
-<li>Require a pull request, with <code>0</code> required approvals (review is allowed, not mandated) and all three merge methods permitted on the PR.</li>
-<li>Require a merge queue using the squash merge method, <code>ALLGREEN</code> grouping, up to 5 entries built and merged per batch, and a 1-minute minimum wait.</li>
-</ul>
-<section id="consequences" class="level3">
-<h3 class="anchored" data-anchor-id="consequences">Consequences</h3>
-<ul>
-<li>Good: <code>main</code> only changes through PRs, and the queue tests each entry against the branch tip before it lands.</li>
-<li>Good: the configuration is captured here and reproducible from the ruleset JSON.</li>
-<li>Bad: solo edits now need a PR and an enqueue step.</li>
-<li>Bad: with <code>0</code> required approvals, the rule enforces process but not review, so an unreviewed PR can still merge.</li>
-</ul>
-</section>
-<section id="confirmation" class="level3">
-<h3 class="anchored" data-anchor-id="confirmation">Confirmation</h3>
-<p>The ruleset is active (id <code>17352485</code>). <code>gh api repos/v-sekai-multiplayer-fabric/manuals/rulesets</code> lists it, and a direct push to <code>main</code> is rejected. Future PRs land via the queue.</p>
-</section>
-</section>
-<section id="more-information" class="level2">
-<h2 class="anchored" data-anchor-id="more-information">More Information</h2>
-<p>Created with <code>gh api -X POST repos/v-sekai-multiplayer-fabric/manuals/rulesets</code>. To change the policy, edit the ruleset rather than protecting the branch through the classic branch-protection API, so the two mechanisms do not overlap.</p>
-
-
-</section>
-<section id="related" class="level2">
-<h2 class="anchored" data-anchor-id="related">Related</h2>
-<ul>
-<li><p><a href="../changelog/2026/20260606-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-06 (Saturday)</a></p></li>
-<li><p><a href="20260606-amend-pr-before-it-enters-the-queue.html">Amend a PR before it enters the merge queue, not after</a></p></li>
-<li><p><a href="20260606-bounded-llm-steering-queue.html">Bound the LLM steering queue to avoid context overflow</a></p></li>
-</ul>
-</section>
-
- ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260606-require-pr-and-merge-queue-on-main.html</guid>
-  <pubDate>Sat, 06 Jun 2026 00:00:00 GMT</pubDate>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-server-authoritative-simulation-deferred-rollback.html</guid>
+  <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
