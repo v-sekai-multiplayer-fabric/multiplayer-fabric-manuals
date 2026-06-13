@@ -20,3 +20,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: bash scripts/check_tropes.sh
+
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        run: pip install jupyter pandas itables plotly scipy panflute
+      - uses: quarto-dev/quarto-actions/setup@v2
+      - run: quarto render
