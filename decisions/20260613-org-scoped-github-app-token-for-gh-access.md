@@ -61,7 +61,7 @@ the set the repo work (push, edit workflows, archive/rename) needs.
 - Bad: the App private key is itself high-value (it can mint tokens for every install of the
   App) and must be guarded as carefully as the token it replaces.
 - Bad: `administration: write` on all repos means the token can still archive / rename /
-  delete / transfer any repo *within* the org — the in-org fat-finger case is not mitigated
+  delete / transfer any repo _within_ the org — the in-org fat-finger case is not mitigated
   by scoping alone.
 
 ### Confirmation
@@ -78,7 +78,7 @@ public-is-public and not a private exposure. The minted token's permissions read
 In-org blast radius — every repo, with `administration: write` — is narrowed further by
 installing on selected repositories instead of all, and by splitting off a separate,
 rarely-used admin App so the everyday token drops `administration: write`. The accidental
-destructive command *within* the org is caught only by an out-of-band confirmation step, not
+destructive command _within_ the org is caught only by an out-of-band confirmation step, not
 by token scoping. This pairs with the move to
 [podman quadlets on Fedora 44](20260613-quadlets-on-fedora-44-instead-of-harvester.md),
 where `gh` drives the same org's repos that carry the quadlet sources.
