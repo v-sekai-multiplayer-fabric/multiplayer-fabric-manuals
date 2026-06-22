@@ -1222,7 +1222,7 @@
     "href": "decisions/20260611-loot-action-core-loop-mvp-vertical-slice.html#decision-outcome",
     "title": "Loot-action core-loop MVP vertical slice",
     "section": "Decision Outcome",
-    "text": "Decision Outcome\nChosen option: ship one vertical slice of an instanced, four-player loot-action core loop. A single bounded loop proves transport, authority, persistence, and budget together, with no open content surface to manage.\nIn scope:\nOne Hub deck with a shop, a four-player party teleporting into one Field room, the melee archetype with a timed combo against one enemy, one loot drop, and persistence of the result.\nOut of scope:\nMore Fields, boss fights, the full economy, trading, and avatar customization. AI generates cores, fixtures, adapters, and content in parallel while the squad reviews and integrates."
+    "text": "Decision Outcome\nChosen option: ship one vertical slice of an instanced, four-player loot-action core loop. A single bounded loop proves transport, authority, persistence, and budget together, with no open content surface to manage.\nOne Hub deck with a shop, a four-player party teleporting into one Field room, the melee archetype with a timed combo against one enemy, one loot drop, and persistence of the result."
   },
   {
     "objectID": "decisions/20260611-loot-action-core-loop-mvp-vertical-slice.html#consequences",
@@ -1236,7 +1236,7 @@
     "href": "decisions/20260611-loot-action-core-loop-mvp-vertical-slice.html#confirmation",
     "title": "Loot-action core-loop MVP vertical slice",
     "section": "Confirmation",
-    "text": "Confirmation\nThe slice is complete when the party clears the enemy, grabs the drop under first-touch contention, and returns with the result committed to the store, holding 72 Hz on a Quest 3."
+    "text": "Confirmation\nThe slice is complete when the party clears the enemy, grabs the drop under first-touch contention, and returns with the result committed to the stor."
   },
   {
     "objectID": "decisions/20260611-loot-action-core-loop-mvp-vertical-slice.html#related",
