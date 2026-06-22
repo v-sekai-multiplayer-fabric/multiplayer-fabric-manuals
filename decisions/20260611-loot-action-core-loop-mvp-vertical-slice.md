@@ -20,7 +20,7 @@ In scope:
 
 Out of scope:
 
-More Fields, boss fights, the full economy, trading, and avatar customization. The deadline is 2026-06-18. AI generates cores, fixtures, adapters, and content in parallel while the squad reviews and integrates.
+More Fields, boss fights, the full economy, trading, and avatar customization. AI generates cores, fixtures, adapters, and content in parallel while the squad reviews and integrates.
 
 ## Consequences
 
