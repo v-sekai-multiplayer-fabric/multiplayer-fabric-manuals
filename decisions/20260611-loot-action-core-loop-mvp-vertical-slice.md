@@ -12,7 +12,7 @@ The fabric needs a first playable that exercises the whole stack end to end: a s
 
 ## Decision Outcome
 
-Chosen option: ship one vertical slice of an instanced, four-player loot-action core loop, because a single bounded loop proves the transport, the authority, the persistence, and the budget together without an open content surface.
+Chosen option: ship one vertical slice of an instanced, four-player loot-action core loop. A single bounded loop proves transport, authority, persistence, and budget together, with no open content surface to manage.
 
 In scope:
 
@@ -20,7 +20,7 @@ In scope:
 
 Out of scope:
 
-More Fields, boss fights, the full economy, trading, and avatar customization. The deadline is 2026-06-18, and AI generates the cores, the fixtures, the adapters, and the content in parallel while the squad reviews and integrates.
+More Fields, boss fights, the full economy, trading, and avatar customization. The deadline is 2026-06-18. AI generates cores, fixtures, adapters, and content in parallel while the squad reviews and integrates.
 
 ## Consequences
 
