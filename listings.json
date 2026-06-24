@@ -14,6 +14,7 @@
   {
     "listing": "/decisions.html",
     "items": [
+      "/decisions/20260624-game-loop-cluster-sequence.html",
       "/decisions/20260611-loot-action-core-loop-mvp-vertical-slice.html",
       "/decisions/madr-proposal-template.html",
       "/decisions/20260624-sccache-github-actions-cache-for-godot-builds.html",
