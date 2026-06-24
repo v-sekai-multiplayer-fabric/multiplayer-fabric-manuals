@@ -10,7 +10,610 @@
 <atom:link href="https://v-sekai-multiplayer-fabric.github.io/manuals/decisions.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.9.38</generator>
-<lastBuildDate>Sun, 21 Jun 2026 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Wed, 24 Jun 2026 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Game-loop-first delivery sequence</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260624-game-loop-cluster-sequence.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Game-loop-first delivery sequence</em></p>
+<p><strong>Status:</strong> accepted</p>
+<section id="game-loop-first-delivery-sequence" class="level1">
+<h1>Game-loop-first delivery sequence</h1>
+<section id="the-context" class="level2">
+<h2 class="anchored" data-anchor-id="the-context">The Context</h2>
+<p>The team polled on which concern to stabilise next. Game-loop received 2 of 4 votes (50%). The uiux-polish, cassie-pen-mesh, shop-economy, and openUSD-i/o concerns all require a verified game-loop as their integration target and are not testable end-to-end without one.</p>
+</section>
+<section id="the-problem-statement" class="level2">
+<h2 class="anchored" data-anchor-id="the-problem-statement">The Problem Statement</h2>
+<p>The uiux-polish, cassie-pen-mesh, shop-economy, and openUSD-i/o concerns have no stable integration target while the game-loop remains unverified. Work that lands on an unstable loop accumulates rework debt that blocks the feedback release.</p>
+</section>
+<section id="design" class="level2">
+<h2 class="anchored" data-anchor-id="design">Design</h2>
+<p>The OpenXR Windows build (export preset <code>OpenXR</code>, <code>build/openxr/loop-slice.exe</code>) is the external feedback artifact. It runs the full hub-to-field-to-loot round trip over the same server-authoritative loop as the Quest 3 build, and is the SteamVR-compatible path for PCVR reviewers. The Quest 3 standalone build at 72 Hz remains the hard performance gate per <a href="../decisions/20260611-quest-3-frame-floor-as-mvp-gate.html">Quest 3 frame floor as the MVP performance gate</a>.</p>
+<p>The game-loop is complete when <code>smoke.sh</code> passes, the OpenXR Windows build exports without error, and at least one external reviewer runs the full loop against a live server.</p>
+</section>
+<section id="cris-score" class="level2">
+<h2 class="anchored" data-anchor-id="cris-score">CRIS Score</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 17%">
+<col style="width: 5%">
+<col style="width: 77%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Factor</th>
+<th>Score</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>C</strong>omplexity</td>
+<td>2</td>
+<td>Sequencing decision only; no new implementation work ordered here</td>
+</tr>
+<tr class="even">
+<td><strong>R</strong>reach</td>
+<td>10</td>
+<td>Sets the integration target for all remaining vertical-slice work</td>
+</tr>
+<tr class="odd">
+<td><strong>I</strong>mpediment</td>
+<td>9</td>
+<td>Without a verified loop, uiux-polish and content accumulate rework</td>
+</tr>
+<tr class="even">
+<td><strong>S</strong>takeholder</td>
+<td>9</td>
+<td>Poll-validated (2 of 4, 50%); feedback release depends on this order</td>
+</tr>
+<tr class="odd">
+<td><strong>Total</strong></td>
+<td>7.5</td>
+<td>Accept and hold</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="the-downsides" class="level2">
+<h2 class="anchored" data-anchor-id="the-downsides">The Downsides</h2>
+<p>The shop-economy and openUSD-i/o concerns have no integration path before the feedback release. If the game-loop verification slips, all four dependent concerns slip with it and there is no parallel path to absorb the delay.</p>
+</section>
+<section id="the-road-not-taken" class="level2">
+<h2 class="anchored" data-anchor-id="the-road-not-taken">The Road Not Taken</h2>
+<p><strong>Parallel concerns</strong> — advancing uiux-polish or cassie-pen-mesh in parallel with the game-loop risks landing polish or authoring work on a loop that is still changing, producing rework.</p>
+<p><strong>Content-first</strong> — stabilising content concerns before the loop means integration gaps appear late, when they are most expensive to fix.</p>
+</section>
+<section id="status" class="level2">
+<h2 class="anchored" data-anchor-id="status">Status</h2>
+<p>Status: Accepted</p>
+</section>
+<section id="decision-makers" class="level2">
+<h2 class="anchored" data-anchor-id="decision-makers">Decision Makers</h2>
+<ul>
+<li>K. S. Ernest (iFire) Lee</li>
+</ul>
+</section>
+<section id="tags" class="level2">
+<h2 class="anchored" data-anchor-id="tags">Tags</h2>
+<ul>
+<li>loot-action, game-loop, uiux-polish, cassie-pen-mesh, shop-economy, openUSD-i/o, feedback-release, 20260624-game-loop-cluster-sequence</li>
+</ul>
+
+
+</section>
+<section id="related" class="level2">
+<h2 class="anchored" data-anchor-id="related">Related</h2>
+<ul>
+<li><p><a href="20260611-quest-3-frame-floor-as-mvp-gate.html">Quest 3 frame floor as the MVP performance gate</a></p></li>
+</ul>
+</section>
+</section>
+
+ ]]></description>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260624-game-loop-cluster-sequence.html</guid>
+  <pubDate>Wed, 24 Jun 2026 00:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Release tags progress chronologically through dev, beta, rc, and release</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260624-release-tag-progression-dev-beta-rc.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Release tags progress chronologically through dev, beta, rc, and release</em></p>
+<p><strong>Status:</strong> accepted</p>
+<section id="release-tags-progress-chronologically-through-dev-beta-rc-and-release" class="level1">
+<h1>Release tags progress chronologically through dev, beta, rc, and release</h1>
+<section id="the-context" class="level2">
+<h2 class="anchored" data-anchor-id="the-context">The Context</h2>
+<p><code>fabric-godot-packaging</code> produces native Linux packages, a Podman quadlet package, a Quest 3 APK, and Windows MSIXes for the loot-action loop-slice. All build workflows are manually dispatched (<code>workflow_dispatch</code>) and accept a <code>version</code> input. Until now there was no defined convention for what version strings to use at each stage of a build’s lifecycle, no incrementable counter within a stage, and no agreed way to list tags in progression order.</p>
+<p>A first attempt used <code>v0.1.0-dev</code>, which has no counter and cannot be incremented without replacing the tag. A second attempt used numeric stage prefixes (<code>v0.1.0-1dev.001</code>, <code>v0.1.0-2beta.001</code>) to force lexicographic ordering, which is functionally correct but visually noisy. A third attempt zero-padded the counter (<code>v0.1.0-dev.001</code>) to preserve within-stage lexicographic order, which is unnecessary once creator-date sort is adopted.</p>
+</section>
+<section id="the-problem-statement" class="level2">
+<h2 class="anchored" data-anchor-id="the-problem-statement">The Problem Statement</h2>
+<p>Without a convention, operators choose version strings ad hoc. The result is tags that neither sort in progression order nor communicate the build’s readiness at a glance. Lexicographic and semver-style sorting both fail to produce the correct stage order for the names <code>dev</code>, <code>beta</code>, <code>rc</code> (since <code>'b' &lt; 'd'</code>, <code>beta</code> precedes <code>dev</code> alphabetically even though it follows it in the pipeline).</p>
+</section>
+<section id="design" class="level2">
+<h2 class="anchored" data-anchor-id="design">Design</h2>
+<p><strong>Tag format</strong></p>
+<p>Semver pre-release identifiers (same scheme as Kubernetes, Node.js, Rust):</p>
+<pre><code>v&lt;major&gt;.&lt;minor&gt;.&lt;patch&gt;-&lt;stage&gt;.&lt;N&gt;   # pre-release
+v&lt;major&gt;.&lt;minor&gt;.&lt;patch&gt;               # final release</code></pre>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Stage</th>
+<th>Example tag</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>dev</td>
+<td><code>v0.1.0-dev.1</code></td>
+</tr>
+<tr class="even">
+<td>beta</td>
+<td><code>v0.1.0-beta.1</code></td>
+</tr>
+<tr class="odd">
+<td>rc</td>
+<td><code>v0.1.0-rc.1</code></td>
+</tr>
+<tr class="even">
+<td>release</td>
+<td><code>v0.1.0</code></td>
+</tr>
+</tbody>
+</table>
+<p>The counter (<code>1</code>, <code>2</code>, …) is unpadded — zero-padding (<code>001</code>) was only needed for lexicographic ordering within a stage, which is unnecessary once creator-date sort is adopted.</p>
+<p><strong>Ordering</strong></p>
+<p>Tags are always created in forward chronological order (dev builds precede beta, beta precedes rc, rc precedes the release tag). Correct progression order is therefore recovered with:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">git</span> tag <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--sort</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>creatordate</span></code></pre></div></div>
+<p>Neither <code>sort</code> nor <code>git tag --sort=version:refname</code> gives the correct cross-stage order for these names — <code>beta</code> precedes <code>dev</code> alphabetically and bare <code>v0.1.0</code> precedes all suffixed forms as a string prefix — so creator date is the authoritative sort key.</p>
+<p><strong>Workflow inputs</strong></p>
+<p>The <code>version</code> workflow input maps directly to <code>LOOP_PKG_VERSION</code>. Pass the stage suffix when dispatching pre-release builds:</p>
+<pre><code>version: 0.1.0-dev.1    # → LOOP_PKG_VERSION=0.1.0-dev.1
+version: 0.1.0-beta.1   # → LOOP_PKG_VERSION=0.1.0-beta.1
+version: 0.1.0-rc.1     # → LOOP_PKG_VERSION=0.1.0-rc.1
+version: 0.1.0            # → LOOP_PKG_VERSION=0.1.0  (final release)</code></pre>
+<p>The build scripts already treat any version containing <code>-</code> as a prerelease (<code>--prerelease</code> flag on <code>gh release create</code>); bare versions produce a full release.</p>
+<p><strong>Tagging procedure</strong></p>
+<p>After a successful workflow run, tag the packaging repo commit that produced the artifacts:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">git</span> tag v0.1.0-dev.1</span>
+<span id="cb4-2"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">git</span> push origin v0.1.0-dev.1</span></code></pre></div></div>
+</section>
+<section id="cris-score" class="level2">
+<h2 class="anchored" data-anchor-id="cris-score">CRIS Score</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 4%">
+<col style="width: 82%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Factor</th>
+<th>Score</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>C</strong>omplexity</td>
+<td>10</td>
+<td>Convention only — no tooling changes; existing scripts already handle the <code>-</code> prerelease flag</td>
+</tr>
+<tr class="even">
+<td><strong>R</strong>each</td>
+<td>7</td>
+<td>Applies to every build artifact across all five release workflows</td>
+</tr>
+<tr class="odd">
+<td><strong>I</strong>mpediment</td>
+<td>5</td>
+<td>Absence causes ad-hoc tags; workaround is operator discipline, which is unreliable over time</td>
+</tr>
+<tr class="even">
+<td><strong>S</strong>takeholder</td>
+<td>6</td>
+<td>External testers and the release pipeline both depend on readable, ordered version identifiers</td>
+</tr>
+<tr class="odd">
+<td><strong>Total</strong></td>
+<td>7</td>
+<td>Schedule soon</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="the-downsides" class="level2">
+<h2 class="anchored" data-anchor-id="the-downsides">The Downsides</h2>
+<ul>
+<li><code>git tag --sort=creatordate</code> requires discipline: a tag created out of order (e.g.&nbsp;a hotfix rc tag applied after the release tag) will appear in the wrong position. There is no enforcement mechanism.</li>
+<li>Within a stage, counter values above 9 sort before 2–9 under plain string sort (<code>dev.10</code> &lt; <code>dev.2</code>). This is only a problem if plain <code>sort</code> is used; <code>--sort=creatordate</code> is unaffected.</li>
+</ul>
+</section>
+<section id="the-road-not-taken" class="level2">
+<h2 class="anchored" data-anchor-id="the-road-not-taken">The Road Not Taken</h2>
+<p><strong>Numeric stage prefixes</strong> (<code>v0.1.0-1dev.1</code>, <code>v0.1.0-2beta.1</code>) — force correct lexicographic order without depending on creator date. Rejected because the numeric prefix is visually noisy and unfamiliar to readers who did not write the convention.</p>
+<p><strong>Zero-padded counter</strong> (<code>v0.1.0-dev.001</code>) — preserves within-stage lexicographic order for counters ≥ 10. Rejected because creator-date sort makes padding unnecessary, and three-digit counters look non-standard compared to Kubernetes, Node.js, and Rust conventions.</p>
+<p><strong><code>alpha</code> instead of <code>dev</code></strong> — <code>alpha &lt; beta &lt; rc</code> sorts correctly as strings. Rejected because the project stages are named dev/beta/rc/release and renaming dev to alpha would introduce a mismatch between the tag and the pipeline vocabulary.</p>
+<p><strong><code>sort -V</code> / <code>--sort=version:refname</code></strong> — both put bare <code>v0.1.0</code> before <code>v0.1.0-dev.*</code> (since a string is a prefix of a longer string) and sort <code>beta</code> before <code>dev</code>. Neither gives the correct cross-stage order for these names.</p>
+</section>
+<section id="status" class="level2">
+<h2 class="anchored" data-anchor-id="status">Status</h2>
+<p>Status: Accepted</p>
+</section>
+<section id="decision-makers" class="level2">
+<h2 class="anchored" data-anchor-id="decision-makers">Decision Makers</h2>
+<ul>
+<li>Ernest Lee</li>
+</ul>
+</section>
+<section id="tags" class="level2">
+<h2 class="anchored" data-anchor-id="tags">Tags</h2>
+<ul>
+<li>release, versioning, git-tags, dev, beta, rc, 20260624-release-tag-progression-dev-beta-rc, madr-proposal-template</li>
+</ul>
+</section>
+<section id="further-reading" class="level2">
+<h2 class="anchored" data-anchor-id="further-reading">Further Reading</h2>
+<pre><code>@misc{semver2013,
+  author = {Preston-Werner, Tom},
+  title  = {Semantic Versioning 2.0.0},
+  year   = {2013},
+  url    = {https://semver.org/}
+}
+
+@misc{v_sekai_2026,
+  title = {V-Sekai},
+  year  = {2026},
+  url   = {https://v-sekai.org/}
+}</code></pre>
+
+
+</section>
+</section>
+
+ ]]></description>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260624-release-tag-progression-dev-beta-rc.html</guid>
+  <pubDate>Wed, 24 Jun 2026 00:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>sccache with GitHub Actions cache for Godot container builds</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260624-sccache-github-actions-cache-for-godot-builds.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › sccache with GitHub Actions cache for Godot container builds</em></p>
+<p><strong>Status:</strong> accepted</p>
+<section id="sccache-with-github-actions-cache-for-godot-container-builds" class="level1">
+<h1>sccache with GitHub Actions cache for Godot container builds</h1>
+<section id="the-context" class="level2">
+<h2 class="anchored" data-anchor-id="the-context">The Context</h2>
+<p>The <code>fabric-godot-images</code> repo builds the Godot engine from source inside a podman container and publishes the result to ghcr.io. A full cold build takes 30–60 minutes. The previous CI path used <code>docker/build-push-action</code> with <code>cache-from/to: type=gha</code>, which cached OCI layers between runs. That action was replaced by plain <code>podman build</code> to align with the fabric’s rootless-podman + systemd-quadlet standard. The layer cache was lost in that migration.</p>
+<p>The previous developer-facing sccache setup forwarded Tigris S3 credentials (<code>SCCACHE_BUCKET</code>, <code>SCCACHE_ENDPOINT</code>, <code>SCCACHE_REGION</code>, <code>AWS_ACCESS_KEY_ID</code>, <code>AWS_SECRET_ACCESS_KEY</code>) as podman build args and secrets. CI did not use sccache at all.</p>
+</section>
+<section id="the-problem-statement" class="level2">
+<h2 class="anchored" data-anchor-id="the-problem-statement">The Problem Statement</h2>
+<p>CI <code>build-docker</code> runs have no compiler-output cache. Every push that triggers the workflow recompiles the full Godot engine from scratch, spending 30–60 minutes on work that was already done the previous run. sccache has a native GitHub Actions cache backend (<code>SCCACHE_GHA_ENABLED=true</code>) that can restore compiler-output entries across runs without an external storage account, but it requires <code>ACTIONS_CACHE_URL</code> and <code>ACTIONS_RUNTIME_TOKEN</code> to be reachable from inside the container where sccache runs.</p>
+</section>
+<section id="design" class="level2">
+<h2 class="anchored" data-anchor-id="design">Design</h2>
+<p>Add <code>SCCACHE_GHA_ENABLED</code> as a build arg in <code>Containerfile</code> and expose it through the environment so sccache picks it up. Mount <code>ACTIONS_CACHE_URL</code> and <code>ACTIONS_RUNTIME_TOKEN</code> as podman build secrets on the <code>scons</code> RUN step; export them in the shell before the compiler is invoked.</p>
+<p><strong><code>Containerfile</code> (build stage)</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode dockerfile code-with-copy"><code class="sourceCode dockerfile"><span id="cb1-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">ARG</span> SCCACHE_GHA_ENABLED=<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">""</span></span>
+<span id="cb1-2"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># … existing ENV block …</span></span>
+<span id="cb1-3"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">ARG</span> SCCACHE_GHA_ENABLED</span>
+<span id="cb1-4"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">ENV</span> SCCACHE_GHA_ENABLED=${SCCACHE_GHA_ENABLED}</span>
+<span id="cb1-5"></span>
+<span id="cb1-6"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">RUN</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">--mount=type=secret,id=ACTIONS_CACHE_URL</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">\</span></span>
+<span id="cb1-7">    <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">--mount=type=secret,id=ACTIONS_RUNTIME_TOKEN</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">\</span></span>
+<span id="cb1-8">    <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">--mount=type=cache,target=/root/.cache/sccache,sharing=locked</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">\</span></span>
+<span id="cb1-9">    <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">export</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">ACTIONS_CACHE_URL</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$(</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">cat</span> /run/secrets/ACTIONS_CACHE_URL <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span>/dev/null <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">||</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">true</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">)</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">&amp;&amp;</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">\</span></span>
+<span id="cb1-10">    <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">export</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">ACTIONS_RUNTIME_TOKEN</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$(</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">cat</span> /run/secrets/ACTIONS_RUNTIME_TOKEN <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span>/dev/null <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">||</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">true</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">)</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">&amp;&amp;</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">\</span></span>
+<span id="cb1-11">    <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">scons</span> platform=linuxbsd <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">\</span></span>
+<span id="cb1-12">        target=<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">${TARGET}</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">\</span></span>
+<span id="cb1-13">        precision=double <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">\</span></span>
+<span id="cb1-14">        c_compiler_launcher=sccache <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">\</span></span>
+<span id="cb1-15">        cpp_compiler_launcher=sccache <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">\</span></span>
+<span id="cb1-16">        <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-j</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$(</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">nproc</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">)</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">&amp;&amp;</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">\</span></span>
+<span id="cb1-17">    <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">sccache</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--show-stats</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">&amp;&amp;</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">\</span></span>
+<span id="cb1-18">    <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">strip</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"bin/</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">${BINARY_NAME}</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span></span></code></pre></div></div>
+<p><strong><code>.github/workflows/build.yml</code> (<code>build-docker</code> job)</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb2-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">-</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">name</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> Build and push image (podman)</span></span>
+<span id="cb2-2"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">  run</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">: </span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">|</span></span>
+<span id="cb2-3">    podman build \</span>
+<span id="cb2-4">      --build-arg TARGET="…" \</span>
+<span id="cb2-5">      --build-arg BINARY_NAME="…" \</span>
+<span id="cb2-6">      --build-arg SCCACHE_GHA_ENABLED=true \</span>
+<span id="cb2-7">      --secret id=ACTIONS_CACHE_URL,env=ACTIONS_CACHE_URL \</span>
+<span id="cb2-8">      --secret id=ACTIONS_RUNTIME_TOKEN,env=ACTIONS_RUNTIME_TOKEN \</span>
+<span id="cb2-9">      --build-context "godot-src=${{ github.workspace }}/godot" \</span>
+<span id="cb2-10">      --file Containerfile \</span>
+<span id="cb2-11">      --tag "${{ matrix.image }}:latest" \</span>
+<span id="cb2-12">      .</span>
+<span id="cb2-13">    podman push "${{ matrix.image }}:latest"</span></code></pre></div></div>
+<p><code>ACTIONS_CACHE_URL</code> and <code>ACTIONS_RUNTIME_TOKEN</code> are set automatically on every GHA runner; no repo secrets are required. They are passed via <code>--secret</code> rather than <code>--build-arg</code> so they are never baked into an image layer or visible in <code>podman history</code>.</p>
+<p>For local <code>just build-docker</code> runs the build arg and secrets are absent; sccache falls back to the on-disk cache at <code>~/.cache/sccache</code>.</p>
+</section>
+<section id="cris-score" class="level2">
+<h2 class="anchored" data-anchor-id="cris-score">CRIS Score</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 4%">
+<col style="width: 84%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Factor</th>
+<th>Score</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>C</strong>omplexity</td>
+<td>8</td>
+<td>sccache GHA backend is a documented, stable feature (since v0.5.0); podman secret mounts are standard</td>
+</tr>
+<tr class="even">
+<td><strong>R</strong>each</td>
+<td>6</td>
+<td>Affects every CI run of <code>build-docker</code>; local builds are unchanged</td>
+</tr>
+<tr class="odd">
+<td><strong>I</strong>mpediment</td>
+<td>7</td>
+<td>Without it every CI run spends 30–60 min recompiling; no workaround short of a different caching strategy</td>
+</tr>
+<tr class="even">
+<td><strong>S</strong>takeholder</td>
+<td>7</td>
+<td><code>zone-baker</code> and <code>zone-server</code> both consume these images; slow CI blocks their image updates</td>
+</tr>
+<tr class="odd">
+<td><strong>Total</strong></td>
+<td>7</td>
+<td>Schedule soon</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="the-downsides" class="level2">
+<h2 class="anchored" data-anchor-id="the-downsides">The Downsides</h2>
+<ul>
+<li>GHA cache has a 10 GB per-repo limit with LRU eviction. A full dual-target sccache population is 2–4 GB, which fits, but will compete with other caches in the same repo.</li>
+<li>Cache entries are scoped to the branch that wrote them, with fallback to the default branch. PRs from forks have read-only access to the parent repo’s cache.</li>
+<li>The <code>--mount=type=cache</code> for <code>/root/.cache/sccache</code> is a no-op when the GHA backend is active (sccache does not write to disk in that mode), so it adds a small mount with no benefit in CI.</li>
+</ul>
+</section>
+<section id="the-road-not-taken" class="level2">
+<h2 class="anchored" data-anchor-id="the-road-not-taken">The Road Not Taken</h2>
+<p><strong>Tigris S3 bucket</strong> — previously used for local builds. Requires provisioning an external account, five repo secrets, and ongoing cost. Removed in favour of zero-config GHA cache.</p>
+<p><strong>OCI layer cache via <code>actions/cache</code></strong> — podman’s build layer cache lives in <code>~/.local/share/containers/storage/</code>, a complex blob store that is expensive to tar and restore. sccache caches compiler outputs at a finer granularity and transfers better across minor source changes.</p>
+<p><strong>Host sccache server + <code>--network=host</code></strong> — running sccache on the GHA runner host and connecting from the container via <code>--network=host</code> avoids the secret-mount approach but changes container network behaviour and requires sccache to be installed on the host separately from the in-container copy.</p>
+</section>
+<section id="status" class="level2">
+<h2 class="anchored" data-anchor-id="status">Status</h2>
+<p>Status: Accepted</p>
+</section>
+<section id="decision-makers" class="level2">
+<h2 class="anchored" data-anchor-id="decision-makers">Decision Makers</h2>
+<ul>
+<li>Ernest Lee</li>
+</ul>
+</section>
+<section id="tags" class="level2">
+<h2 class="anchored" data-anchor-id="tags">Tags</h2>
+<ul>
+<li>sccache, github-actions, godot, podman, ci, 20260624-sccache-github-actions-cache-for-godot-builds, madr-proposal-template</li>
+</ul>
+</section>
+<section id="further-reading" class="level2">
+<h2 class="anchored" data-anchor-id="further-reading">Further Reading</h2>
+<pre><code>@misc{sccache_gha_2026,
+  title = {sccache — GitHub Actions cache backend},
+  year  = {2026},
+  url   = {https://github.com/mozilla/sccache#github-actions-cache}
+}
+
+@misc{v_sekai_2026,
+  title = {V-Sekai},
+  year  = {2026},
+  url   = {https://v-sekai.org/}
+}</code></pre>
+
+
+</section>
+</section>
+
+ ]]></description>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260624-sccache-github-actions-cache-for-godot-builds.html</guid>
+  <pubDate>Wed, 24 Jun 2026 00:00:00 GMT</pubDate>
+</item>
 <item>
   <title>GitHub repos use kebab-case; local checkout dirs keep build-native names</title>
   <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260621-kebab-case-repos-snake-case-local-checkouts.html</link>
@@ -1382,151 +1985,6 @@
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260612-webtransport-persistent-framed-stream.html</guid>
   <pubDate>Fri, 12 Jun 2026 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>r128 Q64.64 fixed-point as a Lean library for the cores</title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260612-r128-fixed-point-as-lean-library.html</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › r128 Q64.64 fixed-point as a Lean library for the cores</em></p>
-<p><strong>Status:</strong> accepted</p>
-<section id="context-and-problem-statement" class="level2">
-<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The deterministic cores (<a href="../decisions/20260611-deterministic-cores-integer-seeded-rng.html">the determinism decision</a>) need Q64.64 fixed-point math inside the Lean kernels, which lower to SPIR-V through <a href="../decisions/20260611-core-codegen-lean-slang.html">lean-slang</a>. The engine already vendors the C <code>r128</code> library (<code>thirdparty/misc/r128</code>), but the kernels are authored in Lean.</p>
-</section>
-<section id="considered-options" class="level2">
-<h2 class="anchored" data-anchor-id="considered-options">Considered Options</h2>
-<ul>
-<li>Call the vendored C <code>r128</code> from the host only and keep the kernels in floating point.</li>
-<li>Reimplement Q64.64 ad hoc inside each kernel.</li>
-<li>Port <code>r128</code> to a Lean library the kernels import.</li>
-</ul>
-</section>
-<section id="decision-outcome" class="level2">
-<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: provide <code>r128</code> as a Lean library that the cores import for their Q64.64 fixed-point math, because one Lean implementation feeds every kernel and lowers to SPIR-V over 64-bit integer pairs, while the vendored C <code>thirdparty/misc/r128</code> stays the host reference the Lean library matches. Keeping the kernels in floating point breaks determinism, and an ad-hoc Q64.64 per kernel drifts.</p>
-</section>
-<section id="consequences" class="level2">
-<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
-<ul>
-<li>The cores share one fixed-point implementation, so the host reference and the SPIR-V kernels agree bit-for-bit.</li>
-<li>The Lean library lowers through lean-slang, so the fixed-point ops reach SPIR-V over 64-bit integer pairs.</li>
-<li>A Plausible suite checks the Lean <code>r128</code> against the vendored C <code>r128</code> for matching results.</li>
-</ul>
-</section>
-<section id="confirmation" class="level2">
-<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
-<p>The Lean <code>r128</code> library matches the vendored <code>thirdparty/misc/r128</code> on a Plausible cross-check, and the lowered SPIR-V reproduces the same results.</p>
-
-
-</section>
-<section id="related" class="level2">
-<h2 class="anchored" data-anchor-id="related">Related</h2>
-<ul>
-<li><p><a href="../changelog/2026/20260612-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-12 (Friday)</a></p></li>
-<li><p><a href="20260611-core-codegen-lean-slang.html">Core kernel codegen via lean-slang (Lean to Slang to SPIR-V)</a></p></li>
-<li><p><a href="20260611-deterministic-cores-integer-seeded-rng.html">Deterministic cores via r128 fixed-point and seeded RNG</a></p></li>
-</ul>
-</section>
-
- ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260612-r128-fixed-point-as-lean-library.html</guid>
-  <pubDate>Fri, 12 Jun 2026 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Budgeter hexagon — core, ports, and adapters</title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-hexagon-budgeter-core.html</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Budgeter hexagon — core, ports, and adapters</em></p>
-<p><strong>Tier:</strong> proof of concept · <strong>Status:</strong> accepted</p>
-<section id="context-and-problem-statement" class="level2">
-<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The slice needs graceful degradation under load on the mobile floor, dialing quality knobs per frame so the player stays inside the experience during a burst.</p>
-</section>
-<section id="decision-outcome" class="level2">
-<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: structure the budgeter as a hexagon. The core is a constraint solver mapping on-device measurements to knob settings — avatar level-of-detail, interpolation against extrapolation, voice radius, and audio sample quality — as a pure reducer; it dials the knobs every frame, never overrules itself, and never dictates how the artists work.</p>
-<p>Driving port: <code>measurement_source</code> (frame time, thermals, and entity counts). Driven port: <code>knob_sink</code> (the settings the runtime applies). Adapters: <code>feat/module-open-telemetry</code> feeds <code>measurement_source</code>; the engine runtime applies <code>knob_sink</code>; a fixture adapter replays a load spike for CI.</p>
-</section>
-<section id="consequences" class="level2">
-<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
-<ul>
-<li>As a hundred extra players land in the hub, the budgeter degrades gracefully, so the player stays inside the experience.</li>
-<li>The solve runs against a recorded spike in CI, so the knob response is testable with no device.</li>
-<li>The budgeter stays advisory, so it never overrules the artists.</li>
-</ul>
-</section>
-<section id="confirmation" class="level2">
-<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
-<p>The core replays a recorded load spike and asserts the knob response, with no device under it.</p>
-
-
-</section>
-<section id="related" class="level2">
-<h2 class="anchored" data-anchor-id="related">Related</h2>
-<ul>
-<li><p><a href="../changelog/2026/20260612-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-12 (Friday)</a></p></li>
-<li><p><a href="20260611-loot-action-core-loop-mvp-vertical-slice.html">Loot-action core-loop MVP vertical slice</a></p></li>
-</ul>
-</section>
-
- ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-hexagon-budgeter-core.html</guid>
-  <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>CASSIE desktop curvenet authoring for content, no Blender</title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-cassie-desktop-curvenet-authoring.html</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › CASSIE desktop curvenet authoring for content, no Blender</em></p>
-<p><strong>Status:</strong> accepted</p>
-<section id="context-and-problem-statement" class="level2">
-<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The content pipeline needs budget-bounded geometry for the slice without standing up Blender. The <code>feat/module-cassie</code> curve-and-surface sketcher produces curve networks that triangulate to a controllable poly count.</p>
-</section>
-<section id="decision-outcome" class="level2">
-<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: author the Hub, the Field, and the enemy as CASSIE curvenets through the desktop path for the deadline, with no Blender, because a curvenet is a bounded, inspectable graph the <code>zone-baker</code> can cost, and the desktop path skips the in-headset ergonomics for the one-week build.</p>
-</section>
-<section id="consequences" class="level2">
-<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
-<ul>
-<li>The geometry arrives near budget, so it passes the baker with little rework.</li>
-<li>The in-headset sketching ergonomics land after the gate.</li>
-<li>The pipeline carries no Blender dependency.</li>
-</ul>
-</section>
-<section id="confirmation" class="level2">
-<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
-<p>The authored Hub and Field pass the <code>zone-baker</code> at budget.</p>
-
-
-</section>
-<section id="related" class="level2">
-<h2 class="anchored" data-anchor-id="related">Related</h2>
-<ul>
-<li><p><a href="../changelog/2026/20260612-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-12 (Friday)</a></p></li>
-<li><p><a href="20260611-content-build-merged-double-precision-mcp.html">Content creation in a single merged double-precision build via the editor MCP</a></p></li>
-</ul>
-</section>
-
- ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260611-cassie-desktop-curvenet-authoring.html</guid>
-  <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
