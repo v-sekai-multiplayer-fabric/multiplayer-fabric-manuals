@@ -10,7 +10,7 @@
 <atom:link href="https://v-sekai-multiplayer-fabric.github.io/manuals/changelog.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.9.38</generator>
-<lastBuildDate>Wed, 24 Jun 2026 17:39:59 GMT</lastBuildDate>
+<lastBuildDate>Wed, 24 Jun 2026 17:55:07 GMT</lastBuildDate>
 <item>
   <title></title>
   <link>https://v-sekai-multiplayer-fabric.github.io/manuals/changelog/2026/20260622-deck-log.html</link>
@@ -48,7 +48,7 @@
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/changelog/2026/20260622-deck-log.html</guid>
-  <pubDate>Wed, 24 Jun 2026 17:39:59 GMT</pubDate>
+  <pubDate>Wed, 24 Jun 2026 17:55:07 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -62,11 +62,11 @@
 <section id="v-sekai-multiplayer-fabric-deck-log-2026-06-12-friday" class="level1">
 <h1>V-Sekai Multiplayer Fabric Deck Log — 2026-06-12 (Friday)</h1>
 <p>Date: 2026-06-12</p>
-<p>Recorded the instanced loot-action core-loop slice as MADRs: the product scope and the Quest 3 gate, the five hexagons, and the core architecture around Lean kernels lowered to SPIR-V over r128 fixed-point.</p>
+<p>Recorded the instanced loot-action core-loop slice as MADRs: the product scope and the performance gate, the five hexagons, and the core architecture around Lean kernels lowered to SPIR-V over r128 fixed-point.</p>
 <section id="added" class="level2">
 <h2 class="anchored" data-anchor-id="added">Added</h2>
 <ul>
-<li>Product and process decisions: <a href="../../decisions/20260611-loot-action-core-loop-mvp-vertical-slice.html">MVP vertical slice</a>, <a href="../../decisions/20260611-quest-3-frame-floor-as-mvp-gate.html">Quest 3 frame-floor gate</a>, <a href="../../decisions/20260611-first-party-curated-content-zone-baker-budgets.html">first-party content budgets</a>, <a href="../../decisions/20260611-genre-generic-naming-no-trademarks.html">genre-generic naming</a>, <a href="../../decisions/20260611-cassie-desktop-curvenet-authoring.html">CASSIE desktop authoring</a>, and <a href="../../decisions/20260611-content-build-merged-double-precision-mcp.html">a merged build via the editor MCP</a>.</li>
+<li>Product and process decisions: <a href="../../decisions/20260611-loot-action-core-loop-mvp-vertical-slice.html">MVP vertical slice</a>, <a href="../../decisions/20260611-first-party-curated-content-zone-baker-budgets.html">first-party content budgets</a>, <a href="../../decisions/20260611-genre-generic-naming-no-trademarks.html">genre-generic naming</a>, <a href="../../decisions/20260611-cassie-desktop-curvenet-authoring.html">CASSIE desktop authoring</a>, and <a href="../../decisions/20260611-content-build-merged-double-precision-mcp.html">a merged build via the editor MCP</a>.</li>
 <li>Hexagon decisions (core, ports, adapters): <a href="../../decisions/20260611-hexagon-combat-core.html">combat</a>, <a href="../../decisions/20260611-hexagon-loot-core.html">loot</a>, <a href="../../decisions/20260611-hexagon-progression-core.html">progression</a>, <a href="../../decisions/20260611-hexagon-budgeter-core.html">budgeter</a>, and <a href="../../decisions/20260611-hexagon-presence-core.html">presence</a>, the last wrapping the existing presence decisions.</li>
 <li>Core architecture decisions: <a href="../../decisions/20260611-lean4-kernel-cores-flat-c-host-adapters.html">Lean kernel cores with flat-C adapters</a>, <a href="../../decisions/20260611-core-codegen-lean-slang.html">Lean to Slang to SPIR-V codegen</a>, <a href="../../decisions/20260612-r128-fixed-point-as-lean-library.html">r128 fixed-point as a Lean library</a>, <a href="../../decisions/20260611-core-contract-pure-reducer-byte-state.html">the pure-reducer byte-state contract</a>, <a href="../../decisions/20260611-deterministic-cores-integer-seeded-rng.html">deterministic state</a>, <a href="../../decisions/20260611-server-authoritative-simulation-deferred-rollback.html">server authority with deferred rollback</a>, <a href="../../decisions/20260611-generated-behavior-sandboxed-riscv.html">sandboxed RISC-V behavior</a>, <a href="../../decisions/20260611-forward-renderer-baked-light.html">the forward renderer</a>, and <a href="../../decisions/20260611-webtransportd-core-transport-adapter.html">the webtransportd transport adapter</a>.</li>
 </ul>
@@ -99,7 +99,7 @@
 <ul>
 <li>The entity-transform wire is integral: int64 absolute micrometers (no origin shift), velocity tied to the predictive BVH’s V_MAX, a 42-byte payload, and a Lean+Plausible source-of-truth in <a href="https://github.com/v-sekai-multiplayer-fabric/entity_packet">entity_packet</a> (<a href="../../decisions/20260612-integral-entity-transform-wire.html">decision</a>, <a href="https://github.com/v-sekai-multiplayer-fabric/godot/pull/58">godot#58</a>).</li>
 <li>Fabric channels are reliability classes with control in the packet payload (<a href="../../decisions/20260612-fabric-channels-as-reliability-classes.html">decision</a>).</li>
-<li>The slice runs on a Quest 3 at a locked 72 Hz: the immersive deployment requirements (OpenXR loader, VR-category manifest, INTERNET, mobile+double shader) are recorded (<a href="../../decisions/20260612-quest3-immersive-deployment.html">decision</a>), and the MCP runtime bridge drives the deployed build over adb (<a href="../../decisions/20260612-mcp-runtime-bridge-deployed-builds.html">decision</a>, <a href="https://github.com/v-sekai-multiplayer-fabric/vsekai-godot-mcp/pull/1">vsekai-godot-mcp#1</a>).</li>
+<li>The MCP runtime bridge drives the deployed OpenXR build over adb (<a href="../../decisions/20260612-mcp-runtime-bridge-deployed-builds.html">decision</a>, <a href="https://github.com/v-sekai-multiplayer-fabric/vsekai-godot-mcp/pull/1">vsekai-godot-mcp#1</a>).</li>
 <li>New repos: the standalone Lean workspaces <a href="https://github.com/v-sekai-multiplayer-fabric/loot-core">loot-core</a>, <a href="https://github.com/v-sekai-multiplayer-fabric/combat-core">combat-core</a>, <a href="https://github.com/v-sekai-multiplayer-fabric/progression-core">progression-core</a>, and the playable <a href="https://github.com/v-sekai-multiplayer-fabric/loop-slice">loop-slice</a>.</li>
 </ul>
 </section>
@@ -110,11 +110,11 @@
 <li>The queue race and the wake-loop starvation each carry a Lean+Plausible proof in the new <a href="https://github.com/v-sekai-multiplayer-fabric/http3-queue">http3-queue</a> workspace: the locked queue stays size-honest for every schedule, the inclusive loop stays starvation-free, and the models exhibit the schedules the unlocked and exclusive variants fail.</li>
 </ul>
 </section>
-<section id="added-the-loop-on-both-transports-and-the-quest-3" class="level2">
-<h2 class="anchored" data-anchor-id="added-the-loop-on-both-transports-and-the-quest-3">Added (the loop on both transports and the Quest 3)</h2>
+<section id="added-the-loop-on-both-transports-and-openxr" class="level2">
+<h2 class="anchored" data-anchor-id="added-the-loop-on-both-transports-and-openxr">Added (the loop on both transports and OpenXR)</h2>
 <ul>
 <li>The loop chooses its transport at launch through <code>TRANSPORT</code>: ENet for the local slice, WebTransport for the browser and headset paths, with the text protocol unchanged across both. Control rides reliable on channel 0, the high-rate transform rides unreliable on channel 1.</li>
-<li>A Quest 3 joins the four-player loop over LAN as a real player: it autoconnects to the desktop server, fights in immersive OpenXR above the 72 Hz floor, and the round commits progression. The headset controllers drive the loop through polled, edge-detected actions (left thumbstick locomotion, right trigger attack, right A grab, left Y teleport vote), reading the bool action <code>trigger_click</code> rather than a float trigger, with the XR camera held by reference so the locomotion branch runs.</li>
+<li>An OpenXR client joins the four-player loop over LAN as a real player: it autoconnects to the desktop server, fights in immersive OpenXR above the frame floor, and the round commits progression. The headset controllers drive the loop through polled, edge-detected actions (left thumbstick locomotion, right trigger attack, right A grab, left Y teleport vote), reading the bool action <code>trigger_click</code> rather than a float trigger, with the XR camera held by reference so the locomotion branch runs.</li>
 <li>The <a href="https://github.com/v-sekai-multiplayer-fabric/merge">merge</a> assembler returns to the base branch and drops the local assembly branch on every run, including dry runs and failures, so a half-built assembly leaves the checkout clean.</li>
 </ul>
 
@@ -124,7 +124,7 @@
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/changelog/2026/20260612-deck-log.html</guid>
-  <pubDate>Wed, 24 Jun 2026 17:39:59 GMT</pubDate>
+  <pubDate>Wed, 24 Jun 2026 17:55:07 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -184,7 +184,7 @@
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/changelog/2026/20260606-deck-log.html</guid>
-  <pubDate>Wed, 24 Jun 2026 17:39:59 GMT</pubDate>
+  <pubDate>Wed, 24 Jun 2026 17:55:07 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -248,7 +248,7 @@
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/changelog/2026/20260507-deck-log.html</guid>
-  <pubDate>Wed, 24 Jun 2026 17:39:59 GMT</pubDate>
+  <pubDate>Wed, 24 Jun 2026 17:55:07 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -299,7 +299,7 @@
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/changelog/2026/20260506-deck-log.html</guid>
-  <pubDate>Wed, 24 Jun 2026 17:39:59 GMT</pubDate>
+  <pubDate>Wed, 24 Jun 2026 17:55:07 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -387,7 +387,7 @@
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/changelog/2026/20260425-deck-log.html</guid>
-  <pubDate>Wed, 24 Jun 2026 17:39:59 GMT</pubDate>
+  <pubDate>Wed, 24 Jun 2026 17:55:07 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -418,7 +418,7 @@
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/changelog/2026/20260421-deck-log.html</guid>
-  <pubDate>Wed, 24 Jun 2026 17:39:59 GMT</pubDate>
+  <pubDate>Wed, 24 Jun 2026 17:55:07 GMT</pubDate>
 </item>
 </channel>
 </rss>

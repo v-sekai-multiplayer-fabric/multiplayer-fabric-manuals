@@ -365,7 +365,7 @@ ul.task-list li input[type="checkbox"] {
 <ul>
 <li>A client opens one reliable stream for its whole session, so concurrent joins keep their stream credit and reach open.</li>
 <li>The channel-plus-reliability flag the ENet peer reads from the transfer channel and mode rides inside the frame, so both transports realize the channels decision with one mental model.</li>
-<li>The slice runs identically on <code>TRANSPORT=enet</code> and <code>TRANSPORT=wt</code>; the text protocol stays transport-agnostic, and the Quest 3 joins the same loop over either.</li>
+<li>The slice runs identically on <code>TRANSPORT=enet</code> and <code>TRANSPORT=wt</code>; the text protocol stays transport-agnostic across both.</li>
 </ul>
 </section>
 <section id="confirmation" class="level2">

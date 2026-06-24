@@ -336,7 +336,7 @@ ul.task-list li input[type="checkbox"] {
 <p><strong>Status:</strong> accepted</p>
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The <a href="../decisions/20260611-loot-action-core-loop-mvp-vertical-slice.html">loot-action core-loop slice</a> spans more than a dozen repositories: a playable app, one Lean core per loop concern, the wire and transport specs, the engine fork and its assembly recipe, the verification queue, and the docs. A reader who clones one repo sees one slice of the whole and has no single place that says which repository owns which concern and how they compose into a build a Quest 3 runs.</p>
+<p>The <a href="../decisions/20260611-loot-action-core-loop-mvp-vertical-slice.html">loot-action core-loop slice</a> spans more than a dozen repositories: a playable app, one Lean core per loop concern, the wire and transport specs, the engine fork and its assembly recipe, the verification queue, and the docs. A reader who clones one repo sees one slice of the whole and has no single place that says which repository owns which concern and how they compose into a deployable build.</p>
 </section>
 <section id="decision-drivers" class="level2">
 <h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
@@ -393,7 +393,7 @@ ul.task-list li input[type="checkbox"] {
 <h3 class="anchored" data-anchor-id="verification-tooling-and-docs">Verification, tooling, and docs</h3>
 <ul>
 <li><a href="https://github.com/v-sekai-multiplayer-fabric/fabric-verify"><code>fabric-verify</code></a> — the verification smokes as a systemd podman quadlet queue, gating the cores against their golden vectors.</li>
-<li><a href="https://github.com/v-sekai-multiplayer-fabric/vsekai-godot-mcp"><code>vsekai-godot-mcp</code></a> — the in-editor and runtime MCP addon that drives a deployed build over adb, including on the Quest 3.</li>
+<li><a href="https://github.com/v-sekai-multiplayer-fabric/vsekai-godot-mcp"><code>vsekai-godot-mcp</code></a> — the in-editor and runtime MCP addon that drives a deployed build over adb.</li>
 <li><a href="https://github.com/v-sekai-multiplayer-fabric/xr-grid"><code>xr-grid</code></a> — the VR interaction tool whose orientation orbs render the peers in the slice.</li>
 <li><a href="https://github.com/v-sekai-multiplayer-fabric/tropes-action"><code>tropes-action</code></a> — the static house-style check the manuals run.</li>
 <li><a href="https://github.com/v-sekai-multiplayer-fabric/manuals"><code>manuals</code></a> — these decisions, the changelog, and the reference docs.</li>
@@ -410,7 +410,7 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="confirmation" class="level2">
 <h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
-<p>A Quest 3 builds from the <code>multiplayer-fabric</code> assembly, joins the <code>loop-slice</code> server over the wire, and completes a Hub-to-Field-to-Loot round that commits progression, exercising the cores, the wire, the transport, and the persistence together.</p>
+<p>An OpenXR build assembles from the <code>multiplayer-fabric</code> assembly, joins the <code>loop-slice</code> server over the wire, and completes a Hub-to-Field-to-Loot round that commits progression, exercising the cores, the wire, the transport, and the persistence together.</p>
 
 
 </section>

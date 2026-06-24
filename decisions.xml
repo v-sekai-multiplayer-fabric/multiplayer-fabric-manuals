@@ -34,7 +34,7 @@
 </section>
 <section id="design" class="level2">
 <h2 class="anchored" data-anchor-id="design">Design</h2>
-<p>The OpenXR Windows build (export preset <code>OpenXR</code>, <code>build/openxr/loop-slice.exe</code>) is the external feedback artifact. It runs the full hub-to-field-to-loot round trip over the same server-authoritative loop as the Quest 3 build, and is the SteamVR-compatible path for PCVR reviewers. The Quest 3 standalone build at 72 Hz remains the hard performance gate per <a href="../decisions/20260611-quest-3-frame-floor-as-mvp-gate.html">Quest 3 frame floor as the MVP performance gate</a>.</p>
+<p>The OpenXR Windows build (export preset <code>OpenXR</code>, <code>build/openxr/loop-slice.exe</code>) is the external feedback artifact. It runs the full hub-to-field-to-loot round trip and is the SteamVR-compatible path for PCVR reviewers.</p>
 <p>The game-loop is complete when <code>smoke.sh</code> passes, the OpenXR Windows build exports without error, and at least one external reviewer runs the full loop against a live server.</p>
 </section>
 <section id="cris-score" class="level2">
@@ -108,12 +108,6 @@
 
 
 </section>
-<section id="related" class="level2">
-<h2 class="anchored" data-anchor-id="related">Related</h2>
-<ul>
-<li><p><a href="20260611-quest-3-frame-floor-as-mvp-gate.html">Quest 3 frame floor as the MVP performance gate</a></p></li>
-</ul>
-</section>
 </section>
 
  ]]></description>
@@ -135,7 +129,7 @@
 <h1>Release tags progress chronologically through dev, beta, rc, and release</h1>
 <section id="the-context" class="level2">
 <h2 class="anchored" data-anchor-id="the-context">The Context</h2>
-<p><code>fabric-godot-packaging</code> produces native Linux packages, a Podman quadlet package, a Quest 3 APK, and Windows MSIXes for the loot-action loop-slice. All build workflows are manually dispatched (<code>workflow_dispatch</code>) and accept a <code>version</code> input. Until now there was no defined convention for what version strings to use at each stage of a build’s lifecycle, no incrementable counter within a stage, and no agreed way to list tags in progression order.</p>
+<p><code>fabric-godot-packaging</code> produces native Linux packages, a Podman quadlet package, an Android APK, and Windows MSIXes for the loot-action loop-slice. All build workflows are manually dispatched (<code>workflow_dispatch</code>) and accept a <code>version</code> input. Until now there was no defined convention for what version strings to use at each stage of a build’s lifecycle, no incrementable counter within a stage, and no agreed way to list tags in progression order.</p>
 <p>A first attempt used <code>v0.1.0-dev</code>, which has no counter and cannot be incremented without replacing the tag. A second attempt used numeric stage prefixes (<code>v0.1.0-1dev.001</code>, <code>v0.1.0-2beta.001</code>) to force lexicographic ordering, which is functionally correct but visually noisy. A third attempt zero-padded the counter (<code>v0.1.0-dev.001</code>) to preserve within-stage lexicographic order, which is unnecessary once creator-date sort is adopted.</p>
 </section>
 <section id="the-problem-statement" class="level2">
@@ -1404,7 +1398,7 @@ font-style: inherit;">|</span></span>
 <p><strong>Status:</strong> accepted</p>
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The Quest 3 gate needs an Android export template of the merged double-precision assembly. The box carries no Android SDK, and Fedora 44 packages only JDK 25 and 26; Gradle rejects Java 25 with “Unsupported class file major version 69”.</p>
+<p>The Android export template of the merged double-precision assembly is needed for OpenXR builds. The box carries no Android SDK, and Fedora 44 packages only JDK 25 and 26; Gradle rejects Java 25 with “Unsupported class file major version 69”.</p>
 </section>
 <section id="decision-outcome" class="level2">
 <h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
@@ -1414,14 +1408,14 @@ font-style: inherit;">|</span></span>
 <section id="consequences" class="level2">
 <h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
 <ul>
-<li>The Quest 3 export template exists days before the gate, retiring the toolchain risk.</li>
+<li>The Android OpenXR export template exists before the gate, retiring the toolchain risk.</li>
 <li><code>config.gradle</code> is the single source of truth for SDK versions; reading it first avoids guessing.</li>
 <li>The JDK is per-user (<code>~/jdks</code>), so system Java stays at the distribution default.</li>
 </ul>
 </section>
 <section id="confirmation" class="level2">
 <h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
-<p><code>bin/android_release.apk</code> builds from the merged assembly and installs on a Quest 3.</p>
+<p><code>bin/android_release.apk</code> builds from the merged assembly and installs on an Android OpenXR device.</p>
 
 
 </section>
@@ -1533,7 +1527,7 @@ font-style: inherit;">|</span></span>
 <p><strong>Status:</strong> accepted</p>
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The OpenXR path needs to run on Linux without a headset: on the workstation for iteration and in a podman quadlet for CI. The standalone Quest 3 build is the performance gate (<a href="../decisions/20260611-quest-3-frame-floor-as-mvp-gate.html">the Quest 3 gate</a>), but functional and integration coverage of the OpenXR path needs a runnable runtime on the box, with no display and no hardware.</p>
+<p>The OpenXR path needs to run on Linux without a headset: on the workstation for iteration and in a podman quadlet for CI. Functional and integration coverage of the OpenXR path needs a runnable runtime on the box, with no display and no hardware.</p>
 </section>
 <section id="decision-outcome" class="level2">
 <h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
@@ -1553,7 +1547,7 @@ font-style: inherit;">|</span></span>
 <li>The OpenXR path runs on the workstation and in a podman quadlet with no display and no headset.</li>
 <li><code>XRT_COMPOSITOR_NULL</code> discards submitted frames, so this covers the runtime, the tracking, and frame submission, with no rendered output and no performance signal.</li>
 <li><code>SIMULATED_ENABLE</code> supplies a head and controllers driven programmatically; the <code>qwerty</code> driver (<code>QWERTY_ENABLE</code>) adds keyboard and mouse control for an interactive desktop run.</li>
-<li>This is functional and integration coverage; the standalone Quest 3 build stays the performance and comfort gate.</li>
+<li>This is functional and integration coverage; the standalone OpenXR build is the performance and comfort gate.</li>
 </ul>
 </section>
 <section id="confirmation" class="level2">
@@ -1566,7 +1560,6 @@ font-style: inherit;">|</span></span>
 <h2 class="anchored" data-anchor-id="related">Related</h2>
 <ul>
 <li><p><a href="../changelog/2026/20260612-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-12 (Friday)</a></p></li>
-<li><p><a href="20260611-quest-3-frame-floor-as-mvp-gate.html">Quest 3 frame floor as the MVP performance gate</a></p></li>
 </ul>
 </section>
 
@@ -1635,7 +1628,7 @@ font-style: inherit;">|</span></span>
 <p><strong>Status:</strong> accepted</p>
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The Godot MCP addon is an editor plugin, so it drives the editor over its <code>EditorInterface</code>. Debugging a deployed build — a headless zone server, a mobile client, a Quest 3 app — needs the same inspection against the running game, where there is no editor.</p>
+<p>The Godot MCP addon is an editor plugin, so it drives the editor over its <code>EditorInterface</code>. Debugging a deployed build — a headless zone server, a mobile client, an OpenXR app — needs the same inspection against the running game, where there is no editor.</p>
 </section>
 <section id="decision-outcome" class="level2">
 <h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
@@ -1645,13 +1638,13 @@ font-style: inherit;">|</span></span>
 <section id="consequences" class="level2">
 <h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
 <ul>
-<li>A deployed Quest build is inspectable and drivable from the workstation: frame stats, the live scene tree, and arbitrary GDScript against the running game.</li>
+<li>A deployed OpenXR build is inspectable and drivable from the workstation: frame stats, the live scene tree, and arbitrary GDScript against the running game.</li>
 <li>Under XR, <code>screenshot</code> reads the flat Window viewport, which is black because the rendered frames go to the XR compositor’s per-eye swapchain and that is not host-readable; <code>get_render_info</code> and <code>run_script</code> cover XR diagnostics instead.</li>
 </ul>
 </section>
 <section id="confirmation" class="level2">
 <h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
-<p>On a Quest 3 over <code>adb forward</code>, <code>get_render_info</code> returns 13 draw calls and 46476 primitives from the running app, and <code>run_script</code> reads the live client state (peer id, connection, phase).</p>
+<p>Over <code>adb forward</code>, <code>get_render_info</code> returns 13 draw calls and 46476 primitives from the running OpenXR app, and <code>run_script</code> reads the live client state (peer id, connection, phase).</p>
 
 
 </section>
@@ -1715,57 +1708,6 @@ font-style: inherit;">|</span></span>
   <pubDate>Fri, 12 Jun 2026 00:00:00 GMT</pubDate>
 </item>
 <item>
-  <title>Quest 3 immersive deployment requirements</title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260612-quest3-immersive-deployment.html</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Quest 3 immersive deployment requirements</em></p>
-<p><strong>Status:</strong> accepted</p>
-<section id="context-and-problem-statement" class="level2">
-<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>Exporting the slice to a Quest 3 surfaced several requirements that stock Godot does not satisfy by default, each of which fails in a different, non-obvious way on the device.</p>
-</section>
-<section id="decision-outcome" class="level2">
-<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: the Android export carries four fixes, each confirmed on the device.</p>
-<ul>
-<li>Bundle the Khronos OpenXR loader into the template. Stock Godot dlopens <code>libopenxr_loader.so</code> at runtime and ships none, so OpenXR fails to start; a fetch script in <a href="https://github.com/v-sekai-multiplayer-fabric/merge">merge</a> places the arm64 loader where gradle packages it.</li>
-<li>Declare <code>com.oculus.intent.category.VR</code> and <code>android.hardware.vr.headtracking</code> on the launcher activity, on <code>feat/horizonos-immersive</code>. Without the VR category Horizon hosts the app as a flat 2D panel and the OpenXR session never reaches visible.</li>
-<li>Enable the <code>INTERNET</code> permission in the export. Without it the runtime MCP and any listen socket fail to open (<code>socket() == -1</code>).</li>
-<li>Fix the forward-mobile vertex shader under <code>precision=double</code>, on <code>feat/double-precision-mobile</code>. The call sites pass the <code>vec4</code> <code>inv_view_precision</code> UBO field where <code>vertex_shader()</code> takes <code>vec3</code>, so every scene shader variant fails to compile and the app dies on launch; the <code>.xyz</code> fix matches the clustered renderer.</li>
-</ul>
-<p>A screen-state detector reads the VrApi frame heartbeat plus the display power state, so automation tells a black mirror (the Quest sleeps when the proximity sensor is uncovered) from a genuine render fault.</p>
-</section>
-<section id="consequences" class="level2">
-<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
-<ul>
-<li>The Quest export is reproducible from the merged assembly, with the engine fixes on feat branches and the loader step scripted.</li>
-<li>The double-precision client runs on the Quest without origin shifting, consistent with the large-world coordinate approach.</li>
-</ul>
-</section>
-<section id="confirmation" class="level2">
-<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
-<p>The APK installs, takes immersive focus (<code>VrFocusManager</code> reports it), and the on-device MCP reports a locked 72 Hz with the hub scene rendering (<a href="../decisions/20260611-quest-3-frame-floor-as-mvp-gate.html">the Quest 3 gate</a>).</p>
-
-
-</section>
-<section id="related" class="level2">
-<h2 class="anchored" data-anchor-id="related">Related</h2>
-<ul>
-<li><p><a href="../changelog/2026/20260612-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-12 (Friday)</a></p></li>
-<li><p><a href="20260611-quest-3-frame-floor-as-mvp-gate.html">Quest 3 frame floor as the MVP performance gate</a></p></li>
-</ul>
-</section>
-
- ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260612-quest3-immersive-deployment.html</guid>
-  <pubDate>Fri, 12 Jun 2026 00:00:00 GMT</pubDate>
-</item>
-<item>
   <title>Repository map of the loot-action vertical slice</title>
   <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260612-vertical-slice-repository-map.html</link>
   <description><![CDATA[ 
@@ -1778,7 +1720,7 @@ font-style: inherit;">|</span></span>
 <p><strong>Status:</strong> accepted</p>
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The <a href="../decisions/20260611-loot-action-core-loop-mvp-vertical-slice.html">loot-action core-loop slice</a> spans more than a dozen repositories: a playable app, one Lean core per loop concern, the wire and transport specs, the engine fork and its assembly recipe, the verification queue, and the docs. A reader who clones one repo sees one slice of the whole and has no single place that says which repository owns which concern and how they compose into a build a Quest 3 runs.</p>
+<p>The <a href="../decisions/20260611-loot-action-core-loop-mvp-vertical-slice.html">loot-action core-loop slice</a> spans more than a dozen repositories: a playable app, one Lean core per loop concern, the wire and transport specs, the engine fork and its assembly recipe, the verification queue, and the docs. A reader who clones one repo sees one slice of the whole and has no single place that says which repository owns which concern and how they compose into a deployable build.</p>
 </section>
 <section id="decision-drivers" class="level2">
 <h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
@@ -1835,7 +1777,7 @@ font-style: inherit;">|</span></span>
 <h3 class="anchored" data-anchor-id="verification-tooling-and-docs">Verification, tooling, and docs</h3>
 <ul>
 <li><a href="https://github.com/v-sekai-multiplayer-fabric/fabric-verify"><code>fabric-verify</code></a> — the verification smokes as a systemd podman quadlet queue, gating the cores against their golden vectors.</li>
-<li><a href="https://github.com/v-sekai-multiplayer-fabric/vsekai-godot-mcp"><code>vsekai-godot-mcp</code></a> — the in-editor and runtime MCP addon that drives a deployed build over adb, including on the Quest 3.</li>
+<li><a href="https://github.com/v-sekai-multiplayer-fabric/vsekai-godot-mcp"><code>vsekai-godot-mcp</code></a> — the in-editor and runtime MCP addon that drives a deployed build over adb.</li>
 <li><a href="https://github.com/v-sekai-multiplayer-fabric/xr-grid"><code>xr-grid</code></a> — the VR interaction tool whose orientation orbs render the peers in the slice.</li>
 <li><a href="https://github.com/v-sekai-multiplayer-fabric/tropes-action"><code>tropes-action</code></a> — the static house-style check the manuals run.</li>
 <li><a href="https://github.com/v-sekai-multiplayer-fabric/manuals"><code>manuals</code></a> — these decisions, the changelog, and the reference docs.</li>
@@ -1852,7 +1794,7 @@ font-style: inherit;">|</span></span>
 </section>
 <section id="confirmation" class="level2">
 <h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
-<p>A Quest 3 builds from the <code>multiplayer-fabric</code> assembly, joins the <code>loop-slice</code> server over the wire, and completes a Hub-to-Field-to-Loot round that commits progression, exercising the cores, the wire, the transport, and the persistence together.</p>
+<p>An OpenXR build assembles from the <code>multiplayer-fabric</code> assembly, joins the <code>loop-slice</code> server over the wire, and completes a Hub-to-Field-to-Loot round that commits progression, exercising the cores, the wire, the transport, and the persistence together.</p>
 
 
 </section>
@@ -1964,7 +1906,7 @@ font-style: inherit;">|</span></span>
 <ul>
 <li>A client opens one reliable stream for its whole session, so concurrent joins keep their stream credit and reach open.</li>
 <li>The channel-plus-reliability flag the ENet peer reads from the transfer channel and mode rides inside the frame, so both transports realize the channels decision with one mental model.</li>
-<li>The slice runs identically on <code>TRANSPORT=enet</code> and <code>TRANSPORT=wt</code>; the text protocol stays transport-agnostic, and the Quest 3 joins the same loop over either.</li>
+<li>The slice runs identically on <code>TRANSPORT=enet</code> and <code>TRANSPORT=wt</code>; the text protocol stays transport-agnostic across both.</li>
 </ul>
 </section>
 <section id="confirmation" class="level2">
@@ -1984,6 +1926,60 @@ font-style: inherit;">|</span></span>
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260612-webtransport-persistent-framed-stream.html</guid>
+  <pubDate>Fri, 12 Jun 2026 00:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>r128 Q64.64 fixed-point as a Lean library for the cores</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260612-r128-fixed-point-as-lean-library.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › r128 Q64.64 fixed-point as a Lean library for the cores</em></p>
+<p><strong>Status:</strong> accepted</p>
+<section id="context-and-problem-statement" class="level2">
+<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
+<p>The deterministic cores (<a href="../decisions/20260611-deterministic-cores-integer-seeded-rng.html">the determinism decision</a>) need Q64.64 fixed-point math inside the Lean kernels, which lower to SPIR-V through <a href="../decisions/20260611-core-codegen-lean-slang.html">lean-slang</a>. The engine already vendors the C <code>r128</code> library (<code>thirdparty/misc/r128</code>), but the kernels are authored in Lean.</p>
+</section>
+<section id="considered-options" class="level2">
+<h2 class="anchored" data-anchor-id="considered-options">Considered Options</h2>
+<ul>
+<li>Call the vendored C <code>r128</code> from the host only and keep the kernels in floating point.</li>
+<li>Reimplement Q64.64 ad hoc inside each kernel.</li>
+<li>Port <code>r128</code> to a Lean library the kernels import.</li>
+</ul>
+</section>
+<section id="decision-outcome" class="level2">
+<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
+<p>Chosen option: provide <code>r128</code> as a Lean library that the cores import for their Q64.64 fixed-point math, because one Lean implementation feeds every kernel and lowers to SPIR-V over 64-bit integer pairs, while the vendored C <code>thirdparty/misc/r128</code> stays the host reference the Lean library matches. Keeping the kernels in floating point breaks determinism, and an ad-hoc Q64.64 per kernel drifts.</p>
+</section>
+<section id="consequences" class="level2">
+<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
+<ul>
+<li>The cores share one fixed-point implementation, so the host reference and the SPIR-V kernels agree bit-for-bit.</li>
+<li>The Lean library lowers through lean-slang, so the fixed-point ops reach SPIR-V over 64-bit integer pairs.</li>
+<li>A Plausible suite checks the Lean <code>r128</code> against the vendored C <code>r128</code> for matching results.</li>
+</ul>
+</section>
+<section id="confirmation" class="level2">
+<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
+<p>The Lean <code>r128</code> library matches the vendored <code>thirdparty/misc/r128</code> on a Plausible cross-check, and the lowered SPIR-V reproduces the same results.</p>
+
+
+</section>
+<section id="related" class="level2">
+<h2 class="anchored" data-anchor-id="related">Related</h2>
+<ul>
+<li><p><a href="../changelog/2026/20260612-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-12 (Friday)</a></p></li>
+<li><p><a href="20260611-core-codegen-lean-slang.html">Core kernel codegen via lean-slang (Lean to Slang to SPIR-V)</a></p></li>
+<li><p><a href="20260611-deterministic-cores-integer-seeded-rng.html">Deterministic cores via r128 fixed-point and seeded RNG</a></p></li>
+</ul>
+</section>
+
+ ]]></description>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260612-r128-fixed-point-as-lean-library.html</guid>
   <pubDate>Fri, 12 Jun 2026 00:00:00 GMT</pubDate>
 </item>
 </channel>

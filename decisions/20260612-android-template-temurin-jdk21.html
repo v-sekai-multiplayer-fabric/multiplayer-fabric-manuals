@@ -328,7 +328,7 @@ ul.task-list li input[type="checkbox"] {
 <p><strong>Status:</strong> accepted</p>
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The Quest 3 gate needs an Android export template of the merged double-precision assembly. The box carries no Android SDK, and Fedora 44 packages only JDK 25 and 26; Gradle rejects Java 25 with “Unsupported class file major version 69”.</p>
+<p>The Android export template of the merged double-precision assembly is needed for OpenXR builds. The box carries no Android SDK, and Fedora 44 packages only JDK 25 and 26; Gradle rejects Java 25 with “Unsupported class file major version 69”.</p>
 </section>
 <section id="decision-outcome" class="level2">
 <h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
@@ -338,14 +338,14 @@ ul.task-list li input[type="checkbox"] {
 <section id="consequences" class="level2">
 <h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
 <ul>
-<li>The Quest 3 export template exists days before the gate, retiring the toolchain risk.</li>
+<li>The Android OpenXR export template exists before the gate, retiring the toolchain risk.</li>
 <li><code>config.gradle</code> is the single source of truth for SDK versions; reading it first avoids guessing.</li>
 <li>The JDK is per-user (<code>~/jdks</code>), so system Java stays at the distribution default.</li>
 </ul>
 </section>
 <section id="confirmation" class="level2">
 <h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
-<p><code>bin/android_release.apk</code> builds from the merged assembly and installs on a Quest 3.</p>
+<p><code>bin/android_release.apk</code> builds from the merged assembly and installs on an Android OpenXR device.</p>
 
 
 </section>

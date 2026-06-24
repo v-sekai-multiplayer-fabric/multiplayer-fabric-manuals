@@ -328,7 +328,7 @@ ul.task-list li input[type="checkbox"] {
 <p><strong>Status:</strong> accepted</p>
 <section id="context-and-problem-statement" class="level2">
 <h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The Godot MCP addon is an editor plugin, so it drives the editor over its <code>EditorInterface</code>. Debugging a deployed build — a headless zone server, a mobile client, a Quest 3 app — needs the same inspection against the running game, where there is no editor.</p>
+<p>The Godot MCP addon is an editor plugin, so it drives the editor over its <code>EditorInterface</code>. Debugging a deployed build — a headless zone server, a mobile client, an OpenXR app — needs the same inspection against the running game, where there is no editor.</p>
 </section>
 <section id="decision-outcome" class="level2">
 <h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
@@ -338,13 +338,13 @@ ul.task-list li input[type="checkbox"] {
 <section id="consequences" class="level2">
 <h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
 <ul>
-<li>A deployed Quest build is inspectable and drivable from the workstation: frame stats, the live scene tree, and arbitrary GDScript against the running game.</li>
+<li>A deployed OpenXR build is inspectable and drivable from the workstation: frame stats, the live scene tree, and arbitrary GDScript against the running game.</li>
 <li>Under XR, <code>screenshot</code> reads the flat Window viewport, which is black because the rendered frames go to the XR compositor’s per-eye swapchain and that is not host-readable; <code>get_render_info</code> and <code>run_script</code> cover XR diagnostics instead.</li>
 </ul>
 </section>
 <section id="confirmation" class="level2">
 <h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
-<p>On a Quest 3 over <code>adb forward</code>, <code>get_render_info</code> returns 13 draw calls and 46476 primitives from the running app, and <code>run_script</code> reads the live client state (peer id, connection, phase).</p>
+<p>Over <code>adb forward</code>, <code>get_render_info</code> returns 13 draw calls and 46476 primitives from the running OpenXR app, and <code>run_script</code> reads the live client state (peer id, connection, phase).</p>
 
 
 </section>
