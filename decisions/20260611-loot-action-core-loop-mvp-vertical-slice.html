@@ -6,9 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2026-06-11">
 
-<title>Loot-action core-loop MVP vertical slice – V-Sekai Fire — Manuals</title>
+<title>loot-action-core-loop-mvp-vertical-slice – V-Sekai Fire — Manuals</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -287,70 +286,187 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#context-and-problem-statement" id="toc-context-and-problem-statement" class="nav-link active" data-scroll-target="#context-and-problem-statement">Context and Problem Statement</a></li>
-  <li><a href="#decision-outcome" id="toc-decision-outcome" class="nav-link" data-scroll-target="#decision-outcome">Decision Outcome</a></li>
-  <li><a href="#consequences" id="toc-consequences" class="nav-link" data-scroll-target="#consequences">Consequences</a></li>
-  <li><a href="#related" id="toc-related" class="nav-link" data-scroll-target="#related">Related</a></li>
+  <li><a href="#loot-action-core-loop-mvp-vertical-slice" id="toc-loot-action-core-loop-mvp-vertical-slice" class="nav-link active" data-scroll-target="#loot-action-core-loop-mvp-vertical-slice">Loot-action core-loop MVP vertical slice</a>
+  <ul class="collapse">
+  <li><a href="#the-context" id="toc-the-context" class="nav-link" data-scroll-target="#the-context">The Context</a></li>
+  <li><a href="#the-problem-statement" id="toc-the-problem-statement" class="nav-link" data-scroll-target="#the-problem-statement">The Problem Statement</a></li>
+  <li><a href="#design" id="toc-design" class="nav-link" data-scroll-target="#design">Design</a></li>
+  <li><a href="#cris-score" id="toc-cris-score" class="nav-link" data-scroll-target="#cris-score">CRIS Score</a></li>
+  <li><a href="#the-downsides" id="toc-the-downsides" class="nav-link" data-scroll-target="#the-downsides">The Downsides</a></li>
+  <li><a href="#the-road-not-taken" id="toc-the-road-not-taken" class="nav-link" data-scroll-target="#the-road-not-taken">The Road Not Taken</a></li>
+  <li><a href="#status" id="toc-status" class="nav-link" data-scroll-target="#status">Status</a></li>
+  <li><a href="#decision-makers" id="toc-decision-makers" class="nav-link" data-scroll-target="#decision-makers">Decision Makers</a></li>
+  <li><a href="#tags" id="toc-tags" class="nav-link" data-scroll-target="#tags">Tags</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading">Further Reading</a></li>
+  </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/v-sekai-multiplayer-fabric/manuals/edit/main/decisions/20260611-loot-action-core-loop-mvp-vertical-slice.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
-
-
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">Loot-action core-loop MVP vertical slice</h1>
-</div>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
 
 
 
-<div class="quarto-title-meta">
-
-    
-    <div>
-    <div class="quarto-title-meta-heading">Published</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date">June 11, 2026</p>
-    </div>
-  </div>
-  
-    
-  </div>
-  
 
 
-</header>
-
-
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Loot-action core-loop MVP vertical slice</em></p>
-<p><strong>Tier:</strong> proof of concept · <strong>Status:</strong> accepted</p>
-<section id="context-and-problem-statement" class="level2">
-<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The fabric needs a first playable that exercises the whole stack end to end: a social hub, an instanced combat zone, and the round trip between them. The team needs one bounded target, small enough for a one-week build yet complete enough to prove the loop.</p>
+<section id="loot-action-core-loop-mvp-vertical-slice" class="level1">
+<h1>Loot-action core-loop MVP vertical slice</h1>
+<section id="the-context" class="level2">
+<h2 class="anchored" data-anchor-id="the-context">The Context</h2>
+<p>The fabric has transport, authority, persistence, and budget decisions in place, but no running loop that exercises all of them together. The team needs a first playable to find the gaps that only appear when the whole stack runs end to end: a social hub where players gather, an instanced combat zone where they fight and collect, and the round trip that carries the result back. Without a bounded target the risk is that each layer is individually correct but the integration is never tested until it is too late to fix.</p>
 </section>
-<section id="decision-outcome" class="level2">
-<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: ship one vertical slice of an instanced, four-player loot-action core loop. A single bounded loop proves transport, authority, persistence, and budget together, with no open content surface to manage.</p>
-<p>One Hub deck with a shop, a four-player party teleporting into one Field room, the melee archetype with a timed combo against one enemy, one loot drop, and persistence of the result.</p>
+<section id="the-problem-statement" class="level2">
+<h2 class="anchored" data-anchor-id="the-problem-statement">The Problem Statement</h2>
+<p>There is no single bounded deliverable that tells the team whether the stack works together. The team needs one vertical slice, small enough to build in a week, complete enough to exercise every integration seam: transport, server authority, loot contention, inventory persistence, performance budgeting, and the Hub-to-Field-to-Hub round trip.</p>
 </section>
-<section id="consequences" class="level2">
-<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
+<section id="design" class="level2">
+<h2 class="anchored" data-anchor-id="design">Design</h2>
+<p>Ship one vertical slice of an instanced, four-player loot-action core loop.</p>
+<p><strong>Scene layout</strong></p>
 <ul>
-<li>The slice runs on placeholder content and is gated on the frame floor, not art.</li>
-<li>Ranged and caster archetypes, more platforms, and in-headset authoring land after the gate.</li>
-<li>The build follows the hexagonal core/ports/adapters structure, per <a href="../decisions/20260610-hexagonal-core-ports-adapters.html">the hexagonal decision</a>, with one core per loop concern behind narrow ports.</li>
+<li>One Hub deck with a shop backed by the loot and progression cores. The shop degrades to a free starting kit if the economy slips.</li>
+<li>One Field room: four players, one melee combo against one enemy, one loot drop, one persistence round trip.</li>
 </ul>
+<p><strong>Loop</strong></p>
+<ol type="1">
+<li>Players gather in the Hub and form a party.</li>
+<li>The party teleports into the Field instance hosted by <code>zone-server</code>.</li>
+<li>One player lands a timed melee combo. The server validates the hit, deducts enemy health, and spawns a loot drop.</li>
+<li>One player touches the drop first. The loot core resolves contention by receipt timestamp, grants the winner, and rejects the rest.</li>
+<li>The progression core commits the inventory delta through the CockroachDB adapter (or the SQLite fallback if the commit path slips).</li>
+<li>The party teleports back to the Hub. The shop reflects the new inventory.</li>
+</ol>
+<p><strong>Cores</strong></p>
+<p>Each concern is a hexagonal pure reducer (<a href="../decisions/20260610-hexagonal-core-ports-adapters.html">the hexagonal decision</a>, <a href="../decisions/20260611-core-contract-pure-reducer-byte-state.html">the core contract</a>):</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Core</th>
+<th>Responsibility</th>
+<th>Key ports</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Combat (<a href="../decisions/20260611-hexagon-combat-core.html">decision</a>)</td>
+<td>Combo timing, hit validation, health, enemy spawn window</td>
+<td><code>input_source</code>, <code>tick_source</code>, <code>behavior_source</code> → <code>state_sink</code>, <code>event_sink</code></td>
+</tr>
+<tr class="even">
+<td>Loot (<a href="../decisions/20260611-hexagon-loot-core.html">decision</a>)</td>
+<td>Drop generation, first-touch contention</td>
+<td><code>loot_request_source</code> → <code>grant_sink</code>, <code>inventory_delta_sink</code></td>
+</tr>
+<tr class="odd">
+<td>Presence (<a href="../decisions/20260611-hexagon-presence-core.html">decision</a>)</td>
+<td>Remote-pose interpolation</td>
+<td><code>pose_source</code> → <code>avatar_sink</code></td>
+</tr>
+<tr class="even">
+<td>Progression (<a href="../decisions/20260611-hexagon-progression-core.html">decision</a>)</td>
+<td>Profile, inventory, affinity gate</td>
+<td><code>profile_source</code> → <code>commit_sink</code></td>
+</tr>
+<tr class="odd">
+<td>Budgeter (<a href="../decisions/20260611-hexagon-budgeter-core.html">decision</a>)</td>
+<td>Per-frame quality knobs under load</td>
+<td><code>measurement_source</code> → <code>knob_sink</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Authority and networking</strong></p>
+<p>The <code>zone-server</code> is the single authority per instance (<a href="../decisions/20260611-server-authoritative-simulation-deferred-rollback.html">server-authoritative decision</a>). For the deadline the model is server-authoritative with client interpolation and no prediction. The rollback adapter lands after the gate behind the same ports.</p>
+<p><strong>Content and performance gate</strong></p>
+<p>Content is first-party curated only; the <code>zone-baker</code> enforces hard budgets at bake time (<a href="../decisions/20260611-first-party-curated-content-zone-baker-budgets.html">content decision</a>). The sign-off gate is a SteamVR build at 90 Hz: four avatars and one Field room under 500,000 visible triangles and 200 draw calls per eye.</p>
+<p><strong>What ships after the gate</strong></p>
+<p>Ranged and caster archetypes, Steam Frame and Steam Deck builds, in-headset authoring, rollback, and user-generated content.</p>
+</section>
+<section id="cris-score" class="level2">
+<h2 class="anchored" data-anchor-id="cris-score">CRIS Score</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 3%">
+<col style="width: 86%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Factor</th>
+<th>Score</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>C</strong>omplexity</td>
+<td>5</td>
+<td>Five hexagonal cores, server authority, three platforms in scope, and a content pipeline; not novel but genuinely wide</td>
+</tr>
+<tr class="even">
+<td><strong>R</strong>each</td>
+<td>10</td>
+<td>This is the whole stack; every subsystem touches the slice</td>
+</tr>
+<tr class="odd">
+<td><strong>I</strong>mpediment</td>
+<td>9</td>
+<td>Without it there is no first playable, no integration proof, and no gate to build subsequent features against</td>
+</tr>
+<tr class="even">
+<td><strong>S</strong>takeholder</td>
+<td>9</td>
+<td>The vertical slice is the primary deliverable for the proof-of-concept milestone; all downstream work depends on it shipping</td>
+</tr>
+<tr class="odd">
+<td><strong>Total</strong></td>
+<td>8.25</td>
+<td>Build now</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="the-downsides" class="level2">
+<h2 class="anchored" data-anchor-id="the-downsides">The Downsides</h2>
+<ul>
+<li>The slice runs on placeholder content; art is not gated, only the frame floor.</li>
+<li>Only the melee archetype ships; ranged and caster are explicitly deferred.</li>
+<li>No client prediction at the deadline; the rollback adapter lands after the gate.</li>
+<li>The SQLite fallback in progression degrades the inventory persistence, which is not visible to the player but makes the economy untrustworthy until the CockroachDB path is confirmed.</li>
+</ul>
+</section>
+<section id="the-road-not-taken" class="level2">
+<h2 class="anchored" data-anchor-id="the-road-not-taken">The Road Not Taken</h2>
+<p><strong>Full toolchain and content pipeline first</strong> — building the full pipeline before the loop means the integration gaps appear late, when they are most expensive. Rejected in favour of the thin steel thread.</p>
+<p><strong>Multi-archetype slice</strong> — including ranged and caster in the first slice widens the scope beyond one week. The melee archetype is sufficient to prove combat authority and loot contention; the others follow the gate.</p>
+<p><strong>Broader platform launch</strong> — targeting Steam Frame and Steam Deck alongside SteamVR at the gate is sufficient scope for the vertical slice; additional standalone VR platforms are deferred.</p>
+<p><strong>Per-zone distributed authority (Maglev intercept model)</strong> — a geometric Hilbert-zone authority was attempted and rejected in the Maglev intercept smoke test. A single <code>zone-server</code> authority per instance is simpler and sufficient for a four-player room.</p>
+</section>
+<section id="status" class="level2">
+<h2 class="anchored" data-anchor-id="status">Status</h2>
+<p>Status: Accepted</p>
+</section>
+<section id="decision-makers" class="level2">
+<h2 class="anchored" data-anchor-id="decision-makers">Decision Makers</h2>
+<ul>
+<li>K. S. Ernest (iFire) Lee</li>
+</ul>
+</section>
+<section id="tags" class="level2">
+<h2 class="anchored" data-anchor-id="tags">Tags</h2>
+<ul>
+<li>loot-action, mvp, vertical-slice, proof-of-concept, hexagonal, 20260611-loot-action-core-loop-mvp-vertical-slice, madr-proposal-template</li>
+</ul>
+</section>
+<section id="further-reading" class="level2">
+<h2 class="anchored" data-anchor-id="further-reading">Further Reading</h2>
+<pre><code>@misc{v_sekai_2026,
+  title = {V-Sekai},
+  year  = {2026},
+  url   = {https://v-sekai.org/}
+}</code></pre>
 
 
 </section>
-<section id="related" class="level2">
-<h2 class="anchored" data-anchor-id="related">Related</h2>
-<ul>
-<li><p><a href="../changelog/2026/20260612-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-12 (Friday)</a></p></li>
-<li><p><a href="20260610-hexagonal-core-ports-adapters.html">Hexagonal core/ports/adapters as the component convention</a></p></li>
-<li><p><a href="20260612-vertical-slice-repository-map.html">Repository map of the loot-action vertical slice</a></p></li>
-</ul>
 </section>
 
 </main> <!-- /main -->
