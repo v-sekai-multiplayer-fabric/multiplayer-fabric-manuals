@@ -399,7 +399,7 @@ ul.task-list li input[type="checkbox"] {
 <li><a href="https://github.com/v-sekai-multiplayer-fabric/zone-backend"><code>zone-backend</code></a> — the Elixir/Phoenix backend: identity, the zone/shard directory (zone servers self-register via <code>POST /shards</code> and heartbeat via <code>PUT /shards/:id</code>), the loop profile commit endpoint (<code>POST /api/v1/loop/commit</code>), and casync asset serving through <code>aria-storage</code>. Follows a hexagonal <code>uro_loop</code> sub-app structure with <code>UroLoop.Ports.ProfileStore</code>.</li>
 <li><a href="https://github.com/v-sekai-multiplayer-fabric/zone-backend-quadlet"><code>zone-backend-quadlet</code></a> — systemd podman quadlet deployment unit for <code>zone-backend</code> on AlmaLinux, with CRDB mTLS client certs and TLS cert mountpoints.</li>
 <li><a href="https://github.com/V-Sekai-fire/aria-storage"><code>aria-storage</code></a> — casync chunk store library (Elixir): encodes and decodes <code>.caibx</code> index files and <code>.cacnk</code> chunk files in the desync-compatible raw-zstd format; <code>desync</code> round-trip verified in CI.</li>
-<li><a href="https://github.com/v-sekai-multiplayer-fabric/cockroach"><code>cockroach</code></a> — CockroachDB cluster configuration with multi-arch Docker build (amd64 + arm64).</li>
+<li><a href="https://github.com/v-sekai/cockroach"><code>cockroach</code></a> — CockroachDB cluster configuration with multi-arch Docker build (amd64 + arm64).</li>
 <li><a href="https://github.com/v-sekai-multiplayer-fabric/observability"><code>observability</code></a> — observability stack: fully-qualified image names for Prometheus and Grafana monitoring.</li>
 </ul>
 </section>
