@@ -120,6 +120,74 @@
   <pubDate>Mon, 29 Jun 2026 00:00:00 GMT</pubDate>
 </item>
 <item>
+  <title>Export loop-slice server telemetry to the observability collector</title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260629-loop-slice-telemetry-to-the-observability-collector.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Export loop-slice server telemetry to the observability collector</em></p>
+<p><strong>Status:</strong> accepted</p>
+<section id="export-loop-slice-server-telemetry-to-the-observability-collector" class="level1">
+<h1>Export loop-slice server telemetry to the observability collector</h1>
+<section id="the-context" class="level2">
+<h2 class="anchored" data-anchor-id="the-context">The Context</h2>
+<p>The loop-slice server emits OpenTelemetry through the <code>OpenTelemetry</code> C++ engine module: spans for the loop’s phases, counters and gauges for grants and ticks, and log lines. Export is opt-in. The server reads <code>OTEL_EXPORTER_OTLP_ENDPOINT</code>, and with no endpoint set it stays idle — it records signals in process but exports nothing, which keeps a server that has no collector from retrying against one that is not there. The <a href="../decisions/20260506-observability-stack-victoriatraces.html">observability stack</a> runs an OTEL collector that ingests OTLP on 4318 (HTTP) and 4317 (gRPC) and routes metrics to VictoriaMetrics, logs to VictoriaLogs, and traces to VictoriaTraces. The collector and the server’s deploy both exist, so the telemetry the server already produces has somewhere to go; by <a href="../decisions/20260629-yagni-times-structure-to-need.html">YAGNI times structure to the need</a>, the need is present and the wiring belongs here.</p>
+</section>
+<section id="the-problem-statement" class="level2">
+<h2 class="anchored" data-anchor-id="the-problem-statement">The Problem Statement</h2>
+<p>A deployed loop-slice server with no configured endpoint is unobservable: its spans, metrics, and logs stay in process and never reach the collector. The export seam is a single environment variable, <code>OTEL_EXPORTER_OTLP_ENDPOINT</code>, and the deploy carries the address that a separately deployed container can actually reach.</p>
+</section>
+<section id="design" class="level2">
+<h2 class="anchored" data-anchor-id="design">Design</h2>
+<p>The loop-slice deploy exports OTLP over HTTP to the observability collector at <code>http://host.containers.internal:4318</code>, with <code>OTEL_SERVICE_NAME=loop-server</code>.</p>
+<ul>
+<li>The collector listens for OTLP HTTP on 4318 and routes each signal to its Victoria backend, so the server’s traces, metrics, and logs all land without further configuration. HTTP on 4318 matches the export protocol the rest of the fabric uses; the zone backend exports OTLP HTTP to the same port.</li>
+<li>The endpoint is <code>host.containers.internal</code>, not <code>127.0.0.1</code>. The loop-slice server runs as a separate rootless container that publishes its game port and does not share the observability pod’s network namespace, so inside the container <code>127.0.0.1</code> is the container’s own loopback. <code>host.containers.internal</code> resolves to the host, where the collector publishes 4318.</li>
+<li>Export stays opt-in in the engine and the image. The deploy opts in by setting the endpoint in its environment, because in the deploy the collector is a co-located, declared dependency. The image carries no default endpoint.</li>
+<li>A collector on another host overrides <code>host.containers.internal</code> with that host’s address.</li>
+</ul>
+<p>The values the deploy sets are <code>OTEL_EXPORTER_OTLP_ENDPOINT=http://host.containers.internal:4318</code> and <code>OTEL_SERVICE_NAME=loop-server</code>. Applying them to the deploy’s environment file and quadlet is follow-up work; this record fixes the address and the protocol, not their application.</p>
+</section>
+<section id="the-downsides" class="level2">
+<h2 class="anchored" data-anchor-id="the-downsides">The Downsides</h2>
+<ul>
+<li>An endpoint pointed at an absent collector returns the server to export-retry load, so the endpoint belongs only where the collector runs; the deploy sets it where the two are co-located.</li>
+<li><code>host.containers.internal</code> holds for a same-host collector and needs the host address for a remote one.</li>
+<li>This record decides the wiring without applying it, so a deploy stays unobservable until its environment carries these values.</li>
+</ul>
+</section>
+<section id="the-road-not-taken" class="level2">
+<h2 class="anchored" data-anchor-id="the-road-not-taken">The Road Not Taken</h2>
+<ul>
+<li>Bake a default endpoint into the image — rejected; a forced default drives connect-retry spam against a collector that may not be there, and it commits the address before the deploy knows it.</li>
+<li>Join the loop-slice container to the observability pod for a <code>localhost:4318</code> endpoint — rejected; it couples the game server’s lifecycle and its published game port to the observability pod.</li>
+<li>Run the loop-slice container on host networking for a <code>127.0.0.1:4318</code> endpoint — rejected; it drops the published-port isolation the deploy relies on.</li>
+<li>Export over gRPC on 4317 — rejected; the fabric’s OTLP export pattern is HTTP on 4318.</li>
+</ul>
+</section>
+<section id="confirmation" class="level2">
+<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
+<p>With the endpoint set, the server prints <code>OTEL ready -&gt; http://host.containers.internal:4318</code> in place of <code>OTEL idle</code>, and the collector receives its spans, metrics, and logs. An OTLP listener on 4318 confirms the connection; a VictoriaMetrics query for the <code>loop-server</code> service confirms the full path once the observability pod runs.</p>
+
+
+</section>
+<section id="related" class="level2">
+<h2 class="anchored" data-anchor-id="related">Related</h2>
+<ul>
+<li><p><a href="20260506-observability-stack-victoriatraces.html">Replace Jaeger with VictoriaTraces for trace storage</a></p></li>
+<li><p><a href="20260629-yagni-times-structure-to-need.html">YAGNI times structure to the need, in code and in the record</a></p></li>
+</ul>
+</section>
+</section>
+
+ ]]></description>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260629-loop-slice-telemetry-to-the-observability-collector.html</guid>
+  <pubDate>Mon, 29 Jun 2026 00:00:00 GMT</pubDate>
+</item>
+<item>
   <title>YAGNI times structure to the need, in code and in the record</title>
   <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260629-yagni-times-structure-to-need.html</link>
   <description><![CDATA[ 
@@ -174,6 +242,7 @@
 <ul>
 <li><p><a href="../changelog/2026/20260629-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-29 (Monday)</a></p></li>
 <li><p><a href="20260629-defer-loot-slice-hardening-until-needed.html">Defer the loot-slice hardening scope until its need arrives</a></p></li>
+<li><p><a href="20260629-loop-slice-telemetry-to-the-observability-collector.html">Export loop-slice server telemetry to the observability collector</a></p></li>
 </ul>
 </section>
 </section>
@@ -2020,129 +2089,6 @@ font-style: inherit;">|</span></span>
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260612-http3-listener-session-findings.html</guid>
-  <pubDate>Fri, 12 Jun 2026 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Repository map of the loot-action vertical slice</title>
-  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260612-vertical-slice-repository-map.html</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › Repository map of the loot-action vertical slice</em></p>
-<p><strong>Status:</strong> accepted</p>
-<section id="context-and-problem-statement" class="level2">
-<h2 class="anchored" data-anchor-id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>The <a href="../decisions/20260611-loot-action-core-loop-mvp-vertical-slice.html">loot-action core-loop slice</a> spans more than a dozen repositories: a playable app, one Lean core per loop concern, the wire and transport specs, the engine fork and its assembly recipe, the backend services, the verification queue, and the docs. A reader who clones one repo sees one slice of the whole and has no single place that says which repository owns which concern and how they compose into a deployable build.</p>
-</section>
-<section id="decision-drivers" class="level2">
-<h2 class="anchored" data-anchor-id="decision-drivers">Decision Drivers</h2>
-<ul>
-<li>The slice follows the <a href="../decisions/20260610-hexagonal-core-ports-adapters.html">hexagonal core/ports/adapters structure</a>, so each loop concern lives behind its own narrow port in its own repository.</li>
-<li>The cores are pure reducers proven in Lean+Plausible, separate from the engine that hosts them.</li>
-<li>The engine fork assembles from independent <code>feat/*</code> branches through a recipe, so the runtime binary has no single source repository.</li>
-</ul>
-</section>
-<section id="decision-outcome" class="level2">
-<h2 class="anchored" data-anchor-id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: one repository owns each concern, and this map is the index. Every repository below lives in the <a href="https://github.com/v-sekai-multiplayer-fabric"><code>v-sekai-multiplayer-fabric</code></a> organization.</p>
-<section id="the-playable-slice" class="level3">
-<h3 class="anchored" data-anchor-id="the-playable-slice">The playable slice</h3>
-<ul>
-<li><a href="https://github.com/v-sekai-multiplayer-fabric/godot-loop-slice"><code>godot-loop-slice</code></a> — the GDScript app: hub deck, party teleport, the timed combo against one enemy, first-touch loot contention, and the round trip that commits the result. The text protocol is transport-agnostic, so <code>TRANSPORT=enet</code> drives the local slice and <code>TRANSPORT=wt</code> drives the WebTransport path over the same protocol.</li>
-</ul>
-</section>
-<section id="the-domain-hexagons-and-their-lean-cores" class="level3">
-<h3 class="anchored" data-anchor-id="the-domain-hexagons-and-their-lean-cores">The domain hexagons and their Lean cores</h3>
-<p>Each loop concern carries a hexagon (<code>core/</code> + <code>ports/</code> + <code>adapters/</code>) and a standalone Lean workspace holding the canonical core:</p>
-<ul>
-<li>combat: <a href="https://github.com/v-sekai-multiplayer-fabric/combat"><code>combat</code></a> hexagon, <a href="https://github.com/v-sekai-multiplayer-fabric/lean-combat-core"><code>lean-combat-core</code></a> Lean core (combo timing, the enemy spawn-invulnerability window, hit validation, damage).</li>
-<li>loot: <a href="https://github.com/v-sekai-multiplayer-fabric/loot"><code>loot</code></a> hexagon, <a href="https://github.com/v-sekai-multiplayer-fabric/lean-loot-core"><code>lean-loot-core</code></a> Lean core (the seeded weighted roll and first-touch contention, with a lean-slang SPIR-V kernel).</li>
-<li>progression: <a href="https://github.com/v-sekai-multiplayer-fabric/progression"><code>progression</code></a> hexagon, <a href="https://github.com/v-sekai-multiplayer-fabric/lean-progression-core"><code>lean-progression-core</code></a> Lean core (profile and inventory rules, the persistence commit).</li>
-</ul>
-</section>
-<section id="the-wire-transport-and-determinism-specs-leanplausible" class="level3">
-<h3 class="anchored" data-anchor-id="the-wire-transport-and-determinism-specs-leanplausible">The wire, transport, and determinism specs (Lean+Plausible)</h3>
-<ul>
-<li><a href="https://github.com/v-sekai-multiplayer-fabric/lean-entity-packet"><code>lean-entity-packet</code></a> — the integral 100-byte entity transform packet (int64 micrometers, no origin shift), with a roundtrip and size proof and a C++ differential.</li>
-<li><a href="https://github.com/v-sekai-multiplayer-fabric/lean-http3-queue"><code>lean-http3-queue</code></a> — the WebTransport transport concurrency model: a mutex-guarded inbound queue proven size-honest, and a starvation-free network-thread loop (<a href="../decisions/20260612-webtransport-persistent-framed-stream.html">the persistent-stream decision</a>).</li>
-<li><a href="https://github.com/v-sekai-multiplayer-fabric/lean-connection-fsm"><code>lean-connection-fsm</code></a> — the client-server connection lifecycle, proven sound and recovering inside the five-second transaction limit.</li>
-<li>the predictive spatial oracle and the proof hexagons that rode alongside it, split out of the now-archived <a href="https://github.com/v-sekai-multiplayer-fabric/lean-predictive-bvh"><code>lean-predictive-bvh</code></a> monorepo into one repository per hexagon cluster along the dependency seams:
-<ul>
-<li><a href="https://github.com/v-sekai-multiplayer-fabric/lean-spatial-oracle"><code>lean-spatial-oracle</code></a> — the predictive BVH and its R128 fixed-point, the velocity scale the entity packet binds to (ghost expansion, SAH, and Hilbert broadphase, emitting <code>predictive_bvh.h</code> through the AmoLean codegen).</li>
-<li><a href="https://github.com/v-sekai-multiplayer-fabric/lean-shared-core"><code>lean-shared-core</code></a> — the shared primitive types every cluster core builds on, dependency-free so the others require it without pulling Mathlib.</li>
-<li><a href="https://github.com/v-sekai-multiplayer-fabric/lean-rebac-core"><code>lean-rebac-core</code></a> — the NoGod / ReBAC authorization core.</li>
-<li><a href="https://github.com/v-sekai-multiplayer-fabric/lean-humanoid-rom"><code>lean-humanoid-rom</code></a> — humanoid range-of-motion and IK constraints (Kusudama, muscle and prismatic limits), with the body-model and biomechanics citations.</li>
-<li><a href="https://github.com/v-sekai-multiplayer-fabric/lean-fabric-protocol"><code>lean-fabric-protocol</code></a> — the fabric networking and SLA proofs: saturation, waypoint bounds, and the abyssal SLA.</li>
-<li><a href="https://github.com/v-sekai-multiplayer-fabric/lean-interest-mgmt"><code>lean-interest-mgmt</code></a> — authority-interest and solve-order: who-sees-whom and solve sequencing.</li>
-</ul></li>
-</ul>
-</section>
-<section id="the-engine-and-its-assembly" class="level3">
-<h3 class="anchored" data-anchor-id="the-engine-and-its-assembly">The engine and its assembly</h3>
-<ul>
-<li><p><a href="https://github.com/v-sekai-multiplayer-fabric/godot"><code>godot</code></a> — the double-precision fork. Each module rides its own <code>feat/*</code> branch (for example <code>feat/module-http3</code> carries WebTransport and the mbedtls ECDSA crypto, <code>feat/module-xr-grid</code> carries the orientation orbs, <code>feat/module-sqlite</code> carries the progression store).</p></li>
-<li><p><a href="https://github.com/v-sekai-multiplayer-fabric/godot-assembly"><code>godot-assembly</code></a> — the <code>gitassembly</code> recipe and the git-assembler driver (<code>update_godot_v_sekai.exs</code>) that stage and merge every <code>feat/*</code> branch into the <code>multiplayer-fabric</code> assembly, then tag the result. The branch stays local; the tag is the durable artifact.</p>
-<p><strong>Assembly structure:</strong> <code>godot-assembly</code> is checked out alongside <code>godot</code> and its driver runs <em>inside</em> the <code>godot</code> working directory. It adds <code>v-sekai-multiplayer-fabric</code> as a remote pointing at the <code>godot</code> repo, calls <code>git-assembler</code> with the <code>gitassembly</code> recipe to produce a local <code>multiplayer-fabric</code> branch (first branch via <code>stage</code>, subsequent branches via <code>merge</code>), creates an annotated tag named <code>v{YYYY.MM.DD.HHMM}-multiplayer-fabric</code>, pushes only the tag to <code>v-sekai-multiplayer-fabric/godot</code>, then deletes the local <code>multiplayer-fabric</code> branch. The <code>godot</code> repo never receives a force-pushed moving branch; the tag is the sole immutable artifact consumers pin.</p></li>
-<li><p><a href="https://github.com/v-sekai-multiplayer-fabric/godot-images"><code>godot-images</code></a> — the engine build factory and its container toolchain. A GitHub Actions matrix cross-compiles the double-precision fork’s editor and export templates (<code>editor</code>, <code>template_release</code>, <code>template_debug</code>) for Windows (through the llvm-mingw toolchain) and Linux, with sccache backed by GitHub Actions cache, and publishes each platform as a release zip (<code>windows-editor.zip</code>, <code>windows-template-release.zip</code>, …) that <code>godot-loop-slice</code> unpacks for its MSIX export. A parallel <code>build-docker</code> job builds the rootless podman quadlet Linux server images to GHCR. The native Linux engine/template builds are currently paused (<a href="https://github.com/v-sekai-multiplayer-fabric/godot-images/pull/28">disabled in #28</a>), so releases ship Windows-only until they are re-enabled.</p></li>
-</ul>
-</section>
-<section id="backend-services" class="level3">
-<h3 class="anchored" data-anchor-id="backend-services">Backend services</h3>
-<ul>
-<li><a href="https://github.com/v-sekai-multiplayer-fabric/zone-backend"><code>zone-backend</code></a> — the Elixir/Phoenix backend: identity, the zone/shard directory (zone servers self-register via <code>POST /shards</code> and heartbeat via <code>PUT /shards/:id</code>), the loop profile commit endpoint (<code>POST /api/v1/loop/commit</code>), and casync asset serving through <code>aria-storage</code>. Follows a hexagonal <code>uro_loop</code> sub-app structure with <code>UroLoop.Ports.ProfileStore</code>.</li>
-<li><a href="https://github.com/v-sekai-multiplayer-fabric/zone-backend-quadlet"><code>zone-backend-quadlet</code></a> — systemd podman quadlet deployment unit for <code>zone-backend</code> on AlmaLinux, with CRDB mTLS client certs and TLS cert mountpoints.</li>
-<li><a href="https://github.com/V-Sekai-fire/aria-storage"><code>aria-storage</code></a> — casync chunk store library (Elixir): encodes and decodes <code>.caibx</code> index files and <code>.cacnk</code> chunk files in the desync-compatible raw-zstd format; <code>desync</code> round-trip verified in CI.</li>
-<li><a href="https://github.com/v-sekai/cockroach"><code>cockroach</code></a> — CockroachDB cluster configuration with multi-arch Docker build (amd64 + arm64).</li>
-<li><a href="https://github.com/v-sekai-multiplayer-fabric/observability"><code>observability</code></a> — observability stack: fully-qualified image names for Prometheus and Grafana monitoring.</li>
-</ul>
-</section>
-<section id="platform-tooling" class="level3">
-<h3 class="anchored" data-anchor-id="platform-tooling">Platform tooling</h3>
-<ul>
-<li><a href="https://github.com/v-sekai-multiplayer-fabric/fabric-platform-central"><code>fabric-platform-central</code></a> — cross-platform Elixir tray launcher (<code>godot-launcher-fire</code>) distributed as a self-contained binary via Burrito; starts and monitors the Godot editor on Linux, macOS, and Windows.</li>
-</ul>
-</section>
-<section id="verification-tooling-and-docs" class="level3">
-<h3 class="anchored" data-anchor-id="verification-tooling-and-docs">Verification, tooling, and docs</h3>
-<ul>
-<li><a href="https://github.com/v-sekai-multiplayer-fabric/fabric-verify"><code>fabric-verify</code></a> — the verification smokes as a systemd podman quadlet queue, gating the cores against their golden vectors.</li>
-<li><a href="https://github.com/v-sekai-multiplayer-fabric/vsekai-godot-mcp"><code>vsekai-godot-mcp</code></a> — the in-editor and runtime MCP addon that drives a deployed build over adb.</li>
-<li><a href="https://github.com/v-sekai-multiplayer-fabric/xr-grid"><code>xr-grid</code></a> — the VR interaction tool whose orientation orbs render the peers in the slice.</li>
-<li><a href="https://github.com/v-sekai-multiplayer-fabric/tropes-action"><code>tropes-action</code></a> — the static house-style check the manuals run.</li>
-<li><a href="https://github.com/v-sekai-multiplayer-fabric/fabric-manuals"><code>fabric-manuals</code></a> — these decisions, the changelog, and the reference docs.</li>
-</ul>
-</section>
-</section>
-<section id="consequences" class="level2">
-<h2 class="anchored" data-anchor-id="consequences">Consequences</h2>
-<ul>
-<li>A reader starts here, follows one link to the concern they care about, and finds a self-contained repository.</li>
-<li>A core proves itself in its own Lean workspace, the engine hosts it through a flat-C adapter, and the slice wires the hexagons together, so a change to one concern stays in one repository.</li>
-<li>The runtime binary is reproducible from the pushed <code>feat/*</code> branches through the <code>godot-assembly</code> recipe, so no single clone holds the whole engine and none needs to.</li>
-</ul>
-</section>
-<section id="confirmation" class="level2">
-<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
-<p>An OpenXR build assembles from the <code>multiplayer-fabric</code> assembly, joins the <code>godot-loop-slice</code> server over the wire, and completes a Hub-to-Field-to-Loot round that commits progression, exercising the cores, the wire, the transport, and the persistence together.</p>
-
-
-</section>
-<section id="related" class="level2">
-<h2 class="anchored" data-anchor-id="related">Related</h2>
-<ul>
-<li><p><a href="../changelog/2026/20260622-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-22 (Monday)</a></p></li>
-<li><p><a href="20260610-hexagonal-core-ports-adapters.html">Hexagonal core/ports/adapters as the component convention</a></p></li>
-<li><p><a href="20260611-loot-action-core-loop-mvp-vertical-slice.html">Loot-action core-loop MVP vertical slice</a></p></li>
-<li><p><a href="20260612-webtransport-persistent-framed-stream.html">WebTransport reliable delivery on one persistent framed stream per session</a></p></li>
-<li><p><a href="20260613-repository-and-capability-inventory.html">Repository and capability inventory for the multiplayer fabric</a></p></li>
-</ul>
-</section>
-
- ]]></description>
-  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/decisions/20260612-vertical-slice-repository-map.html</guid>
   <pubDate>Fri, 12 Jun 2026 00:00:00 GMT</pubDate>
 </item>
 </channel>
