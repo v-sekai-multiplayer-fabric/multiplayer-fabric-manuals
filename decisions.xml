@@ -37,76 +37,24 @@
 <p>The OpenXR Windows build (export preset <code>OpenXR</code>, <code>build/openxr/loop-slice.exe</code>) is the external feedback artifact. It runs the full hub-to-field-to-loot round trip and is the SteamVR-compatible path for PCVR reviewers.</p>
 <p>The game-loop is complete when <code>smoke.sh</code> passes, the OpenXR Windows build exports without error, and at least one external reviewer runs the full loop against a live server.</p>
 </section>
-<section id="cris-score" class="level2">
-<h2 class="anchored" data-anchor-id="cris-score">CRIS Score</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 17%">
-<col style="width: 5%">
-<col style="width: 77%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Factor</th>
-<th>Score</th>
-<th>Evidence</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>C</strong>omplexity</td>
-<td>2</td>
-<td>Sequencing decision only; no new implementation work ordered here</td>
-</tr>
-<tr class="even">
-<td><strong>R</strong>reach</td>
-<td>10</td>
-<td>Sets the integration target for all remaining vertical-slice work</td>
-</tr>
-<tr class="odd">
-<td><strong>I</strong>mpediment</td>
-<td>9</td>
-<td>Without a verified loop, uiux-polish and content accumulate rework</td>
-</tr>
-<tr class="even">
-<td><strong>S</strong>takeholder</td>
-<td>9</td>
-<td>Poll-validated (2 of 4, 50%); feedback release depends on this order</td>
-</tr>
-<tr class="odd">
-<td><strong>Total</strong></td>
-<td>7.5</td>
-<td>Accept and hold</td>
-</tr>
-</tbody>
-</table>
-</section>
 <section id="the-downsides" class="level2">
 <h2 class="anchored" data-anchor-id="the-downsides">The Downsides</h2>
 <p>The shop-economy and openUSD-i/o concerns have no integration path before the feedback release. If the game-loop verification slips, all four dependent concerns slip with it and there is no parallel path to absorb the delay.</p>
 </section>
 <section id="the-road-not-taken" class="level2">
 <h2 class="anchored" data-anchor-id="the-road-not-taken">The Road Not Taken</h2>
-<p><strong>Parallel concerns</strong> — advancing uiux-polish or cassie-pen-mesh in parallel with the game-loop risks landing polish or authoring work on a loop that is still changing, producing rework.</p>
-<p><strong>Content-first</strong> — stabilising content concerns before the loop means integration gaps appear late, when they are most expensive to fix.</p>
-</section>
-<section id="status" class="level2">
-<h2 class="anchored" data-anchor-id="status">Status</h2>
-<p>Status: Accepted</p>
-</section>
-<section id="decision-makers" class="level2">
-<h2 class="anchored" data-anchor-id="decision-makers">Decision Makers</h2>
 <ul>
-<li>K. S. Ernest (iFire) Lee</li>
-</ul>
-</section>
-<section id="tags" class="level2">
-<h2 class="anchored" data-anchor-id="tags">Tags</h2>
-<ul>
-<li>loot-action, game-loop, uiux-polish, cassie-pen-mesh, shop-economy, openUSD-i/o, feedback-release, 20260624-game-loop-cluster-sequence</li>
+<li>Parallel concerns: advancing uiux-polish or cassie-pen-mesh alongside the game-loop risks landing polish or authoring work on a loop that is still changing, producing rework.</li>
+<li>Content-first: stabilising content concerns before the loop pushes integration gaps late, when they are most expensive to fix.</li>
 </ul>
 
 
+</section>
+<section id="related" class="level2">
+<h2 class="anchored" data-anchor-id="related">Related</h2>
+<ul>
+<li><p><a href="../changelog/2026/20260629-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-29 (Monday)</a></p></li>
+</ul>
 </section>
 </section>
 
@@ -195,50 +143,6 @@ font-style: inherit;">git</span> tag v0.1.0-dev.1</span>
 background-color: null;
 font-style: inherit;">git</span> push origin v0.1.0-dev.1</span></code></pre></div></div>
 </section>
-<section id="cris-score" class="level2">
-<h2 class="anchored" data-anchor-id="cris-score">CRIS Score</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 13%">
-<col style="width: 4%">
-<col style="width: 82%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Factor</th>
-<th>Score</th>
-<th>Evidence</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>C</strong>omplexity</td>
-<td>10</td>
-<td>Convention only — no tooling changes; existing scripts already handle the <code>-</code> prerelease flag</td>
-</tr>
-<tr class="even">
-<td><strong>R</strong>each</td>
-<td>7</td>
-<td>Applies to every build artifact across all five release workflows</td>
-</tr>
-<tr class="odd">
-<td><strong>I</strong>mpediment</td>
-<td>5</td>
-<td>Absence causes ad-hoc tags; workaround is operator discipline, which is unreliable over time</td>
-</tr>
-<tr class="even">
-<td><strong>S</strong>takeholder</td>
-<td>6</td>
-<td>External testers and the release pipeline both depend on readable, ordered version identifiers</td>
-</tr>
-<tr class="odd">
-<td><strong>Total</strong></td>
-<td>7</td>
-<td>Schedule soon</td>
-</tr>
-</tbody>
-</table>
-</section>
 <section id="the-downsides" class="level2">
 <h2 class="anchored" data-anchor-id="the-downsides">The Downsides</h2>
 <ul>
@@ -248,43 +152,20 @@ font-style: inherit;">git</span> push origin v0.1.0-dev.1</span></code></pre></d
 </section>
 <section id="the-road-not-taken" class="level2">
 <h2 class="anchored" data-anchor-id="the-road-not-taken">The Road Not Taken</h2>
-<p><strong>Numeric stage prefixes</strong> (<code>v0.1.0-1dev.1</code>, <code>v0.1.0-2beta.1</code>) — force correct lexicographic order without depending on creator date. Rejected because the numeric prefix is visually noisy and unfamiliar to readers who did not write the convention.</p>
-<p><strong>Zero-padded counter</strong> (<code>v0.1.0-dev.001</code>) — preserves within-stage lexicographic order for counters ≥ 10. Rejected because creator-date sort makes padding unnecessary, and three-digit counters look non-standard compared to Kubernetes, Node.js, and Rust conventions.</p>
-<p><strong><code>alpha</code> instead of <code>dev</code></strong> — <code>alpha &lt; beta &lt; rc</code> sorts correctly as strings. Rejected because the project stages are named dev/beta/rc/release and renaming dev to alpha would introduce a mismatch between the tag and the pipeline vocabulary.</p>
-<p><strong><code>sort -V</code> / <code>--sort=version:refname</code></strong> — both put bare <code>v0.1.0</code> before <code>v0.1.0-dev.*</code> (since a string is a prefix of a longer string) and sort <code>beta</code> before <code>dev</code>. Neither gives the correct cross-stage order for these names.</p>
-</section>
-<section id="status" class="level2">
-<h2 class="anchored" data-anchor-id="status">Status</h2>
-<p>Status: Accepted</p>
-</section>
-<section id="decision-makers" class="level2">
-<h2 class="anchored" data-anchor-id="decision-makers">Decision Makers</h2>
 <ul>
-<li>Ernest Lee</li>
+<li>Numeric stage prefixes (<code>v0.1.0-1dev.1</code>, <code>v0.1.0-2beta.1</code>): force correct lexicographic order without depending on creator date. Rejected as visually noisy and unfamiliar to readers who did not write the convention.</li>
+<li>Zero-padded counter (<code>v0.1.0-dev.001</code>): preserves within-stage lexicographic order for counters ≥ 10. Rejected because creator-date sort makes padding unnecessary, and three-digit counters look non-standard next to Kubernetes, Node.js, and Rust.</li>
+<li><code>alpha</code> instead of <code>dev</code>: <code>alpha &lt; beta &lt; rc</code> sorts correctly as strings. Rejected because the project stages are named dev/beta/rc/release, and renaming dev to alpha would mismatch the pipeline vocabulary.</li>
+<li><code>sort -V</code> / <code>--sort=version:refname</code>: both put bare <code>v0.1.0</code> before <code>v0.1.0-dev.*</code> and sort <code>beta</code> before <code>dev</code>, so neither gives the correct cross-stage order.</li>
 </ul>
+
+
 </section>
-<section id="tags" class="level2">
-<h2 class="anchored" data-anchor-id="tags">Tags</h2>
+<section id="related" class="level2">
+<h2 class="anchored" data-anchor-id="related">Related</h2>
 <ul>
-<li>release, versioning, git-tags, dev, beta, rc, 20260624-release-tag-progression-dev-beta-rc, madr-proposal-template</li>
+<li><p><a href="../changelog/2026/20260629-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-29 (Monday)</a></p></li>
 </ul>
-</section>
-<section id="further-reading" class="level2">
-<h2 class="anchored" data-anchor-id="further-reading">Further Reading</h2>
-<pre><code>@misc{semver2013,
-  author = {Preston-Werner, Tom},
-  title  = {Semantic Versioning 2.0.0},
-  year   = {2013},
-  url    = {https://semver.org/}
-}
-
-@misc{v_sekai_2026,
-  title = {V-Sekai},
-  year  = {2026},
-  url   = {https://v-sekai.org/}
-}</code></pre>
-
-
 </section>
 </section>
 
@@ -588,50 +469,6 @@ background-color: null;
 font-weight: bold;
 font-style: inherit;">end</span></span></code></pre></div></div>
 </section>
-<section id="cris-score" class="level2">
-<h2 class="anchored" data-anchor-id="cris-score">CRIS Score</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 12%">
-<col style="width: 4%">
-<col style="width: 83%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Factor</th>
-<th>Score</th>
-<th>Evidence</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>C</strong>omplexity</td>
-<td>7</td>
-<td>Elixir OTP + Burrito are established; Burrito needs Zig in CI, which is a new toolchain dependency</td>
-</tr>
-<tr class="even">
-<td><strong>R</strong>each</td>
-<td>6</td>
-<td>Affects every Windows user who installs via the platform manager MSIX</td>
-</tr>
-<tr class="odd">
-<td><strong>I</strong>mpediment</td>
-<td>8</td>
-<td>Without a working platform manager MSIX, Windows distribution has no self-update path</td>
-</tr>
-<tr class="even">
-<td><strong>S</strong>takeholder</td>
-<td>7</td>
-<td>Directly blocks the three-MSIX release milestone (client, server, platform-central)</td>
-</tr>
-<tr class="odd">
-<td><strong>Total</strong></td>
-<td>7.0</td>
-<td>Schedule soon</td>
-</tr>
-</tbody>
-</table>
-</section>
 <section id="the-downsides" class="level2">
 <h2 class="anchored" data-anchor-id="the-downsides">The Downsides</h2>
 <ul>
@@ -642,56 +479,21 @@ font-style: inherit;">end</span></span></code></pre></div></div>
 </section>
 <section id="the-road-not-taken" class="level2">
 <h2 class="anchored" data-anchor-id="the-road-not-taken">The Road Not Taken</h2>
-<p><strong>Godot + GDExtension casync</strong>: Would require writing the casync protocol from scratch in C++, duplicating <code>aria_storage</code> with no gain. The <code>multiplayer_fabric_asset</code> module stub confirmed this was not started.</p>
-<p><strong>Godot + GDScript HTTPRequest</strong>: Could call <code>Add-AppxPackage</code> via <code>OS.execute()</code> for whole-file downloads but cannot do casync delta transfers without a full casync client in GDScript. Carries the rendering engine for no reason.</p>
-<p><strong>Scoop shim + OTP release tree</strong>: Downloading a pre-built Zig shim from <code>ScoopInstaller/Shim</code> and writing a <code>.shim</code> sidecar avoids writing any stub code, but still ships the full OTP release directory tree (hundreds of files) in the MSIX alongside it. Burrito produces a single file and is an Elixir-native solution.</p>
-<p><strong>Go stub</strong>: A tiny <code>main.go</code> that execs the OTP <code>.bat</code> launcher works but adds a Go compile step and a non-Elixir source file to maintain, offering no advantage over Burrito.</p>
-<p><strong>.NET 8 self-contained launcher</strong>: Was the original approach; removed because .NET 8 is a large dependency (~60 MB self-contained), the team does not otherwise use .NET, and it only wrapped a shell invocation — nothing the OTP release cannot do directly.</p>
-</section>
-<section id="tags" class="level2">
-<h2 class="anchored" data-anchor-id="tags">Tags</h2>
 <ul>
-<li>elixir, burrito, casync, msix, windows, aria-storage, 20260624-fabric-platform-central-elixir-burrito-casync</li>
+<li>Godot + GDExtension casync: would require writing the casync protocol from scratch in C++, duplicating <code>aria_storage</code> with no gain. The <code>multiplayer_fabric_asset</code> module stub confirmed this was not started.</li>
+<li>Godot + GDScript HTTPRequest: could call <code>Add-AppxPackage</code> via <code>OS.execute()</code> for whole-file downloads but cannot do casync delta transfers without a full casync client in GDScript, and carries the rendering engine for no reason.</li>
+<li>Scoop shim + OTP release tree: avoids writing stub code, but still ships the full OTP release directory tree (hundreds of files) in the MSIX. Burrito produces a single file and stays Elixir-native.</li>
+<li>Go stub: a tiny <code>main.go</code> that execs the OTP <code>.bat</code> launcher works but adds a Go compile step and a non-Elixir source file, offering no advantage over Burrito.</li>
+<li>.NET 8 self-contained launcher: the original approach, removed because .NET 8 is a large dependency (~60 MB), the team does not otherwise use .NET, and it only wrapped a shell invocation.</li>
 </ul>
+
+
 </section>
-<section id="further-reading" class="level2">
-<h2 class="anchored" data-anchor-id="further-reading">Further Reading</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode bibtex code-with-copy"><code class="sourceCode bibtex"><span id="cb5-1"><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">@misc</span>{<span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">burrito_2024</span>,</span>
-<span id="cb5-2">  <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">title</span>  = {Burrito — Wrap your application in a BEAM Burrito!},</span>
-<span id="cb5-3">  <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">year</span>   = {2024},</span>
-<span id="cb5-4">  <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">url</span>    = {https://github.com/burrito-elixir/burrito}</span>
-<span id="cb5-5">}</span>
-<span id="cb5-6"></span>
-<span id="cb5-7"><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">@misc</span>{<span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">aria_storage_2025</span>,</span>
-<span id="cb5-8">  <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">title</span>  = {aria-storage — Content-addressable storage with casync protocol},</span>
-<span id="cb5-9">  <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">author</span> = {Lee, K. S. Ernest (iFire)},</span>
-<span id="cb5-10">  <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">year</span>   = {2025},</span>
-<span id="cb5-11">  <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">url</span>    = {https://github.com/V-Sekai-fire/aria-storage}</span>
-<span id="cb5-12">}</span></code></pre></div></div>
-
-
+<section id="related" class="level2">
+<h2 class="anchored" data-anchor-id="related">Related</h2>
+<ul>
+<li><p><a href="../changelog/2026/20260629-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-29 (Monday)</a></p></li>
+</ul>
 </section>
 </section>
 
@@ -919,50 +721,6 @@ font-style: inherit;">|</span></span>
 <p><code>ACTIONS_CACHE_URL</code> and <code>ACTIONS_RUNTIME_TOKEN</code> are set automatically on every GHA runner; no repo secrets are required. They are passed via <code>--secret</code> rather than <code>--build-arg</code> so they are never baked into an image layer or visible in <code>podman history</code>.</p>
 <p>For local <code>just build-docker</code> runs the build arg and secrets are absent; sccache falls back to the on-disk cache at <code>~/.cache/sccache</code>.</p>
 </section>
-<section id="cris-score" class="level2">
-<h2 class="anchored" data-anchor-id="cris-score">CRIS Score</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 12%">
-<col style="width: 4%">
-<col style="width: 84%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Factor</th>
-<th>Score</th>
-<th>Evidence</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>C</strong>omplexity</td>
-<td>8</td>
-<td>sccache GHA backend is a documented, stable feature (since v0.5.0); podman secret mounts are standard</td>
-</tr>
-<tr class="even">
-<td><strong>R</strong>each</td>
-<td>6</td>
-<td>Affects every CI run of <code>build-docker</code>; local builds are unchanged</td>
-</tr>
-<tr class="odd">
-<td><strong>I</strong>mpediment</td>
-<td>7</td>
-<td>Without it every CI run spends 30–60 min recompiling; no workaround short of a different caching strategy</td>
-</tr>
-<tr class="even">
-<td><strong>S</strong>takeholder</td>
-<td>7</td>
-<td><code>zone-baker</code> and <code>zone-server</code> both consume these images; slow CI blocks their image updates</td>
-</tr>
-<tr class="odd">
-<td><strong>Total</strong></td>
-<td>7</td>
-<td>Schedule soon</td>
-</tr>
-</tbody>
-</table>
-</section>
 <section id="the-downsides" class="level2">
 <h2 class="anchored" data-anchor-id="the-downsides">The Downsides</h2>
 <ul>
@@ -973,41 +731,19 @@ font-style: inherit;">|</span></span>
 </section>
 <section id="the-road-not-taken" class="level2">
 <h2 class="anchored" data-anchor-id="the-road-not-taken">The Road Not Taken</h2>
-<p><strong>Tigris S3 bucket</strong> — previously used for local builds. Requires provisioning an external account, five repo secrets, and ongoing cost. Removed in favour of zero-config GHA cache.</p>
-<p><strong>OCI layer cache via <code>actions/cache</code></strong> — podman’s build layer cache lives in <code>~/.local/share/containers/storage/</code>, a complex blob store that is expensive to tar and restore. sccache caches compiler outputs at a finer granularity and transfers better across minor source changes.</p>
-<p><strong>Host sccache server + <code>--network=host</code></strong> — running sccache on the GHA runner host and connecting from the container via <code>--network=host</code> avoids the secret-mount approach but changes container network behaviour and requires sccache to be installed on the host separately from the in-container copy.</p>
-</section>
-<section id="status" class="level2">
-<h2 class="anchored" data-anchor-id="status">Status</h2>
-<p>Status: Accepted</p>
-</section>
-<section id="decision-makers" class="level2">
-<h2 class="anchored" data-anchor-id="decision-makers">Decision Makers</h2>
 <ul>
-<li>Ernest Lee</li>
+<li>Tigris S3 bucket: previously used for local builds; needs an external account, five repo secrets, and ongoing cost. Removed for the zero-config GHA cache.</li>
+<li>OCI layer cache via <code>actions/cache</code>: podman’s build layer cache lives in <code>~/.local/share/containers/storage/</code>, a blob store that is expensive to tar and restore. sccache caches compiler outputs at finer granularity and transfers better across minor source changes.</li>
+<li>Host sccache server + <code>--network=host</code>: avoids the secret mount but changes container network behaviour and needs sccache installed on the host separately from the in-container copy.</li>
 </ul>
+
+
 </section>
-<section id="tags" class="level2">
-<h2 class="anchored" data-anchor-id="tags">Tags</h2>
+<section id="related" class="level2">
+<h2 class="anchored" data-anchor-id="related">Related</h2>
 <ul>
-<li>sccache, github-actions, godot, podman, ci, 20260624-sccache-github-actions-cache-for-godot-builds, madr-proposal-template</li>
+<li><p><a href="../changelog/2026/20260629-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-29 (Monday)</a></p></li>
 </ul>
-</section>
-<section id="further-reading" class="level2">
-<h2 class="anchored" data-anchor-id="further-reading">Further Reading</h2>
-<pre><code>@misc{sccache_gha_2026,
-  title = {sccache — GitHub Actions cache backend},
-  year  = {2026},
-  url   = {https://github.com/mozilla/sccache#github-actions-cache}
-}
-
-@misc{v_sekai_2026,
-  title = {V-Sekai},
-  year  = {2026},
-  url   = {https://v-sekai.org/}
-}</code></pre>
-
-
 </section>
 </section>
 

@@ -327,13 +327,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#the-context" id="toc-the-context" class="nav-link" data-scroll-target="#the-context">The Context</a></li>
   <li><a href="#the-problem-statement" id="toc-the-problem-statement" class="nav-link" data-scroll-target="#the-problem-statement">The Problem Statement</a></li>
   <li><a href="#design" id="toc-design" class="nav-link" data-scroll-target="#design">Design</a></li>
-  <li><a href="#cris-score" id="toc-cris-score" class="nav-link" data-scroll-target="#cris-score">CRIS Score</a></li>
   <li><a href="#the-downsides" id="toc-the-downsides" class="nav-link" data-scroll-target="#the-downsides">The Downsides</a></li>
   <li><a href="#the-road-not-taken" id="toc-the-road-not-taken" class="nav-link" data-scroll-target="#the-road-not-taken">The Road Not Taken</a></li>
-  <li><a href="#status" id="toc-status" class="nav-link" data-scroll-target="#status">Status</a></li>
-  <li><a href="#decision-makers" id="toc-decision-makers" class="nav-link" data-scroll-target="#decision-makers">Decision Makers</a></li>
-  <li><a href="#tags" id="toc-tags" class="nav-link" data-scroll-target="#tags">Tags</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading">Further Reading</a></li>
+  <li><a href="#related" id="toc-related" class="nav-link" data-scroll-target="#related">Related</a></li>
   </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/v-sekai-multiplayer-fabric/manuals/edit/main/decisions/20260624-release-tag-progression-dev-beta-rc.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
@@ -429,50 +425,6 @@ version: 0.1.0            # → LOOP_PKG_VERSION=0.1.0  (final release)</code></
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> tag v0.1.0-dev.1</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push origin v0.1.0-dev.1</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="cris-score" class="level2">
-<h2 class="anchored" data-anchor-id="cris-score">CRIS Score</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 13%">
-<col style="width: 4%">
-<col style="width: 82%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Factor</th>
-<th>Score</th>
-<th>Evidence</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>C</strong>omplexity</td>
-<td>10</td>
-<td>Convention only — no tooling changes; existing scripts already handle the <code>-</code> prerelease flag</td>
-</tr>
-<tr class="even">
-<td><strong>R</strong>each</td>
-<td>7</td>
-<td>Applies to every build artifact across all five release workflows</td>
-</tr>
-<tr class="odd">
-<td><strong>I</strong>mpediment</td>
-<td>5</td>
-<td>Absence causes ad-hoc tags; workaround is operator discipline, which is unreliable over time</td>
-</tr>
-<tr class="even">
-<td><strong>S</strong>takeholder</td>
-<td>6</td>
-<td>External testers and the release pipeline both depend on readable, ordered version identifiers</td>
-</tr>
-<tr class="odd">
-<td><strong>Total</strong></td>
-<td>7</td>
-<td>Schedule soon</td>
-</tr>
-</tbody>
-</table>
-</section>
 <section id="the-downsides" class="level2">
 <h2 class="anchored" data-anchor-id="the-downsides">The Downsides</h2>
 <ul>
@@ -482,43 +434,20 @@ version: 0.1.0            # → LOOP_PKG_VERSION=0.1.0  (final release)</code></
 </section>
 <section id="the-road-not-taken" class="level2">
 <h2 class="anchored" data-anchor-id="the-road-not-taken">The Road Not Taken</h2>
-<p><strong>Numeric stage prefixes</strong> (<code>v0.1.0-1dev.1</code>, <code>v0.1.0-2beta.1</code>) — force correct lexicographic order without depending on creator date. Rejected because the numeric prefix is visually noisy and unfamiliar to readers who did not write the convention.</p>
-<p><strong>Zero-padded counter</strong> (<code>v0.1.0-dev.001</code>) — preserves within-stage lexicographic order for counters ≥ 10. Rejected because creator-date sort makes padding unnecessary, and three-digit counters look non-standard compared to Kubernetes, Node.js, and Rust conventions.</p>
-<p><strong><code>alpha</code> instead of <code>dev</code></strong> — <code>alpha &lt; beta &lt; rc</code> sorts correctly as strings. Rejected because the project stages are named dev/beta/rc/release and renaming dev to alpha would introduce a mismatch between the tag and the pipeline vocabulary.</p>
-<p><strong><code>sort -V</code> / <code>--sort=version:refname</code></strong> — both put bare <code>v0.1.0</code> before <code>v0.1.0-dev.*</code> (since a string is a prefix of a longer string) and sort <code>beta</code> before <code>dev</code>. Neither gives the correct cross-stage order for these names.</p>
-</section>
-<section id="status" class="level2">
-<h2 class="anchored" data-anchor-id="status">Status</h2>
-<p>Status: Accepted</p>
-</section>
-<section id="decision-makers" class="level2">
-<h2 class="anchored" data-anchor-id="decision-makers">Decision Makers</h2>
 <ul>
-<li>Ernest Lee</li>
+<li>Numeric stage prefixes (<code>v0.1.0-1dev.1</code>, <code>v0.1.0-2beta.1</code>): force correct lexicographic order without depending on creator date. Rejected as visually noisy and unfamiliar to readers who did not write the convention.</li>
+<li>Zero-padded counter (<code>v0.1.0-dev.001</code>): preserves within-stage lexicographic order for counters ≥ 10. Rejected because creator-date sort makes padding unnecessary, and three-digit counters look non-standard next to Kubernetes, Node.js, and Rust.</li>
+<li><code>alpha</code> instead of <code>dev</code>: <code>alpha &lt; beta &lt; rc</code> sorts correctly as strings. Rejected because the project stages are named dev/beta/rc/release, and renaming dev to alpha would mismatch the pipeline vocabulary.</li>
+<li><code>sort -V</code> / <code>--sort=version:refname</code>: both put bare <code>v0.1.0</code> before <code>v0.1.0-dev.*</code> and sort <code>beta</code> before <code>dev</code>, so neither gives the correct cross-stage order.</li>
 </ul>
+
+
 </section>
-<section id="tags" class="level2">
-<h2 class="anchored" data-anchor-id="tags">Tags</h2>
+<section id="related" class="level2">
+<h2 class="anchored" data-anchor-id="related">Related</h2>
 <ul>
-<li>release, versioning, git-tags, dev, beta, rc, 20260624-release-tag-progression-dev-beta-rc, madr-proposal-template</li>
+<li><p><a href="../changelog/2026/20260629-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-29 (Monday)</a></p></li>
 </ul>
-</section>
-<section id="further-reading" class="level2">
-<h2 class="anchored" data-anchor-id="further-reading">Further Reading</h2>
-<pre><code>@misc{semver2013,
-  author = {Preston-Werner, Tom},
-  title  = {Semantic Versioning 2.0.0},
-  year   = {2013},
-  url    = {https://semver.org/}
-}
-
-@misc{v_sekai_2026,
-  title = {V-Sekai},
-  year  = {2026},
-  url   = {https://v-sekai.org/}
-}</code></pre>
-
-
 </section>
 </section>
 

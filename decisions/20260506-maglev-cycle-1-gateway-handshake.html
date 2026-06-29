@@ -290,14 +290,10 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#the-context" id="toc-the-context" class="nav-link active" data-scroll-target="#the-context">The Context</a></li>
   <li><a href="#the-problem-statement" id="toc-the-problem-statement" class="nav-link" data-scroll-target="#the-problem-statement">The Problem Statement</a></li>
   <li><a href="#design" id="toc-design" class="nav-link" data-scroll-target="#design">Design</a></li>
-  <li><a href="#estimate" id="toc-estimate" class="nav-link" data-scroll-target="#estimate">Estimate</a></li>
-  <li><a href="#cris-score" id="toc-cris-score" class="nav-link" data-scroll-target="#cris-score">CRIS Score</a></li>
   <li><a href="#the-downsides" id="toc-the-downsides" class="nav-link" data-scroll-target="#the-downsides">The Downsides</a></li>
   <li><a href="#the-road-not-taken" id="toc-the-road-not-taken" class="nav-link" data-scroll-target="#the-road-not-taken">The Road Not Taken</a></li>
-  <li><a href="#status" id="toc-status" class="nav-link" data-scroll-target="#status">Status</a></li>
-  <li><a href="#decision-makers" id="toc-decision-makers" class="nav-link" data-scroll-target="#decision-makers">Decision Makers</a></li>
-  <li><a href="#tags" id="toc-tags" class="nav-link" data-scroll-target="#tags">Tags</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading">Further Reading</a></li>
+  <li><a href="#confirmation" id="toc-confirmation" class="nav-link" data-scroll-target="#confirmation">Confirmation</a></li>
+  <li><a href="#related" id="toc-related" class="nav-link" data-scroll-target="#related">Related</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/v-sekai-multiplayer-fabric/manuals/edit/main/decisions/20260506-maglev-cycle-1-gateway-handshake.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
@@ -354,126 +350,33 @@ ul.task-list li input[type="checkbox"] {
 </ul>
 <p>Every subsequent cycle extends this scene.</p>
 </section>
-<section id="estimate" class="level2">
-<h2 class="anchored" data-anchor-id="estimate">Estimate</h2>
-<p><strong>2 days</strong> (2026-05-07 → 2026-05-08). The gateway was built from scratch in one day (25+ commits on 2026-05-05); the zone server initial deploy took two days (2026-05-05–06). The remaining work is a minimal headless Godot scene that connects and logs one datagram.</p>
-</section>
-<section id="cris-score" class="level2">
-<h2 class="anchored" data-anchor-id="cris-score">CRIS Score</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 4%">
-<col style="width: 1%">
-<col style="width: 93%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Factor</th>
-<th>Score</th>
-<th>Evidence</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>C</strong>omplexity</td>
-<td>6</td>
-<td>Godot’s WebTransport datagram API is documented but untested in this build config; the Fly UDP routing adds one unknown. The wtransport Rust library (v0.7.1) carries an upstream disclaimer that it is not yet considered production-ready; the WebTransport protocol itself is standardized (RFC 9220, 2023).</td>
-</tr>
-<tr class="even">
-<td><strong>R</strong>each</td>
-<td>10</td>
-<td>Every subsequent cycle runs inside this Godot client.</td>
-</tr>
-<tr class="odd">
-<td><strong>I</strong>mpediment</td>
-<td>10</td>
-<td>Nothing else can be tested until a real Godot process receives a datagram end-to-end.</td>
-</tr>
-<tr class="even">
-<td><strong>S</strong>takeholder</td>
-<td>10</td>
-<td>Gate for all Maglev cycles.</td>
-</tr>
-<tr class="odd">
-<td><strong>Total</strong></td>
-<td>9.0</td>
-<td>Build first.</td>
-</tr>
-</tbody>
-</table>
-</section>
 <section id="the-downsides" class="level2">
 <h2 class="anchored" data-anchor-id="the-downsides">The Downsides</h2>
 <p>Writing a minimal Godot scene that connects via WebTransport is more work than a curl ping test, and cannot be deferred — a non-Godot client would not catch Godot-specific datagram handling bugs before they reach Cycle 5.</p>
 </section>
 <section id="the-road-not-taken" class="level2">
 <h2 class="anchored" data-anchor-id="the-road-not-taken">The Road Not Taken</h2>
-<p>A bare WebTransport client (curl, Python, or Elixir test harness) was the original Cycle 1 design but was rejected because it only tests the gateway in isolation, leaving the Godot client’s WebTransport implementation unverified until Cycle 4, where any failure would be much harder to isolate.</p>
-</section>
-<section id="status" class="level2">
-<h2 class="anchored" data-anchor-id="status">Status</h2>
-<p>Status: Done (verified 2026-05-07)</p>
-<p>All three pass criteria verified end-to-end against the live deployment:</p>
 <ul>
-<li>✅ WebTransport/QUIC handshake without TLS error: picoquic trace shows full handshake, h3 ALPN negotiated, 1-RTT keys derived</li>
-<li>✅ One datagram received: gateway returned <code>{"id":"c1-...","ok":true,"result":"pong"}</code> matching the request id, in ~880ms over real internet</li>
-<li>✅ Client exits cleanly: <code>quit(0)</code>, exit code 0, no orphaned process</li>
-</ul>
-<p>The handshake test client lives at <a href="https://github.com/V-Sekai-fire/multiplayer-fabric-cycle-tests/blob/main/cycle-1-gateway-handshake/cycle1.gd"><code>multiplayer-fabric-cycle-tests/cycle-1-gateway-handshake/cycle1.gd</code></a>. Note: the ping is answered directly by the gateway’s <code>Gateway.Router.dispatch/1</code> (<code>router.ex:55</code>), not proxied to the zone server. Zone-routing is exercised in cycle 5+.</p>
-</section>
-<section id="decision-makers" class="level2">
-<h2 class="anchored" data-anchor-id="decision-makers">Decision Makers</h2>
-<ul>
-<li>Lead Architect / Fabric Maintainer</li>
+<li>Bare WebTransport client (curl, Python, or Elixir harness): the original Cycle 1 design; it tests the gateway in isolation and leaves the Godot client’s WebTransport path unverified until Cycle 4, where a failure is much harder to isolate.</li>
 </ul>
 </section>
-<section id="tags" class="level2">
-<h2 class="anchored" data-anchor-id="tags">Tags</h2>
+<section id="confirmation" class="level2">
+<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
+<p>Verified 2026-05-07 against the live deployment, with all three pass criteria met:</p>
 <ul>
-<li>maglev-cycle-1, godot-client, gateway-handshake, webtransport, smoke-test, galls-law, 20260506-maglev-cycle-1-gateway-handshake, present-proposal-template</li>
+<li>WebTransport/QUIC handshake without TLS error: the picoquic trace shows a full handshake, h3 ALPN negotiated, and 1-RTT keys derived.</li>
+<li>One datagram received: the gateway returned <code>{"id":"c1-...","ok":true,"result":"pong"}</code> matching the request id, in ~880 ms over real internet.</li>
+<li>Client exits cleanly: <code>quit(0)</code>, exit code 0, no orphaned process.</li>
 </ul>
+<p>The handshake test client lives at <a href="https://github.com/V-Sekai-fire/multiplayer-fabric-cycle-tests/blob/main/cycle-1-gateway-handshake/cycle1.gd"><code>multiplayer-fabric-cycle-tests/cycle-1-gateway-handshake/cycle1.gd</code></a>. The ping is answered directly by the gateway’s <code>Gateway.Router.dispatch/1</code> (<code>router.ex:55</code>); zone routing is exercised in cycle 5 onward.</p>
+
+
 </section>
-<section id="further-reading" class="level2">
-<h2 class="anchored" data-anchor-id="further-reading">Further Reading</h2>
-<pre><code>@techreport{20260501_webtransport,
-  title       = {Use WebTransport over QUIC for game traffic},
-  institution = {V-Sekai Fire},
-  year        = {2026},
-  type        = {Architecture Decision Record},
-  note        = {decisions/20260501-webtransport-over-quic-for-game-traffic.md}
-}
-
-@techreport{20260501_godot_precision,
-  title       = {Godot double precision template\_release for zone servers},
-  institution = {V-Sekai Fire},
-  year        = {2026},
-  type        = {Architecture Decision Record},
-  note        = {decisions/20260501-godot-double-precision-template-release-for-zone.md}
-}
-
-@techreport{20260501_fly,
-  title       = {Fly.io for deployment},
-  institution = {V-Sekai Fire},
-  year        = {2026},
-  type        = {Architecture Decision Record},
-  note        = {decisions/20260501-fly-io-for-deployment.md}
-}
-
-@techreport{20260506_ghcr,
-  title       = {GHCR packages must be built by the repo that consumes them},
-  institution = {V-Sekai Fire},
-  year        = {2026},
-  type        = {Architecture Decision Record},
-  note        = {decisions/20260506-ghcr-package-ownership-same-repo.md}
-}
-
-@misc{v_sekai_2026,
-  title = {V-Sekai},
-  year  = {2026},
-  url   = {https://v-sekai.org/}
-}</code></pre>
-
-
+<section id="related" class="level2">
+<h2 class="anchored" data-anchor-id="related">Related</h2>
+<ul>
+<li><p><a href="../changelog/2026/20260629-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-29 (Monday)</a></p></li>
+</ul>
 </section>
 
 </main> <!-- /main -->

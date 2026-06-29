@@ -292,12 +292,9 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#the-context" id="toc-the-context" class="nav-link" data-scroll-target="#the-context">The Context</a></li>
   <li><a href="#the-problem-statement" id="toc-the-problem-statement" class="nav-link" data-scroll-target="#the-problem-statement">The Problem Statement</a></li>
   <li><a href="#design" id="toc-design" class="nav-link" data-scroll-target="#design">Design</a></li>
-  <li><a href="#cris-score" id="toc-cris-score" class="nav-link" data-scroll-target="#cris-score">CRIS Score</a></li>
   <li><a href="#the-downsides" id="toc-the-downsides" class="nav-link" data-scroll-target="#the-downsides">The Downsides</a></li>
   <li><a href="#the-road-not-taken" id="toc-the-road-not-taken" class="nav-link" data-scroll-target="#the-road-not-taken">The Road Not Taken</a></li>
-  <li><a href="#status" id="toc-status" class="nav-link" data-scroll-target="#status">Status</a></li>
-  <li><a href="#decision-makers" id="toc-decision-makers" class="nav-link" data-scroll-target="#decision-makers">Decision Makers</a></li>
-  <li><a href="#tags" id="toc-tags" class="nav-link" data-scroll-target="#tags">Tags</a></li>
+  <li><a href="#related" id="toc-related" class="nav-link" data-scroll-target="#related">Related</a></li>
   </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/v-sekai-multiplayer-fabric/manuals/edit/main/decisions/20260624-game-loop-cluster-sequence.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
@@ -348,76 +345,24 @@ ul.task-list li input[type="checkbox"] {
 <p>The OpenXR Windows build (export preset <code>OpenXR</code>, <code>build/openxr/loop-slice.exe</code>) is the external feedback artifact. It runs the full hub-to-field-to-loot round trip and is the SteamVR-compatible path for PCVR reviewers.</p>
 <p>The game-loop is complete when <code>smoke.sh</code> passes, the OpenXR Windows build exports without error, and at least one external reviewer runs the full loop against a live server.</p>
 </section>
-<section id="cris-score" class="level2">
-<h2 class="anchored" data-anchor-id="cris-score">CRIS Score</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 17%">
-<col style="width: 5%">
-<col style="width: 77%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Factor</th>
-<th>Score</th>
-<th>Evidence</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>C</strong>omplexity</td>
-<td>2</td>
-<td>Sequencing decision only; no new implementation work ordered here</td>
-</tr>
-<tr class="even">
-<td><strong>R</strong>reach</td>
-<td>10</td>
-<td>Sets the integration target for all remaining vertical-slice work</td>
-</tr>
-<tr class="odd">
-<td><strong>I</strong>mpediment</td>
-<td>9</td>
-<td>Without a verified loop, uiux-polish and content accumulate rework</td>
-</tr>
-<tr class="even">
-<td><strong>S</strong>takeholder</td>
-<td>9</td>
-<td>Poll-validated (2 of 4, 50%); feedback release depends on this order</td>
-</tr>
-<tr class="odd">
-<td><strong>Total</strong></td>
-<td>7.5</td>
-<td>Accept and hold</td>
-</tr>
-</tbody>
-</table>
-</section>
 <section id="the-downsides" class="level2">
 <h2 class="anchored" data-anchor-id="the-downsides">The Downsides</h2>
 <p>The shop-economy and openUSD-i/o concerns have no integration path before the feedback release. If the game-loop verification slips, all four dependent concerns slip with it and there is no parallel path to absorb the delay.</p>
 </section>
 <section id="the-road-not-taken" class="level2">
 <h2 class="anchored" data-anchor-id="the-road-not-taken">The Road Not Taken</h2>
-<p><strong>Parallel concerns</strong> — advancing uiux-polish or cassie-pen-mesh in parallel with the game-loop risks landing polish or authoring work on a loop that is still changing, producing rework.</p>
-<p><strong>Content-first</strong> — stabilising content concerns before the loop means integration gaps appear late, when they are most expensive to fix.</p>
-</section>
-<section id="status" class="level2">
-<h2 class="anchored" data-anchor-id="status">Status</h2>
-<p>Status: Accepted</p>
-</section>
-<section id="decision-makers" class="level2">
-<h2 class="anchored" data-anchor-id="decision-makers">Decision Makers</h2>
 <ul>
-<li>K. S. Ernest (iFire) Lee</li>
-</ul>
-</section>
-<section id="tags" class="level2">
-<h2 class="anchored" data-anchor-id="tags">Tags</h2>
-<ul>
-<li>loot-action, game-loop, uiux-polish, cassie-pen-mesh, shop-economy, openUSD-i/o, feedback-release, 20260624-game-loop-cluster-sequence</li>
+<li>Parallel concerns: advancing uiux-polish or cassie-pen-mesh alongside the game-loop risks landing polish or authoring work on a loop that is still changing, producing rework.</li>
+<li>Content-first: stabilising content concerns before the loop pushes integration gaps late, when they are most expensive to fix.</li>
 </ul>
 
 
+</section>
+<section id="related" class="level2">
+<h2 class="anchored" data-anchor-id="related">Related</h2>
+<ul>
+<li><p><a href="../changelog/2026/20260629-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-29 (Monday)</a></p></li>
+</ul>
 </section>
 </section>
 

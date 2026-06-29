@@ -6,9 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2026-06-24">
 
-<title>sccache with GitHub Actions cache for Godot container builds – V-Sekai Fire — Manuals</title>
+<title>deck-log – V-Sekai Fire — Manuals</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -24,65 +23,30 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="../site_libs/quarto-nav/headroom.min.js"></script>
-<script src="../site_libs/clipboard/clipboard.min.js"></script>
-<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="../site_libs/quarto-search/fuse.min.js"></script>
-<script src="../site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="../">
-<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../site_libs/quarto-html/popper.min.js"></script>
-<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="../site_libs/quarto-html/anchor.min.js"></script>
-<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
-<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-c8b36098594828138602e592b3b57366.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-c744e0ff86f5d87993c78b6cdbb23212.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-c8b36098594828138602e592b3b57366.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-c8b36098594828138602e592b3b57366.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-c744e0ff86f5d87993c78b6cdbb23212.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-c8b36098594828138602e592b3b57366.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -283,7 +247,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="../index.html">
+    <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">V-Sekai Fire — Manuals</span>
     </a>
   </div>
@@ -294,15 +258,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../changelog.html"> 
+    <a class="nav-link" href="../../changelog.html"> 
 <span class="menu-text">Changes</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../decisions.html"> 
+    <a class="nav-link" href="../../decisions.html"> 
 <span class="menu-text">Decisions</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../references.html"> 
+    <a class="nav-link" href="../../references.html"> 
 <span class="menu-text">References</span></a>
   </li>  
 </ul>
@@ -322,122 +286,32 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#sccache-with-github-actions-cache-for-godot-container-builds" id="toc-sccache-with-github-actions-cache-for-godot-container-builds" class="nav-link active" data-scroll-target="#sccache-with-github-actions-cache-for-godot-container-builds">sccache with GitHub Actions cache for Godot container builds</a>
+  <li><a href="#v-sekai-multiplayer-fabric-deck-log-2026-06-29-monday" id="toc-v-sekai-multiplayer-fabric-deck-log-2026-06-29-monday" class="nav-link active" data-scroll-target="#v-sekai-multiplayer-fabric-deck-log-2026-06-29-monday">V-Sekai Multiplayer Fabric Deck Log — 2026-06-29 (Monday)</a>
   <ul class="collapse">
-  <li><a href="#the-context" id="toc-the-context" class="nav-link" data-scroll-target="#the-context">The Context</a></li>
-  <li><a href="#the-problem-statement" id="toc-the-problem-statement" class="nav-link" data-scroll-target="#the-problem-statement">The Problem Statement</a></li>
-  <li><a href="#design" id="toc-design" class="nav-link" data-scroll-target="#design">Design</a></li>
-  <li><a href="#the-downsides" id="toc-the-downsides" class="nav-link" data-scroll-target="#the-downsides">The Downsides</a></li>
-  <li><a href="#the-road-not-taken" id="toc-the-road-not-taken" class="nav-link" data-scroll-target="#the-road-not-taken">The Road Not Taken</a></li>
-  <li><a href="#related" id="toc-related" class="nav-link" data-scroll-target="#related">Related</a></li>
+  <li><a href="#changed" id="toc-changed" class="nav-link" data-scroll-target="#changed">Changed</a></li>
   </ul></li>
   </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/v-sekai-multiplayer-fabric/manuals/edit/main/decisions/20260624-sccache-github-actions-cache-for-godot-builds.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/v-sekai-multiplayer-fabric/manuals/edit/main/changelog/2026/20260629-deck-log.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
-
-
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">sccache with GitHub Actions cache for Godot container builds</h1>
-</div>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
 
 
 
-<div class="quarto-title-meta">
-
-    
-    <div>
-    <div class="quarto-title-meta-heading">Published</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date">June 24, 2026</p>
-    </div>
-  </div>
-  
-    
-  </div>
-  
 
 
-</header>
-
-
-<p><em><a href="../index.html">Manuals</a> › <a href="../decisions.html">Decisions</a> › sccache with GitHub Actions cache for Godot container builds</em></p>
-<p><strong>Status:</strong> accepted</p>
-<section id="sccache-with-github-actions-cache-for-godot-container-builds" class="level1">
-<h1>sccache with GitHub Actions cache for Godot container builds</h1>
-<section id="the-context" class="level2">
-<h2 class="anchored" data-anchor-id="the-context">The Context</h2>
-<p>The <code>fabric-godot-images</code> repo builds the Godot engine from source inside a podman container and publishes the result to ghcr.io. A full cold build takes 30–60 minutes. The previous CI path used <code>docker/build-push-action</code> with <code>cache-from/to: type=gha</code>, which cached OCI layers between runs. That action was replaced by plain <code>podman build</code> to align with the fabric’s rootless-podman + systemd-quadlet standard. The layer cache was lost in that migration.</p>
-<p>The previous developer-facing sccache setup forwarded Tigris S3 credentials (<code>SCCACHE_BUCKET</code>, <code>SCCACHE_ENDPOINT</code>, <code>SCCACHE_REGION</code>, <code>AWS_ACCESS_KEY_ID</code>, <code>AWS_SECRET_ACCESS_KEY</code>) as podman build args and secrets. CI did not use sccache at all.</p>
-</section>
-<section id="the-problem-statement" class="level2">
-<h2 class="anchored" data-anchor-id="the-problem-statement">The Problem Statement</h2>
-<p>CI <code>build-docker</code> runs have no compiler-output cache. Every push that triggers the workflow recompiles the full Godot engine from scratch, spending 30–60 minutes on work that was already done the previous run. sccache has a native GitHub Actions cache backend (<code>SCCACHE_GHA_ENABLED=true</code>) that can restore compiler-output entries across runs without an external storage account, but it requires <code>ACTIONS_CACHE_URL</code> and <code>ACTIONS_RUNTIME_TOKEN</code> to be reachable from inside the container where sccache runs.</p>
-</section>
-<section id="design" class="level2">
-<h2 class="anchored" data-anchor-id="design">Design</h2>
-<p>Add <code>SCCACHE_GHA_ENABLED</code> as a build arg in <code>Containerfile</code> and expose it through the environment so sccache picks it up. Mount <code>ACTIONS_CACHE_URL</code> and <code>ACTIONS_RUNTIME_TOKEN</code> as podman build secrets on the <code>scons</code> RUN step; export them in the shell before the compiler is invoked.</p>
-<p><strong><code>Containerfile</code> (build stage)</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode dockerfile code-with-copy"><code class="sourceCode dockerfile"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">ARG</span> SCCACHE_GHA_ENABLED=<span class="st">""</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># … existing ENV block …</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">ARG</span> SCCACHE_GHA_ENABLED</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">ENV</span> SCCACHE_GHA_ENABLED=${SCCACHE_GHA_ENABLED}</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">RUN</span> <span class="op">--mount=type=secret,id=ACTIONS_CACHE_URL</span> <span class="op">\</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">--mount=type=secret,id=ACTIONS_RUNTIME_TOKEN</span> <span class="op">\</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">--mount=type=cache,target=/root/.cache/sccache,sharing=locked</span> <span class="op">\</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">export</span> <span class="va">ACTIONS_CACHE_URL</span><span class="op">=</span><span class="st">"</span><span class="va">$(</span><span class="fu">cat</span> /run/secrets/ACTIONS_CACHE_URL <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">||</span> <span class="fu">true</span><span class="va">)</span><span class="st">"</span> <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">export</span> <span class="va">ACTIONS_RUNTIME_TOKEN</span><span class="op">=</span><span class="st">"</span><span class="va">$(</span><span class="fu">cat</span> /run/secrets/ACTIONS_RUNTIME_TOKEN <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">||</span> <span class="fu">true</span><span class="va">)</span><span class="st">"</span> <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="ex">scons</span> platform=linuxbsd <span class="dt">\</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        target=<span class="st">"</span><span class="va">${TARGET}</span><span class="st">"</span> <span class="dt">\</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        precision=double <span class="dt">\</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        c_compiler_launcher=sccache <span class="dt">\</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        cpp_compiler_launcher=sccache <span class="dt">\</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        <span class="at">-j</span><span class="st">"</span><span class="va">$(</span><span class="fu">nproc</span><span class="va">)</span><span class="st">"</span> <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="ex">sccache</span> <span class="at">--show-stats</span> <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">strip</span> <span class="st">"bin/</span><span class="va">${BINARY_NAME}</span><span class="st">"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><strong><code>.github/workflows/build.yml</code> (<code>build-docker</code> job)</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Build and push image (podman)</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">  run</span><span class="kw">: </span><span class="ch">|</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    podman build \</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>      --build-arg TARGET="…" \</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>      --build-arg BINARY_NAME="…" \</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>      --build-arg SCCACHE_GHA_ENABLED=true \</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>      --secret id=ACTIONS_CACHE_URL,env=ACTIONS_CACHE_URL \</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>      --secret id=ACTIONS_RUNTIME_TOKEN,env=ACTIONS_RUNTIME_TOKEN \</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>      --build-context "godot-src=${{ github.workspace }}/godot" \</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>      --file Containerfile \</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>      --tag "${{ matrix.image }}:latest" \</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>      .</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    podman push "${{ matrix.image }}:latest"</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><code>ACTIONS_CACHE_URL</code> and <code>ACTIONS_RUNTIME_TOKEN</code> are set automatically on every GHA runner; no repo secrets are required. They are passed via <code>--secret</code> rather than <code>--build-arg</code> so they are never baked into an image layer or visible in <code>podman history</code>.</p>
-<p>For local <code>just build-docker</code> runs the build arg and secrets are absent; sccache falls back to the on-disk cache at <code>~/.cache/sccache</code>.</p>
-</section>
-<section id="the-downsides" class="level2">
-<h2 class="anchored" data-anchor-id="the-downsides">The Downsides</h2>
+<section id="v-sekai-multiplayer-fabric-deck-log-2026-06-29-monday" class="level1">
+<h1>V-Sekai Multiplayer Fabric Deck Log — 2026-06-29 (Monday)</h1>
+<p>Date: 2026-06-29</p>
+<p>Trimmed the heavy decision records back to the lean MADR template, applying YAGNI to the docs. A decision record carries its context, decision, downsides, alternatives, and verification; the scoring ceremony around it added bulk without changing the decision, so it came out.</p>
+<section id="changed" class="level2">
+<h2 class="anchored" data-anchor-id="changed">Changed</h2>
 <ul>
-<li>GHA cache has a 10 GB per-repo limit with LRU eviction. A full dual-target sccache population is 2–4 GB, which fits, but will compete with other caches in the same repo.</li>
-<li>Cache entries are scoped to the branch that wrote them, with fallback to the default branch. PRs from forks have read-only access to the parent repo’s cache.</li>
-<li>The <code>--mount=type=cache</code> for <code>/root/.cache/sccache</code> is a no-op when the GHA backend is active (sccache does not write to disk in that mode), so it adds a small mount with no benefit in CI.</li>
-</ul>
-</section>
-<section id="the-road-not-taken" class="level2">
-<h2 class="anchored" data-anchor-id="the-road-not-taken">The Road Not Taken</h2>
-<ul>
-<li>Tigris S3 bucket: previously used for local builds; needs an external account, five repo secrets, and ongoing cost. Removed for the zero-config GHA cache.</li>
-<li>OCI layer cache via <code>actions/cache</code>: podman’s build layer cache lives in <code>~/.local/share/containers/storage/</code>, a blob store that is expensive to tar and restore. sccache caches compiler outputs at finer granularity and transfers better across minor source changes.</li>
-<li>Host sccache server + <code>--network=host</code>: avoids the secret mount but changes container network behaviour and needs sccache installed on the host separately from the in-container copy.</li>
+<li>Six decision records dropped their CRIS score tables, <code>Tags</code> lists, <code>Further Reading</code> bibliographies, and the body <code>Status</code> and <code>Decision Makers</code> sections that only duplicated the YAML frontmatter, and collapsed <code>The Road Not Taken</code> to one line per alternative: <a href="../../decisions/20260506-maglev-cycle-1-gateway-handshake.html">maglev cycle 1 gateway handshake</a>, <a href="../../decisions/20260611-loot-action-core-loop-mvp-vertical-slice.html">loot-action core-loop MVP vertical slice</a>, <a href="../../decisions/20260624-fabric-platform-central-elixir-burrito-casync.html">fabric-platform-central as Elixir OTP app</a>, <a href="../../decisions/20260624-game-loop-cluster-sequence.html">game-loop-first delivery sequence</a>, <a href="../../decisions/20260624-release-tag-progression-dev-beta-rc.html">release tag progression</a>, and <a href="../../decisions/20260624-sccache-github-actions-cache-for-godot-builds.html">sccache GitHub Actions cache</a>. The maglev record kept its round-trip verification evidence under a <code>Confirmation</code> heading. The frontmatter and the decisions index are unchanged.</li>
+<li>The <a href="../../decisions/madr-proposal-template.html">MADR proposal template</a> follows the same lean shape, with status and decision-makers in frontmatter, so new records keep to the load-bearing sections.</li>
 </ul>
 
 
-</section>
-<section id="related" class="level2">
-<h2 class="anchored" data-anchor-id="related">Related</h2>
-<ul>
-<li><p><a href="../changelog/2026/20260629-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-29 (Monday)</a></p></li>
-</ul>
 </section>
 </section>
 
@@ -863,7 +737,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </div>   
     <div class="nav-footer-center">
       &nbsp;
-    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/v-sekai-multiplayer-fabric/manuals/edit/main/decisions/20260624-sccache-github-actions-cache-for-godot-builds.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/v-sekai-multiplayer-fabric/manuals/edit/main/changelog/2026/20260629-deck-log.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
     <div class="nav-footer-right">
       <ul class="footer-items list-unstyled">
     <li class="nav-item compact">

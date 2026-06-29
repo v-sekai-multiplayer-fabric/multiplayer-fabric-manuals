@@ -327,11 +327,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#the-context" id="toc-the-context" class="nav-link" data-scroll-target="#the-context">The Context</a></li>
   <li><a href="#the-problem-statement" id="toc-the-problem-statement" class="nav-link" data-scroll-target="#the-problem-statement">The Problem Statement</a></li>
   <li><a href="#design" id="toc-design" class="nav-link" data-scroll-target="#design">Design</a></li>
-  <li><a href="#cris-score" id="toc-cris-score" class="nav-link" data-scroll-target="#cris-score">CRIS Score</a></li>
   <li><a href="#the-downsides" id="toc-the-downsides" class="nav-link" data-scroll-target="#the-downsides">The Downsides</a></li>
   <li><a href="#the-road-not-taken" id="toc-the-road-not-taken" class="nav-link" data-scroll-target="#the-road-not-taken">The Road Not Taken</a></li>
-  <li><a href="#tags" id="toc-tags" class="nav-link" data-scroll-target="#tags">Tags</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading">Further Reading</a></li>
+  <li><a href="#related" id="toc-related" class="nav-link" data-scroll-target="#related">Related</a></li>
   </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/v-sekai-multiplayer-fabric/manuals/edit/main/decisions/20260624-fabric-platform-central-elixir-burrito-casync.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
@@ -430,50 +428,6 @@ AppxManifest.xml</code></pre>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span></span>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="cris-score" class="level2">
-<h2 class="anchored" data-anchor-id="cris-score">CRIS Score</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 12%">
-<col style="width: 4%">
-<col style="width: 83%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Factor</th>
-<th>Score</th>
-<th>Evidence</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>C</strong>omplexity</td>
-<td>7</td>
-<td>Elixir OTP + Burrito are established; Burrito needs Zig in CI, which is a new toolchain dependency</td>
-</tr>
-<tr class="even">
-<td><strong>R</strong>each</td>
-<td>6</td>
-<td>Affects every Windows user who installs via the platform manager MSIX</td>
-</tr>
-<tr class="odd">
-<td><strong>I</strong>mpediment</td>
-<td>8</td>
-<td>Without a working platform manager MSIX, Windows distribution has no self-update path</td>
-</tr>
-<tr class="even">
-<td><strong>S</strong>takeholder</td>
-<td>7</td>
-<td>Directly blocks the three-MSIX release milestone (client, server, platform-central)</td>
-</tr>
-<tr class="odd">
-<td><strong>Total</strong></td>
-<td>7.0</td>
-<td>Schedule soon</td>
-</tr>
-</tbody>
-</table>
-</section>
 <section id="the-downsides" class="level2">
 <h2 class="anchored" data-anchor-id="the-downsides">The Downsides</h2>
 <ul>
@@ -484,34 +438,21 @@ AppxManifest.xml</code></pre>
 </section>
 <section id="the-road-not-taken" class="level2">
 <h2 class="anchored" data-anchor-id="the-road-not-taken">The Road Not Taken</h2>
-<p><strong>Godot + GDExtension casync</strong>: Would require writing the casync protocol from scratch in C++, duplicating <code>aria_storage</code> with no gain. The <code>multiplayer_fabric_asset</code> module stub confirmed this was not started.</p>
-<p><strong>Godot + GDScript HTTPRequest</strong>: Could call <code>Add-AppxPackage</code> via <code>OS.execute()</code> for whole-file downloads but cannot do casync delta transfers without a full casync client in GDScript. Carries the rendering engine for no reason.</p>
-<p><strong>Scoop shim + OTP release tree</strong>: Downloading a pre-built Zig shim from <code>ScoopInstaller/Shim</code> and writing a <code>.shim</code> sidecar avoids writing any stub code, but still ships the full OTP release directory tree (hundreds of files) in the MSIX alongside it. Burrito produces a single file and is an Elixir-native solution.</p>
-<p><strong>Go stub</strong>: A tiny <code>main.go</code> that execs the OTP <code>.bat</code> launcher works but adds a Go compile step and a non-Elixir source file to maintain, offering no advantage over Burrito.</p>
-<p><strong>.NET 8 self-contained launcher</strong>: Was the original approach; removed because .NET 8 is a large dependency (~60 MB self-contained), the team does not otherwise use .NET, and it only wrapped a shell invocation — nothing the OTP release cannot do directly.</p>
-</section>
-<section id="tags" class="level2">
-<h2 class="anchored" data-anchor-id="tags">Tags</h2>
 <ul>
-<li>elixir, burrito, casync, msix, windows, aria-storage, 20260624-fabric-platform-central-elixir-burrito-casync</li>
+<li>Godot + GDExtension casync: would require writing the casync protocol from scratch in C++, duplicating <code>aria_storage</code> with no gain. The <code>multiplayer_fabric_asset</code> module stub confirmed this was not started.</li>
+<li>Godot + GDScript HTTPRequest: could call <code>Add-AppxPackage</code> via <code>OS.execute()</code> for whole-file downloads but cannot do casync delta transfers without a full casync client in GDScript, and carries the rendering engine for no reason.</li>
+<li>Scoop shim + OTP release tree: avoids writing stub code, but still ships the full OTP release directory tree (hundreds of files) in the MSIX. Burrito produces a single file and stays Elixir-native.</li>
+<li>Go stub: a tiny <code>main.go</code> that execs the OTP <code>.bat</code> launcher works but adds a Go compile step and a non-Elixir source file, offering no advantage over Burrito.</li>
+<li>.NET 8 self-contained launcher: the original approach, removed because .NET 8 is a large dependency (~60 MB), the team does not otherwise use .NET, and it only wrapped a shell invocation.</li>
 </ul>
+
+
 </section>
-<section id="further-reading" class="level2">
-<h2 class="anchored" data-anchor-id="further-reading">Further Reading</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode bibtex code-with-copy"><code class="sourceCode bibtex"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="va">@misc</span>{<span class="ot">burrito_2024</span>,</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">title</span>  = {Burrito — Wrap your application in a BEAM Burrito!},</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">year</span>   = {2024},</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">url</span>    = {https://github.com/burrito-elixir/burrito}</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="va">@misc</span>{<span class="ot">aria_storage_2025</span>,</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">title</span>  = {aria-storage — Content-addressable storage with casync protocol},</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">author</span> = {Lee, K. S. Ernest (iFire)},</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">year</span>   = {2025},</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">url</span>    = {https://github.com/V-Sekai-fire/aria-storage}</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-
-
+<section id="related" class="level2">
+<h2 class="anchored" data-anchor-id="related">Related</h2>
+<ul>
+<li><p><a href="../changelog/2026/20260629-deck-log.html">V-Sekai Multiplayer Fabric Deck Log — 2026-06-29 (Monday)</a></p></li>
+</ul>
 </section>
 </section>
 
