@@ -294,6 +294,7 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#design" id="toc-design" class="nav-link" data-scroll-target="#design">Design</a></li>
   <li><a href="#the-downsides" id="toc-the-downsides" class="nav-link" data-scroll-target="#the-downsides">The Downsides</a></li>
   <li><a href="#the-road-not-taken" id="toc-the-road-not-taken" class="nav-link" data-scroll-target="#the-road-not-taken">The Road Not Taken</a></li>
+  <li><a href="#confirmation" id="toc-confirmation" class="nav-link" data-scroll-target="#confirmation">Confirmation</a></li>
   <li><a href="#related" id="toc-related" class="nav-link" data-scroll-target="#related">Related</a></li>
   </ul></li>
   </ul>
@@ -418,6 +419,17 @@ ul.task-list li input[type="checkbox"] {
 <li>Multi-archetype slice: ranged and caster widen scope beyond one week. Melee alone proves combat authority and loot contention; the others follow the gate.</li>
 <li>Broader platform launch: SteamVR is sufficient scope for the slice; Steam Frame and Steam Deck follow.</li>
 <li>Per-zone distributed authority (Maglev intercept model): a geometric Hilbert-zone authority was attempted and rejected in the Maglev smoke test. One <code>zone-server</code> per instance is simpler and sufficient for a four-player room.</li>
+</ul>
+</section>
+<section id="confirmation" class="level2">
+<h2 class="anchored" data-anchor-id="confirmation">Confirmation</h2>
+<p>As built on 2026-06-29, verified by reading the <code>godot-loop-slice</code> source. The engine was not run, so the runtime result is not recorded here.</p>
+<ul>
+<li>Two of the five cores exist as named pure resolvers wired into the server: combat (<code>core/combat.gd</code>) and loot (<code>core/loot.gd</code>). Presence runs through a Hilbert interest core (<code>core/hilbert.gd</code>) and a multiplayer sink (<code>adapters/multiplayer_sink.gd</code>) rather than a named presence core. Progression is an inline inventory append committed through a SQLite adapter (<code>adapters/sqlite_profiles.gd</code>) rather than a separate reducer. The budgeter core is not implemented.</li>
+<li>Persistence is SQLite. The CockroachDB adapter is not implemented.</li>
+<li>The performance gate (90 Hz, 500,000 triangles, 200 draw calls per eye) is not measured or enforced in the repository.</li>
+<li>The <code>OpenXR</code> desktop export preset duplicates the Windows Desktop preset and carries no XR options; the Quest Android preset is the configured XR target.</li>
+<li>The playable-loop smoke (<code>smoke.sh</code>) exercises the full loop and asserts exactly one grant. The committed profile row is printed for inspection without an assertion on it, and the runtime pass is not yet recorded here.</li>
 </ul>
 
 
