@@ -89,4 +89,6 @@ remote backend, region, and `do-tor1` credentials are all working.
 - Per-project key prefixes keep objects from colliding in the one bucket (e.g.
   `godot` vs `idtx-flow`).
 - To debug a non-zero error count, set `SCCACHE_LOG=debug` and `SCCACHE_ERROR_LOG`
-  before restarting the server (`sccache --stop-server; sccache --start-server`).
+  in the sccache service launcher and reinstall the service so the supervised
+  server picks them up
+  ([nssm-supervised services](20260606-windows-background-services-nssm.md)).
