@@ -1,51 +1,42 @@
 ---
-title: "Godot Client Gateway Handshake"
+title: Godot client transport handshake against the authoritative server
 date: 2026-05-06
 status: accepted
 decision-makers: K. S. Ernest (iFire) Lee
 tier: baseline
 ---
 
+# Godot client transport handshake against the authoritative server
+
 ## The Context
 
-The clients in this stack are Godot engine processes built from `multiplayer-fabric-godot` (branch `multiplayer-fabric`, `template_release double`). The Godot WebTransport implementation, its thread model, and its datagram API underpin all subsequent cycles; a curl or test-harness ping tests the gateway in isolation and leaves those untouched.
-
-Cycle 0 (Terraform) must pass before this cycle begins — the Fly apps, dedicated IPv4, and secrets that this cycle depends on are created by Terraform.
+The clients in this stack are Godot engine processes built from the frozen Godot 4.7 "double" engine ([pin the engine](20260606-pin-engine-to-frozen-godot-4-7.md)). Godot's own networking — its multiplayer peer, thread model, and datagram path — carries every later networking behaviour, so a non-Godot ping (curl, Python, an Elixir harness) tests the wire but leaves the engine's own client path unproven. Engine-specific datagram and connection bugs surface only when a real Godot process drives the transport.
 
 ## The Problem Statement
 
-A Godot client running `multiplayer-fabric-godot` has not connected to `multiplayer-fabric-gateway` and received a datagram from `multiplayer-fabric-zone` under Fly's network. Until a real Godot process completes that round trip, the client side of the stack is unvalidated.
+Until a real Godot client opens a connection to the authoritative server and completes the round trip — connect, receive, exit cleanly — the client side of the networking stack is unvalidated. A failure first seen deep in a gameplay scene is far harder to isolate than the same failure seen in a bare handshake.
 
 ## Design
 
-Build a minimal Godot scene (empty world, no avatar, no physics) that opens a WebTransport/QUIC connection to the gateway on UDP 443, waits for one datagram from the zone server, logs the receipt, and exits cleanly. Run it headlessly on a desktop to isolate client behaviour from display and input.
+A minimal headless Godot client opens a transport connection to the authoritative server, waits for the server's first message, logs it, and exits cleanly. Running headless isolates client networking from display and input.
 
-The zone server is `godot.linuxbsd.template_release.double.x86_64` built from `V-Sekai-fire/multiplayer-fabric-zone` (the zone repo owns and publishes its own GHCR image). It runs `--headless` with an empty world and sends one datagram on connection.
-
-The gateway runs as root on UDP 443 (port < 1024 requires root or `CAP_NET_BIND_SERVICE`) and proxies to the zone server on UDP 7443. The Fly DNS record for the gateway endpoint is DNS-only — no Cloudflare proxy, which cannot forward QUIC/UDP. Both services deploy in the `iad` region and communicate over Fly's 6PN private network.
+Transport is switchable in the client ([WebTransport over HTTP/3](20260606-webtransport-http3-transport.md), [fabric channels as reliability classes](20260612-fabric-channels-as-reliability-classes.md)): ENet for a stable local default, or WebTransport/QUIC under `TRANSPORT=wt`. The same handshake holds across both — the client calls `create_client(host, port)` for ENet or `create_client(host, port, "/wt")` for WebTransport and joins once the peer reports connected. The client reaches the authoritative server directly; no separate proxy tier sits in the path.
 
 Pass criteria:
 
-- [ ] Godot client establishes the WebTransport/QUIC connection without TLS or handshake error
-- [ ] Client receives and logs one **datagram** (not a stream) from the zone server
-- [ ] Client exits cleanly; no orphaned Godot process or open port
-
-Every subsequent cycle extends this scene.
+- The Godot client establishes the connection without TLS or handshake error.
+- The client receives and logs the server's first message.
+- The client exits cleanly: no orphaned process, no open port.
 
 ## The Downsides
 
-Writing a minimal Godot scene that connects via WebTransport is more work than a curl ping test, and cannot be deferred — a non-Godot client would not catch Godot-specific datagram handling bugs before they reach Cycle 5.
+A minimal Godot client is more work than a curl or harness ping, and the work cannot be skipped — a non-Godot client would not catch Godot-specific datagram handling before it reaches a gameplay scene.
 
 ## The Road Not Taken
 
-- Bare WebTransport client (curl, Python, or Elixir harness): the original Cycle 1 design; it tests the gateway in isolation and leaves the Godot client's WebTransport path unverified until Cycle 4, where a failure is much harder to isolate.
+- A bare non-Godot client (curl, Python, or Elixir harness): it tests the server in isolation and leaves the Godot client's transport path unverified until a gameplay scene exercises it, where a failure is much harder to isolate.
+- A separate gateway proxy fronting the server on a privileged port: the as-built path connects the client straight to the authoritative server, so a proxy tier adds an unproven hop the slice does not need.
 
 ## Confirmation
 
-Verified 2026-05-07 against the live deployment, with all three pass criteria met:
-
-- WebTransport/QUIC handshake without TLS error: the picoquic trace shows a full handshake, h3 ALPN negotiated, and 1-RTT keys derived.
-- One datagram received: the gateway returned `{"id":"c1-...","ok":true,"result":"pong"}` matching the request id, in ~880 ms over real internet.
-- Client exits cleanly: `quit(0)`, exit code 0, no orphaned process.
-
-The handshake test client lives at [`multiplayer-fabric-cycle-tests/cycle-1-gateway-handshake/cycle1.gd`](https://github.com/V-Sekai-fire/multiplayer-fabric-cycle-tests/blob/main/cycle-1-gateway-handshake/cycle1.gd). The ping is answered directly by the gateway's `Gateway.Router.dispatch/1` (`router.ex:55`); zone routing is exercised in cycle 5 onward.
+The loop-slice client (`godot-loop-slice/client.gd`) completes this handshake against the authoritative server (`godot-loop-slice/server.gd`). The playable-loop smoke runs four real Godot clients through it end to end on ENet: each connects, joins, runs the loop, and exits cleanly. The run on 2026-06-29 passes — all four clients complete and exactly one loot grant lands. The WebTransport/QUIC path is selectable with `TRANSPORT=wt` over the same handshake.

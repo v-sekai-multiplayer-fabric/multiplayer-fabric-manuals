@@ -96,7 +96,9 @@ no `~/.aws/credentials` file or `AWS_PROFILE`.
 absolute prefix before hashing so hits survive a moved/renamed checkout. Point it
 at `GODOT_SRC`. Paths must be **absolute**; separate multiple dirs with `;` on
 Windows and `:` elsewhere (longest matching prefix wins). The server reads it at
-startup — run `sccache --stop-server` after changing it.
+startup, so it lives in the per-instance sccache service launcher; changing it
+means updating that launcher and reinstalling the service
+([nssm-supervised services](20260606-windows-background-services-nssm.md)).
 
 ### Windows — PowerShell profile
 
