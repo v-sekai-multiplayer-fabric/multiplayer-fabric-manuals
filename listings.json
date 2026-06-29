@@ -15,6 +15,7 @@
   {
     "listing": "/decisions.html",
     "items": [
+      "/decisions/20260629-defer-loot-slice-hardening-until-needed.html",
       "/decisions/20260629-yagni-times-structure-to-need.html",
       "/decisions/20260624-game-loop-cluster-sequence.html",
       "/decisions/20260624-release-tag-progression-dev-beta-rc.html",
@@ -55,8 +56,6 @@
       "/decisions/20260611-hexagon-presence-core.html",
       "/decisions/20260611-hexagon-progression-core.html",
       "/decisions/20260611-server-authoritative-simulation-deferred-rollback.html",
-      "/decisions/madr-proposal-template.html",
-      "/decisions/20260611-webtransportd-core-transport-adapter.html",
       "/decisions/20260610-hexagonal-core-ports-adapters.html",
       "/decisions/20260609-umbrella-package-installs-all-components.html",
       "/decisions/20260609-commit-messages-sentence-case.html",
@@ -72,6 +71,8 @@
       "/decisions/20260606-art-game-loop-steel-thread.html",
       "/decisions/20260606-require-pr-and-merge-queue-on-main.html",
       "/decisions/20260606-windows-background-services-nssm.html",
+      "/decisions/madr-proposal-template.html",
+      "/decisions/20260611-webtransportd-core-transport-adapter.html",
       "/decisions/20260606-spatial-audio-patched-resonance-audio.html",
       "/decisions/20260606-webtransport-http3-transport.html",
       "/decisions/20260506-ghcr-package-ownership-same-repo.html",
