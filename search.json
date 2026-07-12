@@ -1183,6 +1183,13 @@
     "text": "More Information\nCreated with gh api -X POST repos/v-sekai-multiplayer-fabric/manuals/rulesets. To change the policy, edit the ruleset rather than protecting the branch through the classic branch-protection API, so the two mechanisms do not overlap."
   },
   {
+    "objectID": "decisions/20260606-require-pr-and-merge-queue-on-main.html#amendment-2026-07-12-auto-delete-head-branches-after-merge",
+    "href": "decisions/20260606-require-pr-and-merge-queue-on-main.html#amendment-2026-07-12-auto-delete-head-branches-after-merge",
+    "title": "Require pull requests and a merge queue on main",
+    "section": "Amendment (2026-07-12): auto-delete head branches after merge",
+    "text": "Amendment (2026-07-12): auto-delete head branches after merge\nForce branch deletion after merge by enabling the repository’s automatically delete head branches setting (delete_branch_on_merge). When a PR merges, its source branch is removed automatically, so merged feature branches do not pile up.\nWhy this is a repo setting and not part of the ruleset:\n\nThe merge queue rejects deletion at merge time — gh pr merge --delete-branch fails with “Cannot use -d or --delete-branch when merge queue enabled”, so the per-merge flag cannot do the cleanup. The repo-level delete_branch_on_merge setting fires after the queue lands the commit and is the correct mechanism.\nIt does not conflict with the ruleset’s “block branch deletion” rule. That rule protects the ruleset’s target (the default branch) from being deleted; this setting deletes the merged PR’s source branch. Different branches, different mechanisms.\n\nApply it declaratively:\ngh api -X PATCH repos/v-sekai-multiplayer-fabric/&lt;repo&gt; \\\n  -F delete_branch_on_merge=true\n\nConfirmation\ngh api repos/v-sekai-multiplayer-fabric/&lt;repo&gt; --jq .delete_branch_on_merge returns true, and the source branch of a merged PR no longer exists."
+  },
+  {
     "objectID": "decisions/20260606-require-pr-and-merge-queue-on-main.html#related",
     "href": "decisions/20260606-require-pr-and-merge-queue-on-main.html#related",
     "title": "Require pull requests and a merge queue on main",
