@@ -72,10 +72,10 @@ source branch is removed automatically, so merged feature branches do not pile u
 Why this is a repo setting and not part of the ruleset:
 
 - The merge queue rejects deletion at merge time — `gh pr merge --delete-branch`
-  fails with *"Cannot use `-d` or `--delete-branch` when merge queue enabled"*, so
+  fails with _"Cannot use `-d` or `--delete-branch` when merge queue enabled"_, so
   the per-merge flag cannot do the cleanup. The repo-level `delete_branch_on_merge`
   setting fires after the queue lands the commit and is the correct mechanism.
-- It does **not** conflict with the ruleset's *"block branch deletion"* rule. That
+- It does **not** conflict with the ruleset's _"block branch deletion"_ rule. That
   rule protects the ruleset's target (the default branch) from being deleted; this
   setting deletes the **merged PR's source branch**. Different branches, different
   mechanisms.
