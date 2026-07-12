@@ -10,7 +10,55 @@
 <atom:link href="https://v-sekai-multiplayer-fabric.github.io/manuals/changelog.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.9.38</generator>
-<lastBuildDate>Sun, 12 Jul 2026 18:28:22 GMT</lastBuildDate>
+<lastBuildDate>Sun, 12 Jul 2026 18:34:46 GMT</lastBuildDate>
+<item>
+  <title></title>
+  <link>https://v-sekai-multiplayer-fabric.github.io/manuals/changelog/2026/20260630-deck-log.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<section id="v-sekai-multiplayer-fabric-deck-log-2026-06-30-tuesday" class="level1">
+<h1>V-Sekai Multiplayer Fabric Deck Log — 2026-06-30 (Tuesday)</h1>
+<p>Date: 2026-06-30</p>
+<p>Made the loot-action slice runnable on a bare Windows 11 machine, with no Docker and no WSL. The slice now ships as a downloadable release: the authoritative server, the client, and the bots that fill the four-player party are native Windows executables, persistence is in-process SQLite, and an optional native observability stack (VictoriaMetrics + OpenTelemetry) runs alongside. One double-click on <code>run-demo.cmd</code> starts the whole thing.</p>
+<p>Along the way the loop closed its last gap — the loot a player wins now travels back to the client and shows in the hub — and the Windows build and packaging were hardened across several release cuts, <code>v0.1.0-dev.3</code> through <code>v0.1.0-dev.6</code>.</p>
+<section id="added" class="level2">
+<h2 class="anchored" data-anchor-id="added">Added</h2>
+<ul>
+<li>A native Windows demo of the <a href="https://github.com/v-sekai-multiplayer-fabric/godot-loop-slice">godot-loop-slice</a> vertical slice, on the <a href="https://github.com/v-sekai-multiplayer-fabric/godot-loop-slice/releases/tag/v0.1.0-dev.6">v0.1.0-dev.6 release</a>: a plain-exe <code>…-demo-windows.zip</code> plus three unsigned MSI installers — the all-in-one demo, a server-only install (binds all interfaces and prints the host’s LAN address), and a client-only install (connects to a given server address).</li>
+<li>Double-click <code>.cmd</code> launchers (<code>run-demo.cmd</code>, <code>run-server.cmd</code>, <code>run-client.cmd</code>) that run the PowerShell launcher as an in-memory scriptblock, so Windows execution policy and Mark-of-the-Web never block a downloaded script — no scoop and no policy change. The MSI Start-menu shortcuts point at the same launchers.</li>
+<li>The loop’s persistence round trip now closes on the client: the granted item is synced back and shown in the hub on return, and the playable-loop smoke asserts the winning client’s inventory matches the committed profile row.</li>
+</ul>
+</section>
+<section id="changed" class="level2">
+<h2 class="anchored" data-anchor-id="changed">Changed</h2>
+<ul>
+<li>Windows distribution moved from a signed MSIX to an unsigned MSI. MSIX must be signed to install and the self-signed cert step failed on the runner, whereas an MSI installs through <code>msiexec</code> without a signature or admin. WiX is pinned to v5 because v6 and later require accepting the paid OSMF EULA.</li>
+</ul>
+</section>
+<section id="fixed" class="level2">
+<h2 class="anchored" data-anchor-id="fixed">Fixed</h2>
+<ul>
+<li>The Windows release build failed because the runner’s backslash stage path (<code>D:\a\_temp\…</code>) reached an Elixir <code>Path.wildcard</code> glob, where a backslash is a glob escape, so the exported editor was never found. The stage path is normalized to forward slashes, which also fixes the same latent bug in the MSIX build script.</li>
+</ul>
+</section>
+<section id="removed" class="level2">
+<h2 class="anchored" data-anchor-id="removed">Removed</h2>
+<ul>
+<li>The MSIX release workflow, superseded by the unsigned MSI path.</li>
+</ul>
+
+
+</section>
+</section>
+
+ ]]></description>
+  <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/changelog/2026/20260630-deck-log.html</guid>
+  <pubDate>Sun, 12 Jul 2026 18:34:46 GMT</pubDate>
+</item>
 <item>
   <title></title>
   <link>https://v-sekai-multiplayer-fabric.github.io/manuals/changelog/2026/20260629-deck-log.html</link>
@@ -51,7 +99,7 @@
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/changelog/2026/20260629-deck-log.html</guid>
-  <pubDate>Sun, 12 Jul 2026 18:28:22 GMT</pubDate>
+  <pubDate>Sun, 12 Jul 2026 18:34:46 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -90,7 +138,7 @@
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/changelog/2026/20260622-deck-log.html</guid>
-  <pubDate>Sun, 12 Jul 2026 18:28:22 GMT</pubDate>
+  <pubDate>Sun, 12 Jul 2026 18:34:46 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -166,7 +214,7 @@
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/changelog/2026/20260612-deck-log.html</guid>
-  <pubDate>Sun, 12 Jul 2026 18:28:22 GMT</pubDate>
+  <pubDate>Sun, 12 Jul 2026 18:34:46 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -226,7 +274,7 @@
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/changelog/2026/20260606-deck-log.html</guid>
-  <pubDate>Sun, 12 Jul 2026 18:28:22 GMT</pubDate>
+  <pubDate>Sun, 12 Jul 2026 18:34:46 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -290,7 +338,7 @@
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/changelog/2026/20260507-deck-log.html</guid>
-  <pubDate>Sun, 12 Jul 2026 18:28:22 GMT</pubDate>
+  <pubDate>Sun, 12 Jul 2026 18:34:46 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -341,7 +389,7 @@
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/changelog/2026/20260506-deck-log.html</guid>
-  <pubDate>Sun, 12 Jul 2026 18:28:22 GMT</pubDate>
+  <pubDate>Sun, 12 Jul 2026 18:34:46 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -429,7 +477,7 @@
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/changelog/2026/20260425-deck-log.html</guid>
-  <pubDate>Sun, 12 Jul 2026 18:28:22 GMT</pubDate>
+  <pubDate>Sun, 12 Jul 2026 18:34:46 GMT</pubDate>
 </item>
 <item>
   <title></title>
@@ -460,7 +508,7 @@
 
  ]]></description>
   <guid>https://v-sekai-multiplayer-fabric.github.io/manuals/changelog/2026/20260421-deck-log.html</guid>
-  <pubDate>Sun, 12 Jul 2026 18:28:22 GMT</pubDate>
+  <pubDate>Sun, 12 Jul 2026 18:34:46 GMT</pubDate>
 </item>
 </channel>
 </rss>
