@@ -62,3 +62,32 @@ lists it, and a direct push to `main` is rejected. Future PRs land via the queue
 Created with `gh api -X POST repos/v-sekai-multiplayer-fabric/manuals/rulesets`.
 To change the policy, edit the ruleset rather than protecting the branch through
 the classic branch-protection API, so the two mechanisms do not overlap.
+
+## Amendment (2026-07-12): auto-delete head branches after merge
+
+Force branch deletion after merge by enabling the repository's **automatically
+delete head branches** setting (`delete_branch_on_merge`). When a PR merges, its
+source branch is removed automatically, so merged feature branches do not pile up.
+
+Why this is a repo setting and not part of the ruleset:
+
+- The merge queue rejects deletion at merge time — `gh pr merge --delete-branch`
+  fails with *"Cannot use `-d` or `--delete-branch` when merge queue enabled"*, so
+  the per-merge flag cannot do the cleanup. The repo-level `delete_branch_on_merge`
+  setting fires after the queue lands the commit and is the correct mechanism.
+- It does **not** conflict with the ruleset's *"block branch deletion"* rule. That
+  rule protects the ruleset's target (the default branch) from being deleted; this
+  setting deletes the **merged PR's source branch**. Different branches, different
+  mechanisms.
+
+Apply it declaratively:
+
+```sh
+gh api -X PATCH repos/v-sekai-multiplayer-fabric/<repo> \
+  -F delete_branch_on_merge=true
+```
+
+### Confirmation
+
+`gh api repos/v-sekai-multiplayer-fabric/<repo> --jq .delete_branch_on_merge`
+returns `true`, and the source branch of a merged PR no longer exists.
