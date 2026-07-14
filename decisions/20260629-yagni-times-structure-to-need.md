@@ -33,6 +33,7 @@ Adopt YAGNI as a question of timing.
 ## The Road Not Taken
 
 - Read YAGNI as effort-saving, so that cheap code retires it. The essay rejects this reading: the bills are optionality and net present value, and cheap generation leaves both intact.
+- Justify building now by the price of the later retrofit. That price is a forecast about the same unknown future the timing rule watches, so the estimate carries the optionality bill again and returns to the question it means to settle. A real near-term need still calls for building now; a projected far-off cost stays a guess.
 
 ## Confirmation
 
